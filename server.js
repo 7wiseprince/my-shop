@@ -2,24 +2,24 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 
-// СЮДИ ВСТАВ СВОЄ ПОСИЛАННЯ І ВПИШИ ПАРОЛЬ ЗАМІСТЬ <db_password>
-const MONGO_URI = "mongodb+srv://admin:Goodprince7@cluster0.xtmklcd.mongodb.net/myShopDB?retryWrites=true&w=majority&appName=Cluster0";
+// Твоє хмарне посилання (не забудь вписати свій пароль замість <db_password>!)
+const MONGO_URI = "mongodb+srv://admin:<db_password>@cluster0.xtmklcd.mongodb.net/myShopDB?retryWrites=true&w=majority&appName=Cluster0";
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(__dirname)); // Роздаємо файли з головної папки
 
 // Підключення до хмари MongoDB Atlas
 mongoose.connect(MONGO_URI)
     .then(() => {
         console.log("Успішно підключено до хмарної бази MongoDB Atlas! ☁️");
-        seedDatabase(); // Перевіряємо та додаємо початкові товари
+        seedDatabase(); 
     })
     .catch(err => console.error("Помилка підключення до хмари:", err));
 
-// ОПИС СХЕМИ ТОВАРУ ДЛЯ ХМАРИ
+// СХЕМА ТОВАРУ
 const productSchema = new mongoose.Schema({
     id: Number,
     name: String,
@@ -30,7 +30,7 @@ const productSchema = new mongoose.Schema({
 });
 const Product = mongoose.model('Product', productSchema);
 
-// ОПИС СХЕМИ ЗАМОВЛЕННЯ ДЛЯ ХМАРИ
+// СХЕМА ЗАМОВЛЕННЯ
 const orderSchema = new mongoose.Schema({
     id: Number,
     customerName: String,
@@ -41,7 +41,7 @@ const orderSchema = new mongoose.Schema({
 });
 const Order = mongoose.model('Order', orderSchema);
 
-// Функція першого наповнення бази даних товарів
+// Наповнення бази даних
 async function seedDatabase() {
     const count = await Product.countDocuments();
     if (count === 0) {
@@ -55,11 +55,12 @@ async function seedDatabase() {
     }
 }
 
+// ГОЛОВНА СТОРІНКА (Зверни увагу на велику літеру 'Index.html'!)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'Index.html'));
 });
 
-// API: Отримання товарів з хмари
+// API ТОЧКИ
 app.get('/api/products', async (req, res) => {
     try {
         const products = await Product.find({});
@@ -69,7 +70,6 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// API: Додавання товару в хмару
 app.post('/api/products', async (req, res) => {
     try {
         const { name, price, category, image, description } = req.body;
@@ -86,24 +86,22 @@ app.post('/api/products', async (req, res) => {
         });
 
         await newProduct.save();
-        res.json({ success: true, message: "Товар успішно додано в ХМАРУ!" });
+        res.json({ success: true, message: "Товар успішно додано!" });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// API: Видалення товару з хмари
 app.delete('/api/products/:id', async (req, res) => {
     try {
         const productId = Number(req.params.id);
         await Product.deleteOne({ id: productId });
-        res.json({ success: true, message: "Товар успішно видалено з ХМАРИ!" });
+        res.json({ success: true, message: "Товар успішно видалено!" });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-// API: Збереження замовлення в хмару
 app.post('/api/orders', async (req, res) => {
     try {
         const { items, total, customerName } = req.body;
@@ -127,8 +125,5 @@ app.post('/api/orders', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Сервер працює на http://localhost:3000`);
+    console.log(`Сервер працює`);
 });
-
-0
-
