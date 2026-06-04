@@ -3,7 +3,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 // Твоє хмарне посилання (не забудь вписати свій пароль замість <db_password>!)
-const MONGO_URI = "mongodb+srv://admin:<db_password>@cluster0.xtmklcd.mongodb.net/myShopDB?retryWrites=true&w=majority&appName=Cluster0";
+const MONGO_URI = "mongodb+srv://admin:Goodprince7@cluster0.xtmklcd.mongodb.net/myShopDB?retryWrites=true&w=majority&appName=Cluster0";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
