@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyShop — Мій Магазин</title>
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #f4f6f9; color: #333; }
+        
+        header { background-color: #2c3e50; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 24px; font-weight: bold; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+        .logo span { color: #f1c40f; }
+        
+        nav { display: flex; gap: 15px; }
+        nav a { color: #bdc3c7; text-decoration: none; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.3s; }
+        nav a.active, nav a:hover { color: white; }
+
+        .cart-icon-container { position: relative; cursor: pointer; display: flex; align-items: center; }
+        .cart-badge { position: absolute; top: -8px; right: -10px; background-color: #e74c3c; color: white; border-radius: 50%; padding: 2px 6px; font-size: 12px; font-weight: bold; }
+
+        .page { display: none; padding: 30px 20px; max-width: 1200px; margin: 0 auto; }
+        .page.active { display: block; }
+
+        .hero { background: linear-gradient(135deg, #3498db, #2c3e50); color: white; padding: 40px 20px; text-align: center; border-radius: 12px; margin-bottom: 30px; }
+        .hero h1 { font-size: 32px; margin-bottom: 10px; }
+        .hero button { background-color: #f1c40f; color: #2c3e50; border: none; padding: 12px 25px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; margin-top: 15px; }
+
+        .filters { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .filter-btn { background-color: white; border: 2px solid #34495e; padding: 8px 18px; border-radius: 20px; cursor: pointer; font-weight: 600; color: #34495e; transition: 0.3s; }
+        .filter-btn.active, .filter-btn:hover { background-color: #34495e; color: white; }
+
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .product-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 8px 15px rgba(0,0,0,0.1); }
+        .product-image { width: 100%; height: 200px; object-fit: cover; border-radius: 8px; margin-bottom: 15px; }
+        .product-title { font-size: 18px; margin-bottom: 10px; color: #2c3e50; font-weight: bold; }
+        .product-desc { font-size: 14px; color: #7f8c8d; margin-bottom: 15px; min-height: 40px; }
+        .product-price { font-size: 20px; font-weight: bold; color: #27ae60; margin-bottom: 15px; }
+        .btn-add-to-cart { background-color: #3498db; color: white; border: none; width: 100%; padding: 10px; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-add-to-cart:hover { background-color: #2980b9; }
+
+        .about-section { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); line-height: 1.6; }
+        
+        /* СТИЛІ АДМІНКИ ТА СПИСКУ КЕРУВАННЯ */
+        .admin-layout { display: flex; flex-direction: column; gap: 30px; max-width: 600px; margin: 0 auto; }
+        .admin-box { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 15px; }
+        .btn-submit { background-color: #27ae60; color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        
+        .manage-items-list { margin-top: 15px; }
+        .manage-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; background: #fafafa; margin-bottom: 5px; border-radius: 6px; }
+        .manage-item-name { font-weight: 600; color: #2c3e50; }
+        .btn-delete-prod { color: #e74c3c; background: none; border: none; cursor: pointer; font-size: 22px; display: flex; align-items: center; }
+
+        .cart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
+        .cart-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .close-cart { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 24px; color: #95a5a6; }
+        .cart-title { font-size: 22px; margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f2f2f2; }
+        .btn-remove { color: #e74c3c; cursor: pointer; font-size: 20px; background: none; border: none; }
+        .cart-total { font-size: 20px; font-weight: bold; text-align: right; margin: 20px 0; color: #2c3e50; }
+        .empty-message { color: #7f8c8d; text-align: center; padding: 20px; }
+        /* Код для екранів, які менші за 480 пікселів (смартфони) */
+@media (max-width: 480px) {
+  /* Зменшуємо загальний розмір шрифту для навігації */
+  nav, .header-menu, .nav-links { 
+    font-size: 14px; /* або 13px, якщо все одно затісно */
+    gap: 8px;        /* зменшуємо відстань між елементами меню */
+  }
+
+  /* Якщо у тебе елементи меню — це посилання <a> */
+  nav a, .header-menu a {
+    padding: 4px 6px; /* робимо менші внутрішні відступи */
+  }
+}
+
+ </style>
+</head>
+<body>
+
+    <header>
+            <div class="logo" ondblclick="checkAdminPassword()">⚡ My<span>Shop</span></div>
+        <nav>
+            <a id="nav-home" class="active" onclick="switchPage('home')">Головна</a>
+            <a id="nav-catalog" onclick="switchPage('catalog')">Каталог</a>
+            <a id="nav-about" onclick="switchPage('about')">Про нас</a>
+        </nav>
+        <div class="cart-icon-container" onclick="toggleCart(true)">
+            <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
+            <span class="cart-badge" id="cart-count">0</span>
+        </div>
+    </header>
+
+    <div id="page-home" class="page active">
+        <div class="hero">
+            <h1>Ласкаво просимо до MyShop!</h1>
+            <p>Знайдіть найкращі товари за найкращими цінами.</p>
+            <button onclick="switchPage('catalog')">Перейти до покупок</button>
+        </div>
+        <h2>Популярні товари</h2>
+        <div class="products-grid" id="featured-products"></div>
+    </div>
+
+    <div id="page-catalog" class="page">
+        <div class="filters">
+            <button class="filter-btn active" onclick="filterProducts('all', this)">Все</button>
+            <button class="filter-btn" onclick="filterProducts('shoes', this)">Взуття</button>
+            <button class="filter-btn" onclick="filterProducts('clothes', this)">Одяг</button>
+            <button class="filter-btn" onclick="filterProducts('accessories', this)">Аксесуари</button>
+        </div>
+        <div class="products-grid" id="catalog-products"></div>
+    </div>
+
+    <div id="page-about" class="page">
+        <div class="about-section">
+            <h2>Про наш магазин ⚡ MyShop</h2>
+            <p>MyShop — це сучасний Fullstack-додаток, що працює на базі Node.js та бази даних LowDB файлового типу.</p>
+        </div>
+    </div>
+
+    <div id="page-admin" class="page">
+        <div class="admin-layout">
+            <div class="admin-box">
+                <h2 style="margin-bottom:15px; color:#2c3e50;">Додати новий товар</h2>
+                <form id="addProductForm">
+                    <div class="form-group"><label>Назва:</label><input type="text" id="p-name" required></div>
+                    <div class="form-group"><label>Ціна (грн):</label><input type="number" id="p-price" required></div>
+                    <div class="form-group">
+                        <label>Категорія:</label>
+                        <select id="p-category">
+                            <option value="shoes">Взуття</option>
+                            <option value="clothes">Одяг</option>
+                            <option value="accessories">Аксесуари</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Посилання на фото:</label><input type="url" id="p-image"></div>
+                    <div class="form-group"><label>Опис:</label><textarea id="p-desc" rows="2" required></textarea></div>
+                    <button type="submit" class="btn-submit">Зберегти в базу даних</button>
+                </form>
+            </div>
+
+            <div class="admin-box">
+                <h2 style="margin-bottom:15px; color:#2c3e50;">Усі товари в базі даних</h2>
+                <div class="manage-items-list" id="admin-goods-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <span class="close-cart" onclick="toggleCart(false)">&times;</span>
+            <div class="cart-title">Твій Кошик</div>
+            <div id="cart-items-list"></div>
+            <div class="cart-total" id="cart-total-price">Загалом: 0 грн</div>
+            <div id="paypal-button-container"></div>
+        </div>
+    </div>
+    <script>
+        let allProducts = [];
+        let cart = [];
+
+        // Секретна функція для перевірки пароля адміністратора
+        function checkAdminPassword() {
+            const password = prompt("Введіть секретний пароль адміністратора:");
+            const secretPassword = "admin"; // Твій пароль
+
+            if (password === secretPassword) {
+                alert("Доступ дозволено, шеф! 😎");
+                
+                document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+                document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
+                
+                document.getElementById('page-admin').classList.add('active');
+                window.scrollTo(0, 0);
+            } else if (password !== null) {
+                alert("Невірний пароль! Доступ заблоковано.");
+            }
+        }
+
+        function switchPage(pageId) {
+            if (pageId === 'admin') {
+                checkAdminPassword();
+                return;
+            }
+
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
+            
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            
+            const navLink = document.getElementById(`nav-${pageId}`);
+            if (navLink) navLink.classList.add('active');
+            
+            window.scrollTo(0, 0);
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch('/api/products');
+                allProducts = await response.json();
+                renderProducts(allProducts, 'catalog-products');
+                renderProducts(allProducts.slice(0, 2), 'featured-products');
+                renderAdminProducts();
+            } catch (error) {
+                console.error("Помилка завантаження товарів:", error);
+            }
+        }
+
+        function renderProducts(products, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (products.length === 0) {
+                container.innerHTML = '<p class="empty-message">Товарів не знайдено</p>';
+                return;
+            }
+            products.forEach(product => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img class="product-image" src="${product.image}" alt="${product.name}">
+                        <div class="product-title">${product.name}</div>
+                        <div class="product-desc">${product.description}</div>
+                        <div class="product-price">${product.price} грн</div>
+                        <button class="btn-add-to-cart" onclick="addToCart(${product.id})">Додати в кошик</button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderAdminProducts() {
+            const container = document.getElementById('admin-goods-list');
+            container.innerHTML = '';
+            if (allProducts.length === 0) {
+                container.innerHTML = '<p class="empty-message">База даних порожня</p>';
+                return;
+            }
+            allProducts.forEach(product => {
+                container.innerHTML += `
+                    <div class="manage-item">
+                        <span class="manage-item-name">${product.name} (${product.price} грн)</span>
+                        <button class="btn-delete-prod" onclick="deleteProductFromDB(${product.id})">
+                            <i class="material-icons">delete_forever</i>
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        async function deleteProductFromDB(id) {
+            if (!confirm("Ти впевнений, що хочеш видалити цей товар зі справжньої бази даних?")) return;
+
+            const response = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+            const result = await response.json();
+            
+            if (result.success) {
+                alert(result.message);
+                loadProducts();
+            }
+        }
+
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productData = {
+                name: document.getElementById('p-name').value,
+                price: document.getElementById('p-price').value,
+                category: document.getElementById('p-category').value,
+                image: document.getElementById('p-image').value,
+                description: document.getElementById('p-desc').value
+            };
+
+            const response = await fetch('/api/products', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(productData)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert(result.message);
+                document.getElementById('addProductForm').reset();
+                loadProducts();
+            }
+        });
+
+        function filterProducts(category, button) {
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            if (category === 'all') {
+                renderProducts(allProducts, 'catalog-products');
+            } else {
+                const filtered = allProducts.filter(p => p.category === category);
+                renderProducts(filtered, 'catalog-products');
+            }
+        }
+
+        function addToCart(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (product) { cart.push(product); updateCartUI(); }
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1); updateCartUI();
+        }
+
+        function toggleCart(show) {
+            document.getElementById('cartModal').style.display = show ? 'flex' : 'none';
+        }
+
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.length;
+            const listContainer = document.getElementById('cart-items-list');
+            listContainer.innerHTML = '';
+            let total = 0;
+
+            if (cart.length === 0) {
+                listContainer.innerHTML = '<p class="empty-message">Кошик порожній</p>';
+                document.getElementById('paypal-button-container').innerHTML = '';
+            } else {
+                cart.forEach((item, index) => {
+                    total += item.price;
+                    listContainer.innerHTML += `
+                        <div class="cart-item">
+                            <div style="text-align:left;">
+                                <div style="font-weight:600;">${item.name}</div>
+                                <div style="color:#27ae60; font-size:14px;">${item.price} грн</div>
+                            </div>
+                            <button class="btn-remove" onclick="removeFromCart(${index})"><i class="material-icons">delete</i></button>
+                        </div>
+                    `;
+                });
+                renderPayPalButton(total);
+            }
+            document.getElementById('cart-total-price').innerText = `Загалом: ${total} грн`;
+        }
+
+        function renderPayPalButton(totalUah) {
+            const usdRate = 40;
+            const totalUsd = (totalUah / usdRate).toFixed(2);
+            document.getElementById('paypal-button-container').innerHTML = '';
+            
+            paypal.Buttons({
+                createOrder: function(data, actions) {
+                    return actions.order.create({ purchase_units: [{ amount: { value: totalUsd } }] });
+                },
+                onApprove: function(data, actions) {
+                    return actions.order.capture().then(async function(details) {
+                        const buyerName = details.payer.name.given_name + " " + details.payer.name.surname;
+                        const orderItems = cart.map(item => ({ name: item.name, price: item.price }));
+
+                        try {
+                            const response = await fetch('/api/orders', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    items: orderItems,
+                                    total: totalUah,
+                                    customerName: buyerName
+                                })
+                            });
+
+                            const result = await response.json();
+                            if (result.success) {
+                                alert(`🎉 Оплачено! Дякуємо за покупку, ${buyerName}.\nНомер вашого замовлення: #${result.orderId}`);
+                            }
+                        } catch (error) {
+                            console.error("Помилка збереження замовлення:", error);
+                        }
+
+                        cart = []; 
+                        updateCartUI(); 
+                        toggleCart(false);
+                    });
+                }
+            }).render('#paypal-button-container');
+        }
+
+        // Запуск завантаження товарів
+        loadProducts();
+    </script>
+</body>
+</html>
+0
+
+
