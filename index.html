@@ -95,6 +95,7 @@
         </header>
     
     <div id="page-home" class="page active">
+    <div id="page-home" class="page" style="display: block;">
         <div class="hero">
             <h1>Ласкаво просимо до MyShop!</h1>
             <p>Знайдіть найкращі товари за найкращими цінами в Україні.</p>
@@ -104,7 +105,7 @@
         <div class="products-grid" id="featured-products"></div>
     </div>
 
-    <div id="page-catalog" class="page">
+    <div id="page-catalog" class="page" style="display: none;">
         <div class="filters">
             <button class="filter-btn active" onclick="filterProducts('all', this)">Все</button>
             <button class="filter-btn" onclick="filterProducts('shoes', this)">Взуття</button>
@@ -114,14 +115,14 @@
         <div class="products-grid" id="catalog-products"></div>
     </div>
 
-
-    
-    <div id="page-about" class="page">
+    <div id="page-about" class="page" style="display: none;">
         <div class="about-section">
             <h2>Про наш магазин ⚡ MyShop</h2>
-            <p>MyShop — це сучасний та швидкий інтернет-магазин.</p>
+            <p>MyShop — це сучасний та швидкий internet-магазин.</p>
         </div>
-    </div> <div id="page-login" class="page" style="display: none;">
+    </div> 
+
+    <div id="page-login" class="page" style="display: none;">
         <div style="max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
             <div style="font-size: 50px; margin-bottom: 10px;">🔐</div>
             <h2 style="color: #2c3e50; margin-bottom: 20px;">Вхід в панель керування</h2>
@@ -138,7 +139,7 @@
         </div>
     </div>
     
-    <div id="page-admin" class="page">
+    <div id="page-admin" class="page" style="display: none;">
         <div class="adminBox">
             <h2 style="margin-bottom:20px; color:#2c3e50;">Додати новий товар</h2>
             <form id="addProductForm">
@@ -168,15 +169,16 @@
                 </div>
                 <button type="submit" class="btn-submit">Зберегти в базу даних</button>
             </form>
-               <div class="adminBox" style="margin-top: 30px; background: #fdfefe; border-top: 4px solid #2980b9;">
+        </div>
+
+        <div class="adminBox" style="margin-top: 30px; background: #fdfefe; border-top: 4px solid #2980b9;">
             <h2 style="margin-bottom:20px; color:#2c3e50;">📦 Список замовлень</h2>
             <div id="admin-orders-list">
                 <p style="color: #7f8c8d;">Завантаження замовлень...</p>
             </div>
-               </div>
-            
         </div>
     </div>
+        
 
     <div class="cart-modal" id="cartModal">
         <div class="cart-content">
@@ -211,13 +213,28 @@
         let cart = [];
 
         function switchPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.querySelectorAll('nav a').forEach(link => link.classList.remove('active'));
-            
-            document.getElementById(`page-${pageId}`).classList.add('active');
-            document.getElementById(`nav-${pageId}`).classList.add('active');
-            window.scrollTo(0, 0);
+    // 1. Ховаємо взагалі всі сторінки
+    const pages = document.querySelectorAll('.page');
+    pages.forEach(page => {
+        page.style.display = 'none';
+    });
+
+    // 2. Показуємо сторінку, яку викликали
+    const activePage = document.getElementById('page-' + pageId);
+    if (activePage) {
+        activePage.style.display = 'block';
+    } else {
+        console.error("Не знайдено сторінку: page-" + pageId);
+    }
+
+    // 3. Перемикаємо активні класи на кнопках меню (для краси)
+    const navLinks = document.querySelectorAll('nav a');
+    navLinks.forEach(link => link.classList.remove('active'));
+    
+    const activeLink = document.getElementById('nav-' + pageId);
+    if (activeLink) activeLink.classList.add('active');
         }
+        
 
         async function loadProducts() {
             try {
