@@ -46,7 +46,6 @@
         .about-section h2 { margin-bottom: 20px; color: #2c3e50; }
         .about-section p { margin-bottom: 15px; font-size: 16px; color: #555; }
 
-        /* Стилі для форми АДМІНА */
         .adminBox { background: white; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 15px; text-align: left; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #2c3e50; }
@@ -55,17 +54,7 @@
         .btn-submit:hover { background-color: #219653; }
 
         .cart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
-        .cart-content { 
-    background: white; 
-    padding: 20px; 
-    border-radius: 12px; 
-    width: 90%; 
-    max-width: 500px; 
-    max-height: 85vh; /* Обмежуємо висоту вікна до 85% екрана */
-    overflow-y: auto; /* Додаємо авто-скролл, якщо елементів багато! */
-    position: relative; 
-    box-sizing: border-box;
-        }
+        .cart-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 85vh; overflow-y: auto; position: relative; box-sizing: border-box; }
         
         .close-cart { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 24px; color: #95a5a6; }
         .cart-title { font-size: 22px; margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
@@ -79,23 +68,22 @@
     </style>
 </head>
 <body>
-        <header>
-    <span class="logo" id="secret-bag" onclick="toggleAdmin()" style="cursor: pointer;">🛍️</span>
+    <header>
+        <span class="logo" id="secret-bag" onclick="toggleAdmin()" style="cursor: pointer;">🛍️</span>
         <nav>
-        <a id="nav-home" class="active" onclick="switchPage('home')">Головна</a>
-        <a id="nav-catalog" onclick="switchPage('catalog')">Каталог</a>
-        <a id="nav-about" onclick="switchPage('about')">Про нас</a>
-        <a id="nav-admin" onclick="switchPage('admin')" style="display: none;">Адмінка ⚙️</a>
-    </nav>
-    
-    <div class="cart-icon-container" onclick="toggleCart(true)">
-        <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
-        <span class="cart-badge" id="cart-count">0</span>
-    </div>
-        </header>
-    
+            <a id="nav-home" class="active" onclick="switchPage('home')">Головна</a>
+            <a id="nav-catalog" onclick="switchPage('catalog')">Каталог</a>
+            <a id="nav-about" onclick="switchPage('about')">Про нас</a>
+            <a id="nav-admin" onclick="switchPage('admin')" style="display: none;">Адмінка ⚙️</a>
+        </nav>
+        
+        <div class="cart-icon-container" onclick="toggleCart(true)">
+            <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
+            <span class="cart-badge" id="cart-count">0</span>
+        </div>
+    </header>
+
     <div id="page-home" class="page active">
-    <div id="page-home" class="page" style="display: block;">
         <div class="hero">
             <h1>Ласкаво просимо до MyShop!</h1>
             <p>Знайдіть найкращі товари за найкращими цінами в Україні.</p>
@@ -105,7 +93,7 @@
         <div class="products-grid" id="featured-products"></div>
     </div>
 
-    <div id="page-catalog" class="page" style="display: none;">
+    <div id="page-catalog" class="page">
         <div class="filters">
             <button class="filter-btn active" onclick="filterProducts('all', this)">Все</button>
             <button class="filter-btn" onclick="filterProducts('shoes', this)">Взуття</button>
@@ -115,14 +103,14 @@
         <div class="products-grid" id="catalog-products"></div>
     </div>
 
-    <div id="page-about" class="page" style="display: none;">
+    <div id="page-about" class="page">
         <div class="about-section">
             <h2>Про наш магазин ⚡ MyShop</h2>
             <p>MyShop — це сучасний та швидкий internet-магазин.</p>
         </div>
     </div> 
 
-    <div id="page-login" class="page" style="display: none;">
+    <div id="page-login" class="page">
         <div style="max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
             <div style="font-size: 50px; margin-bottom: 10px;">🔐</div>
             <h2 style="color: #2c3e50; margin-bottom: 20px;">Вхід в панель керування</h2>
@@ -139,7 +127,7 @@
         </div>
     </div>
     
-    <div id="page-admin" class="page" style="display: none;">
+    <div id="page-admin" class="page">
         <div class="adminBox">
             <h2 style="margin-bottom:20px; color:#2c3e50;">Додати новий товар</h2>
             <form id="addProductForm">
@@ -179,31 +167,29 @@
         </div>
     </div>
         
-
     <div class="cart-modal" id="cartModal">
         <div class="cart-content">
             <span class="close-cart" onclick="toggleCart(false)">&times;</span>
             <div class="cart-title">Твій Кошик</div>
             <div id="cart-items-list"></div>
             <div class="cart-total" id="cart-total-price">Загалом: 0 грн</div>
-         <div id="checkout-form-container" style="margin-top: 20px; border-top: 2px solid #ecf0f1; padding-top: 15px;">
-    <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 10px; text-align: left;">Дані для доставки:</h3>
-    
-    <div class="form-group">
-        <label>Прізвище та Ім'я:</label>
-        <input type="text" id="order-name" placeholder="Good Prince" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px;">
-    </div>
-    
-    <div class="form-group">
-        <label>Номер телефону:</label>
-        <input type="tel" id="order-phone" placeholder="+380777777777" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px;">
-    </div>
-    
-    <div class="form-group">
-        <label>Місто та № відділення Нової Пошти:</label>
-        <input type="text" id="order-delivery" placeholder="Київ, Відділення №1" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px;">
-    </div>
-         </div>
+            <div id="checkout-form-container" style="margin-top: 20px; border-top: 2px solid #ecf0f1; padding-top: 15px;">
+                <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 10px; text-align: left;">Дані для доставки:</h3>
+                
+                <div class="form-group">
+                    <label>Прізвище та Ім'я:</label>
+                    <input type="text" id="order-name" placeholder="Good Prince" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
+                
+                <div class="form-group">
+                    <label>Номер телефону:</label>
+                    <input type="tel" id="order-phone" placeholder="+380777777777" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
+                <div class="form-group">
+                    <label>Місто та № відділення Нової Пошти:</label>
+                    <input type="text" id="order-delivery" placeholder="Київ, Відділення №1" style="width: 100%; padding: 8px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 6px;">
+                </div>
+            </div>
             <div id="paypal-button-container"></div>
         </div>
     </div>
@@ -213,28 +199,24 @@
         let cart = [];
 
         function switchPage(pageId) {
-    // 1. Ховаємо взагалі всі сторінки
-    const pages = document.querySelectorAll('.page');
-    pages.forEach(page => {
-        page.style.display = 'none';
-    });
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
 
-    // 2. Показуємо сторінку, яку викликали
-    const activePage = document.getElementById('page-' + pageId);
-    if (activePage) {
-        activePage.style.display = 'block';
-    } else {
-        console.error("Не знайдено сторінку: page-" + pageId);
-    }
+            const activePage = document.getElementById('page-' + pageId);
+            if (activePage) {
+                activePage.classList.add('active');
+            } else {
+                console.error("Не знайдено сторінку: page-" + pageId);
+            }
 
-    // 3. Перемикаємо активні класи на кнопках меню (для краси)
-    const navLinks = document.querySelectorAll('nav a');
-    navLinks.forEach(link => link.classList.remove('active'));
-    
-    const activeLink = document.getElementById('nav-' + pageId);
-    if (activeLink) activeLink.classList.add('active');
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            const activeLink = document.getElementById('nav-' + pageId);
+            if (activeLink) activeLink.classList.add('active');
         }
-        
 
         async function loadProducts() {
             try {
@@ -249,6 +231,7 @@
 
         function renderProducts(products, containerId) {
             const container = document.getElementById(containerId);
+            if (!container) return;
             container.innerHTML = '';
             
             if (products.length === 0) {
@@ -280,9 +263,8 @@
             }
         }
 
-        // Обробка форми додавання товару
         document.getElementById('addProductForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); // Зупиняємо перезавантаження сторінки
+            e.preventDefault();
 
             const productData = {
                 name: document.getElementById('p-name').value,
@@ -292,19 +274,17 @@
                 description: document.getElementById('p-desc').value
             };
 
-            // Надсилаємо дані методом POST на сервер
             const response = await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(productData)
             });
-
             const result = await response.json();
             if (result.success) {
                 alert(result.message);
-                document.getElementById('addProductForm').reset(); // Очищаємо форму
-                loadProducts(); // Перезавантажуємо список товарів у пам'яті фронтенду
-                switchPage('catalog'); // Перенаправляємо адміна в каталог, щоб побачити результат
+                document.getElementById('addProductForm').reset();
+                loadProducts();
+                switchPage('catalog');
             }
         });
 
@@ -321,7 +301,7 @@
             document.getElementById('cartModal').style.display = show ? 'flex' : 'none';
         }
 
-                        function updateCartUI() {
+        function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
             const listContainer = document.getElementById('cart-items-list');
             listContainer.innerHTML = '';
@@ -330,7 +310,6 @@
             if (cart.length === 0) {
                 listContainer.innerHTML = '<p class="empty-message">Кошик порожній</p>';
                 document.getElementById('paypal-button-container').innerHTML = '';
-                
                 if (document.getElementById('checkout-form-container')) {
                     document.getElementById('checkout-form-container').style.display = 'none';
                 }
@@ -362,7 +341,7 @@
             }
         }
 
-                function renderPayPalButton(totalUah) {
+        function renderPayPalButton(totalUah) {
             const usdRate = 40;
             const totalUsd = (totalUah / usdRate).toFixed(2);
             document.getElementById('paypal-button-container').innerHTML = '';
@@ -384,35 +363,26 @@
                 },
                 onApprove: function(data, actions) {
                     return actions.order.capture().then(function(details) {
-                        // Беру дані з трьох полів
                         const name = document.getElementById('order-name').value.trim();
                         const phone = document.getElementById('order-phone').value.trim();
                         const delivery = document.getElementById('order-delivery').value.trim();
 
-                        // Об'єдную їх в одне поле customerName, яке чекає твій сервер
-                        const orderData = {
-                            customerName: `${name} | Тел: ${phone} | Доставка: ${delivery}`,
+                        const orderData = {customerName: `${name} | Тел: ${phone} | Доставка: ${delivery}`,
                             items: cart.map(item => ({ name: item.name, price: item.price })),
                             total: totalUah
                         };
 
-                        // Відправляємо на твій сервер
                         fetch('/api/orders', {
                             method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
+                            headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify(orderData)
                         })
                         .then(response => response.json())
                         .then(data => {
                             alert(`Оплачено! Дякуємо за покупку, ${name}. Замовлення збережено в базу даних!`);
-                            
-                            // Очищаємо поля форми
                             document.getElementById('order-name').value = '';
                             document.getElementById('order-phone').value = '';
                             document.getElementById('order-delivery').value = '';
-                            
                             cart = []; 
                             updateCartUI(); 
                             toggleCart(false);
@@ -424,99 +394,85 @@
                     });
                 }
             }).render('#paypal-button-container');
-                }
-        
+        }
 
-        // Перемикає на сторінку логіну
         function toggleAdmin() {
-            // Якщо ми вже в адмінці — повертаємо на головну
-            if (document.getElementById('page-admin').style.display === 'block') {
+            const adminPage = document.getElementById('page-admin');
+            if (adminPage && adminPage.classList.contains('active')) {
                 document.getElementById('nav-admin').style.display = 'none';
                 switchPage('home');
             } else {
-                // Інакше — ведемо на сторінку красивого входу
                 switchPage('login');
                 document.getElementById('admin-password-input').value = '';
                 document.getElementById('login-error-msg').style.display = 'none';
             }
         }
 
-        // Обробка введення пароля
         function submitAdminLogin() {
             const passwordInput = document.getElementById('admin-password-input').value;
             const errorMsg = document.getElementById('login-error-msg');
 
-            // Поки що перевіряємо на фронтенді, як і раніше
             if (passwordInput === "1111") { 
-                errorMsg.style.display = 'none';
-                
-                // Показуємо секретну кнопку в меню
+                if (errorMsg) errorMsg.style.display = 'none';
                 document.getElementById('nav-admin').style.display = 'inline-block'; 
-                
-                // Переходимо в адмінку і завантажуємо замовлення
                 switchPage('admin'); 
                 loadAdminOrders();
             } else {
-                // Якщо пароль невірний — показуємо червону помилку
-                errorMsg.style.display = 'block';
+                if (errorMsg) errorMsg.style.display = 'block';
             }
         }
             
         async function loadAdminOrders() {
-    const container = document.getElementById('admin-orders-list');
-    if (!container) return;
+            const container = document.getElementById('admin-orders-list');
+            if (!container) return;
 
-    try {
-        const response = await fetch('/api/orders');
-        const orders = await response.json();
+            try {
+                const response = await fetch('/api/orders');
+                const orders = await response.json();
 
-        // Перевіряємо, чи повернувся масив і чи є в ньому замовлення
-        if (!orders || orders.length === 0) {
-            container.innerHTML = '<p style="color: #7f8c8d; text-align:center; padding: 20px;">📦 Замовлень поки немає</p>';
-            return;
+                if (!orders || orders.length === 0) {
+                    container.innerHTML = '<p style="color: #7f8c8d; text-align:center; padding: 20px;">📦 Замовлень поки немає</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                orders.forEach(order => {
+                    let itemsHtml = '';
+                    if (order.items && Array.isArray(order.items)) {
+                        itemsHtml = order.items.map(item => `<li>${item.name} — ${item.price} грн</li>`).join('');
+                    } else {
+                        itemsHtml = '<li>Товари не вказані</li>';
+                    }
+                    
+                    container.innerHTML += `
+                        <div style="background: #f8f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #27ae60; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #2c3e50; margin-bottom: 8px;">
+                                <span>Замовлення №${order.id || '---'}</span>
+                                <span style="color: #27ae60;">${order.status || 'Оплачено'}</span>
+                            </div>
+                            <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Покупець:</strong> ${order.customerName || 'Невідомо'}</p>
+                            <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Дата:</strong> ${order.date || '---'}</p>
+                            <div style="margin-top: 10px; padding-left: 15px; font-size: 14px;">
+                                <strong>Товари:</strong>
+                                <ul style="margin: 5px 0; padding-left: 20px;">${itemsHtml}</ul>
+                            </div>
+                            <div style="text-align: right; font-weight: bold; margin-top: 10px; color: #2c3e50;">
+                                Разом: ${order.total || 0} грн
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Помилка завантаження замовлень:", err);
+                container.innerHTML = '<p style="color: #e74c3c; text-align:center; padding: 20px;">❌ Не вдалося завантажити замовлення</p>';
+            }
         }
-
-        container.innerHTML = '';
-        orders.forEach(order => {
-            // Перевіряємо, чи є товари в замовленні
-            let itemsHtml = '';
-            if (order.items && Array.isArray(order.items)) {
-                itemsHtml = order.items.map(item => `<li>${item.name} — ${item.price} грн</li>`).join('');
-            } else {
-                itemsHtml = '<li>Товари не вказані</li>';
-            }
-            
-            container.innerHTML += `
-                <div style="background: #f8f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #27ae60; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <div style="display: flex; justify-content: space-between; font-weight: bold; color: #2c3e50; margin-bottom: 8px;">
-                        <span>Замовлення №${order.id || '---'}</span>
-                        <span style="color: #27ae60;">${order.status || 'Оплачено'}</span>
-                    </div>
-                    <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Покупець:</strong> ${order.customerName || 'Невідомо'}</p>
-                    <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Дата:</strong> ${order.date || '---'}</p>
-                    <div style="margin-top: 10px; padding-left: 15px; font-size: 14px;">
-                        <strong>Товари:</strong>
-                        <ul style="margin: 5px 0; padding-left: 20px;">${itemsHtml}</ul>
-                    </div>
-                    <div style="text-align: right; font-weight: bold; margin-top: 10px; color: #2c3e50;">
-                        Разом: ${order.total || 0} грн
-                    </div>
-                </div>
-            `;
-        });
-    } catch (err) {
-        console.error("Помилка завантаження замовлень:", err);
-        container.innerHTML = '<p style="color: #e74c3c; text-align:center; padding: 20px;">❌ Не вдалося завантажити замовлення</p>';
-    }
-            }
         
-        
-                // Запускаємо логіку тільки після повного завантаження сторінки
         document.addEventListener("DOMContentLoaded", () => {
             loadProducts();
             loadAdminOrders(); 
         });
-        
     </script>
 </body>
 </html>
+            
