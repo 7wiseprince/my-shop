@@ -55,7 +55,18 @@
         .btn-submit:hover { background-color: #219653; }
 
         .cart-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; justify-content: center; align-items: center; }
-        .cart-content { background: white; padding: 30px; border-radius: 12px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .cart-content { 
+    background: white; 
+    padding: 20px; 
+    border-radius: 12px; 
+    width: 90%; 
+    max-width: 500px; 
+    max-height: 85vh; /* Обмежуємо висоту вікна до 85% екрана */
+    overflow-y: auto; /* Додаємо авто-скролл, якщо елементів багато! */
+    position: relative; 
+    box-sizing: border-box;
+        }
+        
         .close-cart { position: absolute; top: 15px; right: 15px; cursor: pointer; font-size: 24px; color: #95a5a6; }
         .cart-title { font-size: 22px; margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; }
         .cart-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #f2f2f2; }
@@ -269,7 +280,7 @@
             document.getElementById('cartModal').style.display = show ? 'flex' : 'none';
         }
 
-        function updateCartUI() {
+                function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
             const listContainer = document.getElementById('cart-items-list');
             listContainer.innerHTML = '';
@@ -278,7 +289,17 @@
             if (cart.length === 0) {
                 listContainer.innerHTML = '<p class="empty-message">Кошик порожній</p>';
                 document.getElementById('paypal-button-container').innerHTML = '';
+                
+                // ХОВАЄМО форму замовлення, якщо в кошику нічого немає
+                if(document.getElementById('checkout-form-container')) {
+                    document.getElementById('checkout-form-container').style.display = 'none';
+                }
             } else {
+                // ПОКАЗУЄМО форму замовлення, якщо з'явився товар
+                if(document.getElementById('checkout-form-container')) {
+                    document.getElementById('checkout-form-container').style.display = 'block';
+                }
+
                 cart.forEach((item, index) => {
                     total += item.price;
                     listContainer.innerHTML += `
@@ -291,6 +312,10 @@
                         </div>
                     `;
                 });
+            }
+            
+            // Тут далі йде твій код виведення загальної суми та виклику renderPayPalButton(total)
+            
                 renderPayPalButton(total);
             }
             document.getElementById('cart-total-price').innerText = `Загалом: ${total} грн`;
