@@ -101,7 +101,6 @@ app.delete('/api/products/:id', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
-
 app.post('/api/orders', async (req, res) => {
     try {
         const { items, total, customerName } = req.body;
@@ -116,16 +115,7 @@ app.post('/api/orders', async (req, res) => {
             status: "Оплачено, очікує відправки",
             date: new Date().toLocaleString('uk-UA')
         });
-// Маршрут для отримання всіх замовлень (для адміна)
-app.get('/api/orders', async (req, res) => {
-    try {
-        const orders = await Order.find({}).sort({ id: -1 }); // Нові замовлення будуть зверху
-        res.json(orders);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-        
+
         await newOrder.save();
         res.json({ success: true, orderId: orderId });
     } catch (err) {
@@ -133,6 +123,17 @@ app.get('/api/orders', async (req, res) => {
     }
 });
 
+// ТЕПЕР МАРШРУТ GET СТОЇТЬ ОКРЕМО, ЯК САМОСТІЙНИЙ БЛОК:
+app.get('/api/orders', async (req, res) => {
+    try {
+        const orders = await Order.find({}).sort({ id: -1 });
+        res.json(orders);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Сервер працює`);
 });
+            
