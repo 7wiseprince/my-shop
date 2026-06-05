@@ -70,23 +70,19 @@
 <body>
         <header>
     <span class="logo" id="secret-bag" onclick="toggleAdmin()" style="cursor: pointer;">🛍️</span>
-    
-    <nav>
+        <nav>
         <a id="nav-home" class="active" onclick="switchPage('home')">Головна</a>
         <a id="nav-catalog" onclick="switchPage('catalog')">Каталог</a>
         <a id="nav-about" onclick="switchPage('about')">Про нас</a>
+        <a id="nav-admin" onclick="switchPage('admin')" style="display: none;">Адмінка ⚙️</a>
     </nav>
-
-
-<div class="page-admin" id="adminBox" style="display: none;">
-</div>
     
-        <div class="cart-icon-container" onclick="toggleCart(true)">
-            <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
-            <span class="cart-badge" id="cart-count">0</span>
-        </div>
-    </header>
-
+    <div class="cart-icon-container" onclick="toggleCart(true)">
+        <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
+        <span class="cart-badge" id="cart-count">0</span>
+    </div>
+        </header>
+    
     <div id="page-home" class="page active">
         <div class="hero">
             <h1>Ласкаво просимо до MyShop!</h1>
@@ -301,22 +297,25 @@
                         
             ).render('#paypal-button-container');
         }
-
-        // --- НАША ФУНКЦІЯ ДЛЯ СЕКРЕТНОЇ ТОРБИНКИ ---
+                // --- ОНОВЛЕНА ФУНКЦІЯ ДЛЯ СЕКРЕТНОЇ ТОРБИНКИ ---
         function toggleAdmin() {
             let password = prompt("Введіть секретний пароль:");
-            if (password === "1111") { // Твій пароль для входу
-                let box = document.getElementById('adminBox');
-                if (box.style.display === "none") {
-                    box.style.display = "block";
-                    alert("Доступ дозволено! Адмін-панель відкрита.");
+            if (password === "1111") { // Твій пароль
+                let adminLink = document.getElementById('nav-admin');
+                
+                if (adminLink.style.display === "none") {
+                    adminLink.style.display = "inline-block"; // Показуємо кнопку в меню
+                    alert("Доступ дозволено! Переходимо в адмін-панель.");
+                    switchPage('admin'); // Автоматично відкриваємо сторінку адміна
                 } else {
-                    box.style.display = "none";
+                    adminLink.style.display = "none";
+                    switchPage('home'); // Якщо панель закриваємо — повертаємо на головну
                 }
             } else {
                 alert("Невірний пароль!");
             }
         }
+        
 
         loadProducts();
     </script>
