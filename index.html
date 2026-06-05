@@ -68,15 +68,19 @@
     </style>
 </head>
 <body>
+        <header>
+    <span class="logo" id="secret-bag" onclick="toggleAdmin()" style="cursor: pointer;">🛍️</span>
+    
+    <nav>
+        <a id="nav-home" class="active" onclick="switchPage('home')">Головна</a>
+        <a id="nav-catalog" onclick="switchPage('catalog')">Каталог</a>
+        <a id="nav-about" onclick="switchPage('about')">Про нас</a>
+    </nav>
 
-    <header>
-        <div class="logo" onclick="switchPage('home')">🛍️ My<span>Shop</span></div>
-        <nav>
-            <a id="nav-home" class="active" onclick="switchPage('home')">Головна</a>
-            <a id="nav-catalog" onclick="switchPage('catalog')">Каталог</a>
-            <a id="nav-about" onclick="switchPage('about')">Про нас</a>
-            <a id="nav-admin" onclick="switchPage('admin')">⚙️ Адмінка</a>
-        </nav>
+
+<div class="admin-panel" id="adminBox" style="display: none;">
+</div>
+    
         <div class="cart-icon-container" onclick="toggleCart(true)">
             <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
             <span class="cart-badge" id="cart-count">0</span>
@@ -293,8 +297,31 @@
                         cart = []; updateCartUI(); toggleCart(false);
                     });
                 }
+            }
+                        }
             }).render('#paypal-button-container');
         }
+
+        // --- НАША ФУНКЦІЯ ДЛЯ СЕКРЕТНОЇ ТОРБИНКИ ---
+        function toggleAdmin() {
+            let password = prompt("Введіть секретний пароль:");
+            if (password === "1111") { // Твій пароль для входу
+                let box = document.getElementById('adminBox');
+                if (box.style.display === "none") {
+                    box.style.display = "block";
+                    alert("Доступ дозволено! Адмін-панель відкрита.");
+                } else {
+                    box.style.display = "none";
+                }
+            } else {
+                alert("Невірний пароль!");
+            }
+        }
+
+        loadProducts();
+    </script>
+</body>
+</html>
 
         loadProducts();
     </script>
