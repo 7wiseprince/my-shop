@@ -461,7 +461,12 @@ loadAdminOrders(); // <--- Додаємо виклик сюди!
             }
         
         
-        loadProducts();
+                // Запускаємо логіку тільки після повного завантаження сторінки
+        document.addEventListener("DOMContentLoaded", () => {
+            loadProducts();
+            loadAdminOrders(); 
+        });
+        
     </script>
 </body>
 </html>
