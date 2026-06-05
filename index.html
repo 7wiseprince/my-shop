@@ -280,7 +280,7 @@
             document.getElementById('cartModal').style.display = show ? 'flex' : 'none';
         }
 
-                function updateCartUI() {
+                        function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
             const listContainer = document.getElementById('cart-items-list');
             listContainer.innerHTML = '';
@@ -290,13 +290,11 @@
                 listContainer.innerHTML = '<p class="empty-message">Кошик порожній</p>';
                 document.getElementById('paypal-button-container').innerHTML = '';
                 
-                // ХОВАЄМО форму замовлення, якщо в кошику нічого немає
-                if(document.getElementById('checkout-form-container')) {
+                if (document.getElementById('checkout-form-container')) {
                     document.getElementById('checkout-form-container').style.display = 'none';
                 }
             } else {
-                // ПОКАЗУЄМО форму замовлення, якщо з'явився товар
-                if(document.getElementById('checkout-form-container')) {
+                if (document.getElementById('checkout-form-container')) {
                     document.getElementById('checkout-form-container').style.display = 'block';
                 }
 
@@ -314,11 +312,13 @@
                 });
             }
             
-            // Тут далі йде твій код виведення загальної суми та виклику renderPayPalButton(total)
-            
+            if (document.getElementById('cart-total-price')) {
+                document.getElementById('cart-total-price').innerText = `Загалом: ${total} грн`;
+            }
+
+            if (total > 0) {
                 renderPayPalButton(total);
             }
-            document.getElementById('cart-total-price').innerText = `Загалом: ${total} грн`;
         }
 
         function renderPayPalButton(totalUah) {
@@ -327,43 +327,56 @@
             document.getElementById('paypal-button-container').innerHTML = '';
             
             paypal.Buttons({
+                onClick: function(data, actions) {
+                    const name = document.getElementById('order-name').value.trim();
+                    const phone = document.getElementById('order-phone').value.trim();
+                    const delivery = document.getElementById('order-delivery').value.trim();
+
+                    if (!name || !phone || !delivery) {
+                        alert('Будь ласка, заповніть всі поля для доставки перед оплатою!');
+                        return actions.reject();
+                    }
+                    return actions.resolve();
+                },
                 createOrder: function(data, actions) {
                     return actions.order.create({ purchase_units: [{ amount: { value: totalUsd } }] });
                 },
                 onApprove: function(data, actions) {
                     return actions.order.capture().then(function(details) {
-                        alert('Оплачено! Дякуємо за покупку, ' + details.payer.name.given_name);
-                        cart = []; updateCartUI(); toggleCart(false);
+                        const buyerName = document.getElementById('order-name').value;
+                        alert('Оплачено! Дякуємо за покупку, ' + buyerName);
+                        
+                        document.getElementById('order-name').value = '';
+                        document.getElementById('order-phone').value = '';
+                        document.getElementById('order-delivery').value = '';
+                        
+                        cart = []; 
+                        updateCartUI(); 
+                        toggleCart(false);
                     });
                 }
-            }
-                        
-            ).render('#paypal-button-container');
+            }).render('#paypal-button-container');
         }
-                // --- ОНОВЛЕНА ФУНКЦІЯ ДЛЯ СЕКРЕТНОЇ ТОРБИНКИ ---
+
+        // --- ОНОВЛЕНА ФУНКЦІЯ ДЛЯ СЕКРЕТНОЇ ТОРБИНКИ ---
         function toggleAdmin() {
             let password = prompt("Введіть секретний пароль:");
-            if (password === "1111") { // Твій пароль
+            if (password === "1111") {
                 let adminLink = document.getElementById('nav-admin');
-                
                 if (adminLink.style.display === "none") {
-                    adminLink.style.display = "inline-block"; // Показуємо кнопку в меню
-                    alert("Доступ дозволено! Переходимо в адмін-панель.");
-                    switchPage('admin'); // Автоматично відкриваємо сторінку адміна
+                    adminLink.style.display = "inline-block";
+                    alert("Доступ дозволено! Переходимо в admin-панель.");
+                    switchPage('admin');
                 } else {
                     adminLink.style.display = "none";
-                    switchPage('home'); // Якщо панель закриваємо — повертаємо на головну
+                    switchPage('home');
                 }
             } else {
                 alert("Невірний пароль!");
             }
         }
-        
 
         loadProducts();
     </script>
 </body>
 </html>
-
-    
-
