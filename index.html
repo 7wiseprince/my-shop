@@ -151,6 +151,13 @@
                 </div>
                 <button type="submit" class="btn-submit">Зберегти в базу даних</button>
             </form>
+               <div class="adminBox" style="margin-top: 30px; background: #fdfefe; border-top: 4px solid #2980b9;">
+            <h2 style="margin-bottom:20px; color:#2c3e50;">📦 Список замовлень</h2>
+            <div id="admin-orders-list">
+                <p style="color: #7f8c8d;">Завантаження замовлень...</p>
+            </div>
+               </div>
+            
         </div>
     </div>
 
@@ -397,13 +404,55 @@
                     switchPage('admin');
                 } else {
                     adminLink.style.display = "none";
-                    switchPage('home');
+                    switchPage('admin');
+loadAdminOrders(); // <--- Додаємо виклик сюди!
+                    
                 }
             } else {
                 alert("Невірний пароль!");
             }
         }
+        async function loadAdminOrders() {
+            const container = document.getElementById('admin-orders-list');
+            if (!container) return;
 
+            try {
+                const response = await fetch('/api/orders');
+                const orders = await response.json();
+
+                if (orders.length === 0) {
+                    container.innerHTML = '<p style="color: #7f8c8d; text-align:center;">Замовлень поки немає</p>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                orders.forEach(order => {
+                    let itemsHtml = order.items.map(item => `<li>${item.name} — ${item.price} грн</li>`).join('');
+                    
+                    container.innerHTML += `
+                        <div style="background: #f8f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #27ae60; text-align: left;">
+                            <div style="display: flex; justify-content: space-between; font-weight: bold; color: #2c3e50; margin-bottom: 8px;">
+                                <span>Замовлення №${order.id}</span>
+                                <span style="color: #27ae60;">${order.status}</span>
+                            </div>
+                            <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Покупець:</strong> ${order.customerName}</p>
+                            <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Дата:</strong> ${order.date}</p>
+                            <div style="margin-top: 10px; padding-left: 15px; font-size: 14px;">
+                                <strong>Товари:</strong>
+                                <ul style="margin: 5px 0; padding-left: 20px;">${itemsHtml}</ul>
+                            </div>
+                            <div style="text-align: right; font-weight: bold; margin-top: 10px; color: #2c3e50;">
+                                Разом: ${order.total} грн
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (err) {
+                console.error("Помилка завантаження замовлень:", err);
+                container.innerHTML = '<p style="color: #e74c3c;">Не вдалося завантажити замовлення</p>';
+            }
+        }
+        
         loadProducts();
     </script>
 </body>
