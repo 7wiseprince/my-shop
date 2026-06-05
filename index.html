@@ -114,13 +114,31 @@
         <div class="products-grid" id="catalog-products"></div>
     </div>
 
+
+    
     <div id="page-about" class="page">
         <div class="about-section">
             <h2>Про наш магазин ⚡ MyShop</h2>
             <p>MyShop — це сучасний та швидкий інтернет-магазин зі справжньою базою даних JSON на борту!</p>
         </div>
     </div>
-
+        <div id="page-login" class="page" style="display: none;">
+        <div style="max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
+            <div style="font-size: 50px; margin-bottom: 10px;">🔐</div>
+            <h2 style="color: #2c3e50; margin-bottom: 20px;">Вхід в панель керування</h2>
+            
+            <div style="margin-bottom: 20px; text-align: left;">
+                <label style="display:block; margin-bottom: 8px; color: #7f8c8d; font-size: 14px;">Секретний пароль:</label>
+                <input type="password" id="admin-password-input" placeholder="Введіть пароль" style="width: 100%; padding: 12px; border: 2px solid #bdc3c7; border-radius: 8px; font-size: 16px; box-sizing: border-box; outline: none; transition: 0.3s;">
+            </div>
+            
+            <button onclick="submitAdminLogin()" style="width: 100%; background: #2980b9; color: white; padding: 12px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s;">
+                Увійти
+            </button>
+            <p id="login-error-msg" style="color: #e74c3c; margin-top: 15px; font-size: 14px; display: none;">Невірний пароль! Спробуйте ще раз.</p>
+        </div>
+        </div>
+    
     <div id="page-admin" class="page">
         <div class="adminBox">
             <h2 style="margin-bottom:20px; color:#2c3e50;">Додати новий товар</h2>
@@ -393,25 +411,41 @@
                 }
         
 
-        // --- ОНОВЛЕНА ФУНКЦІЯ ДЛЯ СЕКРЕТНОЇ ТОРБИНКИ ---
+        // Перемикає на сторінку логіну
         function toggleAdmin() {
-            let password = prompt("Введіть секретний пароль:");
-            if (password === "1111") {
-                let adminLink = document.getElementById('nav-admin');
-                if (adminLink.style.display === "none") {
-                    adminLink.style.display = "inline-block";
-                    alert("Доступ дозволено! Переходимо в admin-панель.");
-                    switchPage('admin');
-                } else {
-                    adminLink.style.display = "none";
-                    switchPage('admin');
-loadAdminOrders(); // <--- Додаємо виклик сюди!
-                    
-                }
+            // Якщо ми вже в адмінці — повертаємо на головну
+            if (document.getElementById('page-admin').style.display === 'block') {
+                document.getElementById('nav-admin').style.display = 'none';
+                switchPage('home');
             } else {
-                alert("Невірний пароль!");
+                // Інакше — ведемо на сторінку красивого входу
+                switchPage('login');
+                document.getElementById('admin-password-input').value = '';
+                document.getElementById('login-error-msg').style.display = 'none';
             }
         }
+
+        // Обробка введення пароля
+        function submitAdminLogin() {
+            const passwordInput = document.getElementById('admin-password-input').value;
+            const errorMsg = document.getElementById('login-error-msg');
+
+            // Поки що перевіряємо на фронтенді, як і раніше
+            if (passwordInput === "1111") { 
+                errorMsg.style.display = 'none';
+                
+                // Показуємо секретну кнопку в меню
+                document.getElementById('nav-admin').style.display = 'inline-block'; 
+                
+                // Переходимо в адмінку і завантажуємо замовлення
+                switchPage('admin'); 
+                loadAdminOrders();
+            } else {
+                // Якщо пароль невірний — показуємо червону помилку
+                errorMsg.style.display = 'block';
+            }
+        }
+            
         async function loadAdminOrders() {
     const container = document.getElementById('admin-orders-list');
     if (!container) return;
