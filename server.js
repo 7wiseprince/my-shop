@@ -57,7 +57,7 @@ async function seedDatabase() {
 
 // ГОЛОВНА СТОРІНКА (Зверни увагу на велику літеру 'Index.html'!)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Index.html'));
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // API ТОЧКИ
