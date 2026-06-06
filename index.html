@@ -463,21 +463,25 @@ function closeSuccessModal() {
     <div class="bottom-nav">
     <div class="bottom-nav-item" onclick="switchPage('home')">
         <span class="nav-icon">🏠</span>
-        <span class="nav-text">Каталог</span>
+        <span class="nav-text">Головна</span>
     </div>
-    <div class="bottom-nav-item" onclick="switchPage('favorites')">
-        <span class="nav-icon">❤️</span>
-        <span class="nav-text">Улюблене</span>
+    <div class="bottom-nav-item" onclick="switchPage('catalog')">
+        <span class="nav-icon">📃</span> <span class="nav-text">Каталог</span>
     </div>
-    <div class="bottom-nav-item" onclick="toggleCart()">
+    <div class="bottom-nav-item" onclick="toggleCart(true)">
         <span class="nav-icon">🛒</span>
         <span class="nav-text">Кошик</span>
     </div>
-    <div class="bottom-nav-item" onclick="switchPage('admin')">
+    <div class="bottom-nav-item" onclick="switchPage('favorites')">
+        <span class="nav-icon">❤️</span>
+        <span class="nav-text">Обране</span>
+    </div>
+    <div class="bottom-nav-item" onclick="openAdminModal()">
         <span class="nav-icon">👤</span>
         <span class="nav-text">Кабінет</span>
     </div>
     </div>
+    
     
 </body>
 </html>
