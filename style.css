@@ -518,4 +518,71 @@ nav a.active, nav a:hover {
 .btn-continue:active {
     transform: scale(0.98);
 }
+/* --- СТИЛІ ДЛЯ ПОШУКУ ЗВЕРХУ --- */
+.search-container {
+    max-width: 1200px;
+    margin: 20px auto 10px auto;
+    padding: 0 20px;
+}
+
+#search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #dcdde1;
+    border-radius: 25px; /* Округлений пошук */
+    font-size: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+#search-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+}
+
+/* --- СТИЛІ ДЛЯ НИЖНЬОЇ ПАНЕЛІ (ТАБИ) --- */
+.bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #ffffff;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 999; /* Завжди поверх усього */
+    border-top: 1px solid #edf2f7;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #7f8c8d;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    width: 25%;
+    height: 100%;
+    transition: color 0.2s ease;
+}
+
+.bottom-nav-item:hover, .bottom-nav-item:active {
+    color: #3498db; /* Синій колір при натисканні */
+}
+
+.nav-icon {
+    font-size: 20px;
+    margin-bottom: 2px;
+}
+
+/* Щоб нижня панель не перекривала контент сайту знизу */
+body {
+    padding-bottom: 70px;
+    }
+
 
