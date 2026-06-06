@@ -18,6 +18,9 @@
             <a id="nav-about" onclick="switchPage('about')">Про нас</a>
             <a id="nav-admin" onclick="switchPage('admin')" style="display: none;">Адмінка ⚙️</a>
         </nav>
+        <div class="search-container">
+    <input type="text" id="search-input" placeholder="Пошук товарів..." oninput="handleSearch()">
+        </div>
         
         <div class="cart-icon-container" onclick="toggleCart(true)">
             <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
@@ -450,6 +453,25 @@ function closeSuccessModal() {
             loadAdminOrders(); 
         });
     </script>
+    <div class="bottom-nav">
+    <div class="bottom-nav-item" onclick="switchPage('home')">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-text">Каталог</span>
+    </div>
+    <div class="bottom-nav-item" onclick="switchPage('favorites')">
+        <span class="nav-icon">❤️</span>
+        <span class="nav-text">Улюблене</span>
+    </div>
+    <div class="bottom-nav-item" onclick="toggleCart()">
+        <span class="nav-icon">🛒</span>
+        <span class="nav-text">Кошик</span>
+    </div>
+    <div class="bottom-nav-item" onclick="switchPage('admin')">
+        <span class="nav-icon">👤</span>
+        <span class="nav-text">Кабінет</span>
+    </div>
+    </div>
+    
 </body>
 </html>
             
