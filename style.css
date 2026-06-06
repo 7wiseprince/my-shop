@@ -584,5 +584,31 @@ nav a.active, nav a:hover {
 body {
     padding-bottom: 70px;
     }
+/* Контейнер для центрування пошуку */
+.search-container {
+    max-width: 1200px;
+    margin: 15px auto 5px auto;
+    padding: 0 16px;
+}
+
+/* Красиве поле пошуку */
+#search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 25px; /* Заокруглені краї як у додатках */
+    font-size: 15px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+/* Ефект при натисканні на пошук */
+#search-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.12);
+}
+
 
 
