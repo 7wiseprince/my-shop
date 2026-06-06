@@ -335,7 +335,7 @@
                         })
                         .then(response => response.json())
                         .then(data => {
-                            alert(`Оплачено! Дякуємо за покупку, ${name}. Замовлення збережено в базу даних!`);
+                            showSuccessModal();
                             document.getElementById('order-name').value = '';
                             document.getElementById('order-phone').value = '';
                             document.getElementById('order-delivery').value = '';
