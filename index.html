@@ -12,20 +12,11 @@
 <body>
     <header>
         <span class="logo" id="secret-bag" onclick="toggleAdmin()" style="cursor: pointer;">🛍️</span>
-        <nav>
-            <a id="nav-home" class="active" onclick="switchPage('home')">Головна</a>
-            <a id="nav-catalog" onclick="switchPage('catalog')">Каталог</a>
-            <a id="nav-about" onclick="switchPage('about')">Про нас</a>
-            <a id="nav-admin" onclick="switchPage('admin')" style="display: none;">Адмінка ⚙️</a>
-        </nav>
+        
         <div class="search-container">
     <input type="text" id="search-input" placeholder="Пошук товарів..." oninput="handleSearch()">
         </div>
-        
-        <div class="cart-icon-container" onclick="toggleCart(true)">
-            <i class="material-icons" style="font-size:30px; color: white;">shopping_cart</i>
-            <span class="cart-badge" id="cart-count">0</span>
-        </div>
+
     </header>
 
     <div id="page-home" class="page active">
