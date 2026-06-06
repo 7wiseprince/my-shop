@@ -252,7 +252,7 @@
         }
 
         function updateCartUI() {
-            document.getElementById('cart-count').innerText = cart.length;
+            document.getElementById('cart-items-container').innerText = cart.length;
             const listContainer = document.getElementById('cart-items-list');
             listContainer.innerHTML = '';
             let total = 0;
