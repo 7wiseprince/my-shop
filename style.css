@@ -1,0 +1,179 @@
+/* Подключаем современный и чистый шрифт Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-color: #2ecc71;       /* Акцентный зеленый для кнопок "Купити" */
+    --primary-hover: #27ae60;       /* Цвет кнопки при наведении */
+    --bg-dark: #1e272e;             /* Стильный темный для шапки (навигации) */
+    --text-main: #2c3e50;           /* Основной цвет текста (глубокий графитовый) */
+    --text-muted: #7f8c8d;          /* Вторичный текст (серый) */
+    --bg-light: #f8f9fa;            /* Светлый фон для карточек и блоков */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;          /* Мягкое закругление углов */
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    background-color: #ffffff;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- ОБНОВЛЕННАЯ ШАПКА САЙТА --- */
+header, .navbar, nav {
+    background-color: var(--bg-dark) !important;
+    padding: 15px 20px;
+    box-shadow: var(--shadow-sm);
+}
+
+/* --- СЕТКА ТОВАРОВ (CATALOG) --- */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- СТИЛЬНАЯ КАРТОЧКА ТОВАРА --- */
+.product-card {
+    background: #ffffff;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+/* Эффект «левитации» при наведении на товар */
+.product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Обертка для картинки, чтобы они все были одного размера */
+.product-img-wrapper {
+    width: 100%;
+    height: 260px;
+    overflow: hidden;
+    background-color: var(--bg-light);
+    position: relative;
+}
+
+.product-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Картинка заполняет блок без искажений */
+    transition: transform 0.5s ease;
+}
+
+/* Эффект приближения картинки при наведении */
+.product-card:hover img {
+    transform: scale(1.06);
+}
+
+/* Инфо-блок внутри карточки */
+.product-info {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.product-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+    color: var(--text-main);
+}
+
+.product-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-bottom: 15px;
+    flex-grow: 1;
+}
+
+.product-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.product-price {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* --- СОВРЕМЕННЫЕ КНОПКИ --- */
+.btn-buy, .adminBox button, #addProductForm button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-buy:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-buy:active {
+    transform: scale(0.97); /* Эффект нажатия */
+}
+
+/* --- КРАСИВЫЙ АНИМИРОВАННЫЙ СПИННЕР ЗАГРУЗКИ --- */
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--bg-light);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 30px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* --- СТИЛИЗАЦИЯ ФОРМ И АДМИНКИ --- */
+.adminBox, #page-login {
+    background: var(--bg-light);
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--shadow-sm);
+    max-width: 500px;
+    margin: 50px auto;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px 14px;
+    margin-top: 8px;
+    margin-bottom: 20px;
+    border: 1px solid #dcdde1;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+  
