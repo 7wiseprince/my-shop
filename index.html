@@ -426,6 +426,22 @@
                 container.innerHTML = '<p style="color: #e74c3c; text-align:center; padding: 20px;">❌ Не вдалося завантажити замовлення</p>';
             }
         }
+        function handleSearch() {
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const productCards = document.querySelectorAll('.product-card');
+
+    productCards.forEach(card => {
+        // Шукаємо заголовок всередині картки товару
+        const title = card.querySelector('.product-title').innerText.toLowerCase();
+        
+        if (title.includes(query)) {
+            card.style.display = 'flex'; // Показуємо товар
+        } else {
+            card.style.display = 'none'; // Ховаємо товар
+        }
+    });
+        }
+        
         // Функція для відкриття вікна успіху
 function showSuccessModal() {
     // Спочатку ховаємо кошик, якщо він відкритий
