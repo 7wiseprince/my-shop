@@ -135,7 +135,21 @@
             <div id="paypal-button-container"></div>
         </div>
     </div>
+<div id="success-modal" class="success-modal">
+    <div class="success-content">
+        <div class="success-icon">✓</div>
+        <h2>Дякуємо за замовлення!</h2>
+        <p class="success-message">Ваш запит успішно оброблено. Наш менеджер зв'яжеться з вами найближчим часом.</p>
+        
+        <div class="order-details-box">
+            <span class="details-label">Статус оплати:</span>
+            <span class="details-value status-paid">Успішно</span>
+        </div>
 
+        <button class="btn-continue" onclick="closeSuccessModal()">Продовжити покупки</button>
+    </div>
+</div>
+    
     <script>
         let allProducts = [];
         let cart = [];
