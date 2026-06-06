@@ -423,6 +423,27 @@
                 container.innerHTML = '<p style="color: #e74c3c; text-align:center; padding: 20px;">❌ Не вдалося завантажити замовлення</p>';
             }
         }
+        // Функція для відкриття вікна успіху
+function showSuccessModal() {
+    // Спочатку ховаємо кошик, якщо він відкритий
+    const cartModal = document.getElementById('cart-modal');
+    if (cartModal) cartModal.style.display = 'none';
+    
+    // Показуємо вікно успіху
+    document.getElementById('success-modal').style.display = 'flex';
+}
+
+// Функція для закриття вікна успіху
+function closeSuccessModal() {
+    document.getElementById('success-modal').style.display = 'none';
+    // Очищаємо кошик і повертаємо на головну
+    if (typeof cart !== 'undefined') {
+        cart = [];
+        updateCartUI();
+    }
+    switchPage('home'); 
+}
+        
         
         document.addEventListener("DOMContentLoaded", () => {
             loadProducts();
