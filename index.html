@@ -103,14 +103,14 @@
         </div>
     </div>
         
-    <div class="cart-modal" id="cartModal">
+  <div class="cart-modal" id="cartModal">
     <div class="cart-content">
         <span class="close-cart" onclick="toggleCart(false)">&times;</span>
         <div class="cart-title">Твій Кошик</div>
         
         <div id="cart-items-container"></div>
         
-        <div id="checkout-form-container" style="margin-top: 20px; border-top: 2px solid #ecf0f1; padding-top: 15px; margin-bottom: 20px;">
+        <div id="checkout-form-container" style="margin-top: 20px; border-top: 2px solid #ecf0f1; padding-top: 15px;">
             <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 10px; text-align: left;">Дані для доставки:</h3>
             
             <div class="form-group">
@@ -128,21 +128,39 @@
             </div>
         </div>
 
-        <div class="cart-footer">
-            <div class="cart-total-row">
-                <span class="cart-total-label">Загальна сума:</span>
-                <span id="cart-total-price" class="cart-total-price">0 грн</span>
+        <div class="payment-methods" style="margin-top: 15px; border-top: 2px solid #ecf0f1; padding-top: 15px; text-align: left;">
+            <h3 style="font-size: 18px; color: #2c3e50; margin-bottom: 10px;">Спосіб оплати:</h3>
+            
+            <div style="margin-bottom: 10px;">
+                <label style="font-size: 16px; cursor: pointer;">
+                    <input type="radio" name="payment-method" value="cod" checked onclick="handlePaymentMethodChange('cod')"> 
+                    📦 Оплата при отриманні (Післяплата)
+                </label>
             </div>
-            
-            <div id="paypal-button-container"></div>
-            
-            <div class="cart-actions" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                <button class="btn-checkout" onclick="showSuccessModal()" style="width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">Оформити замовлення</button>
-                <button class="btn-close-text" onclick="toggleCart(false)" style="width: 100%; background: none; border: none; color: #3498db; font-weight: bold; cursor: pointer;">Продовжити покупки</button>
+            <div>
+                <label style="font-size: 16px; cursor: pointer;">
+                    <input type="radio" name="payment-method" value="online" onclick="handlePaymentMethodChange('online')"> 
+                    💳 Онлайн-оплата (PayPal)
+                </label>
             </div>
         </div>
+
+        <div class="cart-footer" style="margin-top: 20px; border-top: 2px solid #ecf0f1; padding-top: 15px;">
+            <div class="cart-total" id="cart-total-price" style="font-size: 20px; font-weight: bold; margin-bottom: 15px; text-align: right;">Загалом: 0 грн</div>
+            
+            <div id="paypal-button-container" style="display: none;"></div>
+            
+            <button id="main-checkout-btn" class="btn-checkout" onclick="submitOrderCOD()" style="width: 100%; padding: 12px; background: #2ecc71; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 10px;">
+                Оформити замовлення
+            </button>
+            
+            <button class="btn-close-text" onclick="toggleCart(false)" style="width: 100%; background: none; border: none; color: #3498db; font-weight: bold; cursor: pointer; padding: 5px;">
+                Продовжити покупки
+            </button>
+        </div>
     </div>
-    </div>
+  </div>
+    
     
         
 <div id="success-modal" class="success-modal">
@@ -276,51 +294,125 @@
             }
         }
 
-        function updateCartUI() {
-            // Тепер товари вставляються прямо в контейнер кошика
-            const listContainer = document.getElementById('cart-items-container');
-            if (!listContainer) return;
-            
-            listContainer.innerHTML = '';
-            let total = 0;
+        // 1. ГОЛОВНА ФУНКЦІЯ ОНОВЛЕННЯ КОШИКА
+function updateCartUI() {
+    const listContainer = document.getElementById('cart-items-container');
+    if (!listContainer) return;
+    
+    listContainer.innerHTML = '';
+    let total = 0;
 
-            if (cart.length === 0) {
-                listContainer.innerHTML = '<p class="empty-message">Кошик порожній</p>';
-                if (document.getElementById('paypal-button-container')) {
-                    document.getElementById('paypal-button-container').innerHTML = '';
-                }
-                if (document.getElementById('checkout-form-container')) {
-                    document.getElementById('checkout-form-container').style.display = 'none';
-                }
-            } else {
-                if (document.getElementById('checkout-form-container')) {
-                    document.getElementById('checkout-form-container').style.display = 'block';
-                }
+    // Знаходимо елементи керування замовленням
+    const checkoutForm = document.getElementById('checkout-form-container');
+    const paymentBlock = document.querySelector('.payment-methods');
+    const codButton = document.getElementById('main-checkout-btn');
+    const paypalContainer = document.getElementById('paypal-button-container');
 
-                cart.forEach((item, index) => {
-                    total += Number(item.price);
-                    listContainer.innerHTML += `
-                        <div class="cart-item">
-                            <div class="cart-item-info">
-                                <div class="cart-item-title">${item.name}</div>
-                                <div class="cart-item-price">${item.price} грн</div>
-                            </div>
-                            <button class="btn-remove" onclick="removeFromCart(${index})">🗑️</button>
-                        </div>
-                    `;
-                });
-            }
-            
-            // Оновлюємо загальну суму
-            const totalPriceElement = document.getElementById('cart-total-price');
-            if (totalPriceElement) {
-                totalPriceElement.innerText = `${total} грн`;
-            }
+    if (cart.length === 0) {
+        // Якщо кошик порожній — виводимо текст і ХОВАЄМО ВСЕ зайве
+        listContainer.innerHTML = '<p class="empty-message">Кошик порожній</p>';
+        
+        if (checkoutForm) checkoutForm.style.display = 'none';
+        if (paymentBlock) paymentBlock.style.display = 'none';
+        if (codButton) codButton.style.display = 'none';
+        if (paypalContainer) paypalContainer.innerHTML = ''; 
+    } else {
+        // Якщо в кошику є товари — ПОКАЗУЄМО форму доставки та блок оплати
+        if (checkoutForm) checkoutForm.style.display = 'block';
+        if (paymentBlock) paymentBlock.style.display = 'block';
 
-            if (total > 0 && typeof paypal !== 'undefined') {
-                renderPayPalButton(total);
-            }
+        // Перевіряємо, який спосіб оплати зараз обраний, і показуємо відповідну кнопку
+        const selectedPayment = document.querySelector('input[name="payment-method"]:checked');
+        const currentMethod = selectedPayment ? selectedPayment.value : 'cod';
+        handlePaymentMethodChange(currentMethod);
+
+        // Виводимо товари
+        cart.forEach((item, index) => {
+            total += Number(item.price);
+            listContainer.innerHTML += `
+                <div class="cart-item">
+                    <div class="cart-item-info">
+                        <div class="cart-item-title">${item.name}</div>
+                        <div class="cart-item-price">${item.price} грн</div>
+                    </div>
+                    <button class="btn-remove" onclick="removeFromCart(${index})">🗑️</button>
+                </div>
+            `;
+        });
+    }
+    
+    // Оновлюємо загальну суму
+    const totalPriceElement = document.getElementById('cart-total-price');
+    if (totalPriceElement) {
+        totalPriceElement.innerText = `Загалом: ${total} грн`;
+    }
+
+    // Якщо обрано PayPal і є сума — рендеримо кнопку PayPal
+    if (total > 0 && typeof paypal !== 'undefined') {
+        const selectedPayment = document.querySelector('input[name="payment-method"]:checked');
+        if (selectedPayment && selectedPayment.value === 'online') {
+            renderPayPalButton(total);
         }
+    }
+}
+
+// 2. ФУНКЦІЯ ПЕРЕМИКАННЯ КНОПОК ОПЛАТИ
+function handlePaymentMethodChange(method) {
+    const paypalContainer = document.getElementById('paypal-button-container');
+    const codButton = document.getElementById('main-checkout-btn');
+    const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+    
+    if (cart.length === 0) return; // Якщо порожньо, нічого не робимо
+
+    if (method === 'online') {
+        if (paypalContainer) paypalContainer.style.display = 'block';
+        if (codButton) codButton.style.display = 'none';
+        if (total > 0) renderPayPalButton(total); // Перемальовуємо PayPal під поточну суму
+    } else {
+        if (paypalContainer) paypalContainer.style.display = 'none';
+        if (codButton) codButton.style.display = 'block';
+    }
+}
+
+// 3. ФУНКЦІЯ ВІДПРАВКИ ЗАМОВЛЕННЯ ПІСЛЯПЛАТОЮ
+function submitOrderCOD() {
+    const name = document.getElementById('order-name').value.trim();
+    const phone = document.getElementById('order-phone').value.trim();
+    const delivery = document.getElementById('order-delivery').value.trim();
+
+    if (!name || !phone || !delivery) {
+        alert('Будь ласка, заповніть всі поля для доставки!');
+        return;
+    }
+
+    const orderData = {
+        customerName: `${name} | Тел: ${phone} | Доставка: ${delivery}`,
+        items: cart.map(item => ({ name: item.name, price: item.price })),
+        total: cart.reduce((sum, item) => sum + Number(item.price), 0),
+        status: "Післяплата"
+    };
+
+    fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(orderData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        showSuccessModal();
+        // Очищаємо форму та кошик після успіху
+        document.getElementById('order-name').value = '';
+        document.getElementById('order-phone').value = '';
+        document.getElementById('order-delivery').value = '';
+        cart = [];
+        updateCartUI();
+    })
+    .catch(err => {
+        console.error('Помилка сервера:', err);
+        alert('Не вдалося зберегти замовлення.');
+    });
+    }
+    
 
         // Інтеграція PayPal
         function renderPayPalButton(totalUah) {
