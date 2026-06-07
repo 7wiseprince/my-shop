@@ -190,7 +190,8 @@
 <script>
         let allProducts = [];
         let cart = [];
-
+        let favorites = []; // Масив для зберігання улюблених товарів
+    
         // НАВІГАЦІЯ: перемикання між сторінками
         function switchPage(pageId) {
             const pages = document.querySelectorAll('.page');
@@ -288,7 +289,30 @@
                 updateCartUI(); 
             }
         }
+       function toggleFavorite(productId) {
+    // Шукаємо товар у нашому загальному списку товарів (припустимо, він називається products)
+    // Якщо у тебе товари завантажуються з бази, ми знайдемо його по ID
+    const product = products.find(p => p.id === productId);
+    if (!product) return;
 
+    // Перевіряємо, чи є вже цей товар в обраному
+    const index = favorites.findIndex(item => item.id === productId);
+
+    if (index === -1) {
+        // Якщо немає — додаємо в масив
+        favorites.push(product);
+        console.log(`Додано в обране: ${product.name}`);
+    } else {
+        // Якщо вже є — видаляємо з масиву
+        favorites.splice(index, 1);
+        console.log(`Видалено з обраного: ${product.name}`);
+    }
+
+    // Після кожної зміни оновлюємо вигляд карток і сторінку "Обране"
+    updateFavoritesUI(); 
+       }
+    
+    
         function removeFromCart(index) {
             cart.splice(index, 1); 
             updateCartUI();
