@@ -221,27 +221,34 @@
 
         // Відображення карток товарів
         function renderProducts(products, containerId) {
-            const container = document.getElementById(containerId);
-            if (!container) return;
-            container.innerHTML = '';
-            
-            if (products.length === 0) {
-                container.innerHTML = '<p class="empty-message">Товарів не знайдено</p>';
-                return;
-            }
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (products.length === 0) {
+        container.innerHTML = '<p class="empty-message">Товарів не знайдено</p>';
+        return;
+    }
 
-            products.forEach(product => {
-                container.innerHTML += `
-                    <div class="product-card">
-                        <img class="product-image" src="${product.image}" alt="${product.name}">
-                        <div class="product-title">${product.name}</div>
-                        <div class="product-desc">${product.description}</div>
-                        <div class="product-price">${product.price} грн</div>
-                        <button class="btn-add-to-cart" onclick="addToCart(${product.id})">Додати в кошик</button>
-                    </div>
-                `;
-            });
+    products.forEach(product => {
+        // Перевіряємо, чи цей товар уже є в обраному, щоб правильно зафарбувати сердечко
+        const isFavorite = favorites.some(item => item.id === product.id);
+        const heartIcon = isFavorite ? '❤️' : '🤍';
+
+        container.innerHTML += `
+            <div class="product-card">
+                <button class="btn-favorite" onclick="toggleFavorite(${product.id})">${heartIcon}</button>
+                
+                <img class="product-image" src="${product.image}" alt="${product.name}">
+                <div class="product-title">${product.name}</div>
+                <div class="product-desc">${product.description}</div>
+                <div class="product-price">${product.price} грн</div>
+                <button class="btn-add-to-cart" onclick="addToCart(${product.id})">Додати в кошик</button>
+            </div>
+        `;
+    });
         }
+    
 
         // Фільтрація товарів за категоріями
         function filterProducts(category, button) {
