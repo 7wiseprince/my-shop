@@ -211,6 +211,21 @@ app.post('/api/login', async (req, res) => {
 });
 
 
+// === ЗБЕРЕЖЕННЯ ОБРАНОГО В ХМАРУ ===
+app.post('/api/favorites', async (req, res) => {
+    try {
+        const { userId, favorites } = req.body;
+
+        // Знаходимо користувача за його ID та оновлюємо масив favorites
+        await User.findByIdAndUpdate(userId, { favorites: favorites });
+
+        res.json({ success: true, message: 'Обране синхронізовано з базою!' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
 
 
 app.listen(PORT, () => {
