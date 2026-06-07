@@ -113,7 +113,8 @@ app.delete('/api/products/:id', async (req, res) => {
 });
 app.post('/api/orders', async (req, res) => {
     try {
-        const { items, total, customerName } = req.body;
+        // Додаємо status, який ми тепер передаємо з JavaScript кошика
+        const { items, total, customerName, status } = req.body; 
         const lastOrder = await Order.findOne().sort({ id: -1 });
         const orderId = lastOrder ? lastOrder.id + 1 : 1001;
 
@@ -122,7 +123,8 @@ app.post('/api/orders', async (req, res) => {
             customerName: customerName || "Анонімний покупець",
             items,
             total,
-            status: "Оплачено, очікує відправки",
+            // Якщо статус передано (наприклад "Післяплата"), ставимо його, інакше стандартний
+            status: status || "Оплачено, очікує відправки", 
             date: new Date().toLocaleString('uk-UA')
         });
 
@@ -132,6 +134,7 @@ app.post('/api/orders', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+    
 
 // ТЕПЕР МАРШРУТ GET СТОЇТЬ ОКРЕМО, ЯК САМОСТІЙНИЙ БЛОК:
 app.get('/api/orders', async (req, res) => {
@@ -142,6 +145,73 @@ app.get('/api/orders', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
+const bcrypt = require('bcrypt');
+
+// === МАРШРУТ РЕЄСТРАЦІЇ ===
+app.post('/api/register', async (req, res) => {
+    try {
+        const { name, email, password } = req.body;
+
+        // Перевіряємо, чи є вже такий користувач у базі MongoDB
+        const userExists = await User.findOne({ email });
+        if (userExists) {
+            return res.status(400).json({ success: false, message: 'Користувач з таким Email вже існує!' });
+        }
+
+        // Хешуємо пароль
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Створюємо новий документ
+        const newUser = new User({
+            name,
+            email,
+            password: hashedPassword,
+            favorites: []
+        });
+
+        // Зберігаємо в хмару
+        await newUser.save();
+
+        res.status(201).json({ 
+            success: true,
+            message: 'Реєстрація успішна!', 
+            user: { id: newUser._id, name: newUser.name, email: newUser.email, favorites: newUser.favorites } 
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// === МАРШРУТ ВХОДУ ===
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        // Шукаємо в MongoDB за email
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'Неправильний Email або пароль!' });
+        }
+
+        // Порівнюємо паролі
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            return res.status(400).json({ success: false, message: 'Неправильний Email або пароль!' });
+        }
+
+        res.json({
+            success: true,
+            message: 'Вхід успішний!',
+            user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+
+
 
 app.listen(PORT, () => {
     console.log(`Сервер працює`);
