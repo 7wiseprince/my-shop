@@ -47,6 +47,7 @@ const orderSchema = new mongoose.Schema({
     items: Array,
     total: Number,
     status: String,
+    paymentMethod: String,
     date: String
 });
 const Order = mongoose.model('Order', orderSchema);
@@ -113,8 +114,8 @@ app.delete('/api/products/:id', async (req, res) => {
 });
 app.post('/api/orders', async (req, res) => {
     try {
-        // Додаємо status, який ми тепер передаємо з JavaScript кошика
-        const { items, total, customerName, status } = req.body; 
+        // 1. Додаємо paymentMethod, який прилетить із кошика
+        const { items, total, customerName, status, paymentMethod } = req.body; 
         const lastOrder = await Order.findOne().sort({ id: -1 });
         const orderId = lastOrder ? lastOrder.id + 1 : 1001;
 
@@ -123,8 +124,9 @@ app.post('/api/orders', async (req, res) => {
             customerName: customerName || "Анонімний покупець",
             items,
             total,
-            // Якщо статус передано (наприклад "Післяплата"), ставимо його, інакше стандартний
-            status: status || "Оплачено, очікує відправки", 
+            // Якщо обрано післяплату, статус логічно зробити "Очікує оплати при отриманні"
+            status: status || (paymentMethod === 'післяплата' ? "Очікує оплати при отриманні" : "Оплачено, очікує відправки"), 
+            paymentMethod: paymentMethod || "Не вказано", // 2. Записуємо метод оплати в базу
             date: new Date().toLocaleString('uk-UA')
         });
 
@@ -134,6 +136,7 @@ app.post('/api/orders', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+            
     
 
 // ТЕПЕР МАРШРУТ GET СТОЇТЬ ОКРЕМО, ЯК САМОСТІЙНИЙ БЛОК:
