@@ -165,55 +165,82 @@ nav a.active, nav a:hover {
 }
 
 /* --- СІТКА ТОВАРІВ --- */
-.products-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-    gap: 30px; 
+/* Контейнер для товарів тепер стає гнучкою сіткою на 2 колонки */
+#catalog-products, #featured-products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Рівно дві колонки */
+    gap: 12px;                             /* Відстань між картками */
+    padding: 12px;
 }
 
-.product-card { 
-    background: white; 
-    border-radius: var(--radius-lg); 
-    padding: 20px; 
-    text-align: center; 
-    box-shadow: var(--shadow-sm); 
-    transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.3s ease; 
-    border: 1px solid rgba(0,0,0,0.02);
+/* Сама картка товару — стає компактною та відносною для позиціонування сердечка */
+.product-card {
+    position: relative; /* Потрібно, щоб сердечко сиділо точно в кутку */
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
-.product-card:hover { 
-    transform: translateY(-6px); 
-    box-shadow: var(--shadow-md); 
+
+/* Зменшуємо картинку під розмір колонки */
+.product-image {
+    width: 100%;
+    height: 140px;      /* Фіксована висота, щоб усі картки були рівними */
+    object-fit: cover;  /* Картинка акуратно обрізається, а не стискається */
+    border-radius: 8px;
 }
 
-.product-image { 
-    width: 100%; 
-    height: 220px; 
-    object-fit: cover; 
-    border-radius: var(--radius-sm); 
-    margin-bottom: 18px; 
+/* Стиль для заголовка товару */
+.product-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 8px;
+    color: #2c3e50;
 }
 
-.product-title { 
-    font-size: 18px; 
-    font-weight: 600;
-    margin-bottom: 8px; 
-    color: var(--text-main); 
+/* Зменшуємо опис, щоб картка не розтягувалася */
+.product-desc {
+    font-size: 11px;
+    color: #7f8c8d;
+    margin: 4px 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Показувати максимум 2 рядки опису, далі три крапки */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
-.product-desc { 
-    font-size: 14px; 
-    color: var(--text-muted); 
-    margin-bottom: 18px; 
-    min-height: 42px; 
-    line-height: 1.4;
+
+/* Стиль для кнопки-сердечка */
+.btn-favorite {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.85); /* Напівпрозорий білий фон */
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 5;
+    transition: transform 0.2s;
+}
+
+.btn-favorite:active {
+    transform: scale(1.2); /* Ефект пульсації при натисканні */
 }
 .product-price { 
-    font-size: 20px; 
+    font-size: 16px;          /* Зменшили з 20px, щоб ціна не перекривала все */
     font-weight: 700; 
     color: var(--success-hover); 
-    margin-bottom: 18px; 
+    margin-bottom: 10px;      /* Зменшили відступ з 18px */
+    margin-top: auto;         /* Магія CSS: штовхає ціну та кнопку до самого низу картки, щоб вони були на одному рівні в усіх товарах */
 }
 
 .btn-add-to-cart { 
@@ -221,18 +248,20 @@ nav a.active, nav a:hover {
     color: white; 
     border: none; 
     width: 100%; 
-    padding: 12px; 
+    padding: 8px 10px;        /* Зменшили вертикальний паддінг з 12px до 8px */
     border-radius: var(--radius-sm); 
-    font-size: 15px; 
+    font-size: 13px;          /* Зменшили шрифт з 15px, щоб текст точно поміщався в один рядок */
     font-weight: 600; 
     cursor: pointer; 
     transition: background-color 0.2s, transform 0.1s; 
 }
+
 .btn-add-to-cart:hover { 
     background-color: var(--primary-hover); 
 }
+
 .btn-add-to-cart:active {
-    transform: scale(0.98);
+    transform: scale(0.95);   /* Зробили ефект натискання трохи помітнішим для маленької кнопки */
 }
 
 /* --- СТОРІНКА ПРО НАС --- */
