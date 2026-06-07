@@ -367,7 +367,7 @@
 
     // Оновлюємо зовнішній вигляд сайту
     updateFavoritesUI(); 
-
+    updateCabinetFavoritesUI();
     // МАГІЯ: Якщо користувач авторизований, зберігаємо його обране на сервер
     if (currentUser) {
         fetch('/api/favorites', {
