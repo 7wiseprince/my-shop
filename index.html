@@ -72,7 +72,7 @@
 
         <div style="text-align: left; border-top: 2px solid #ecf0f1; padding-top: 20px;">
             <h3 style="color: #2c3e50; margin-bottom: 15px;">Твої збережені товари:</h3>
-            <div id="cabinet-favorites-grid"></div>
+            <div id="cabinet-favorites-list"class="products-grid"></div>
         </div>
     </div>
     </div>
@@ -785,11 +785,12 @@ function showUserCabinet() {
     document.getElementById('cabinet-user-email').innerText = currentUser.email;
 
      // СИНХРОНІЗАЦІЯ: Завантажуємо обрані товари користувача з бази даних в наш масив
-    if (currentUser.favorites) {
+     if (currentUser.favorites) {
         favorites = currentUser.favorites;
-        updateFavoritesUI(); // Оновлюємо сердечка на сайті під цього користувача
-    }
-    
+        updateFavoritesUI(); // Оновлює велику вкладку "Обране"
+        updateCabinetFavoritesUI(); // 🔥 Оновлює список товарів СЕРЕДИНІ КАБІНЕТУ!
+        }
+            
     // Очищаємо поля форми на всяк випадок
     document.getElementById('auth-name').value = '';
     document.getElementById('auth-email').value = '';
@@ -820,7 +821,36 @@ function logout() {
             updateCartUI();
             switchPage('home'); 
         }
-        
+
+
+function updateCabinetFavoritesUI() {
+    const cabinetList = document.getElementById('cabinet-favorites-list');
+    if (!cabinetList) return; // Якщо такого контейнера немає в HTML, зупиняємо роботу
+
+    cabinetList.innerHTML = ''; // Очищаємо контейнер від старого тексту
+
+    if (favorites.length === 0) {
+        cabinetList.innerHTML = '<p class="no-items">У тебе поки немає збережених товарів.</p>';
+        return;
+    }
+
+    // Пробігаємося по кожному улюбленому товару і створюємо для нього HTML-картку
+    favorites.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.innerHTML = `
+            <img src="${product.image}" alt="${product.name}">
+            <h4>${product.name}</h4>
+            <p class="price">${product.price} грн</p>
+            <button onclick="addToCart(${product.id})" class="btn-buy">Додати в кошик</button>
+        `;
+        cabinetList.appendChild(productCard);
+    });
+}
+
+
+
+    
         // Старт додатка
         document.addEventListener("DOMContentLoaded", () => {
             loadProducts();
