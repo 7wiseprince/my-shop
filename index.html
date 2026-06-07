@@ -350,25 +350,40 @@
                 updateCartUI(); 
             }
         }
-     function toggleFavorite(productId) {
-    // Шукаємо товар у нашому масиві allProducts
+
+     
+    
+    function toggleFavorite(productId) {
     const product = allProducts.find(p => p.id === productId);
     if (!product) return;
 
-    // Перевіряємо, чи є вже цей товар в обраному
     const index = favorites.findIndex(item => item.id === productId);
 
     if (index === -1) {
-        // Якщо немає — додаємо в масив
         favorites.push(product);
     } else {
-        // Якщо вже є — видаляємо з масиву
         favorites.splice(index, 1);
     }
 
-    // Оновлюємо інтерфейс скрізь
+    // Оновлюємо зовнішній вигляд сайту
     updateFavoritesUI(); 
-     }
+
+    // МАГІЯ: Якщо користувач авторизований, зберігаємо його обране на сервер
+    if (currentUser) {
+        fetch('/api/favorites', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: currentUser.id, // Передаємо ID користувача
+                favorites: favorites    // Передаємо оновлений масив товарів
+            })
+        })
+        .then(res => res.json())
+        .then(data => console.log(data.message))
+        .catch(err => console.error('Помилка збереження обраного:', err));
+    }
+        }
+    
     
     
      function updateFavoritesUI() {
@@ -769,6 +784,12 @@ function showUserCabinet() {
     document.getElementById('cabinet-user-name').innerText = `Привіт, ${currentUser.name}!`;
     document.getElementById('cabinet-user-email').innerText = currentUser.email;
 
+     // СИНХРОНІЗАЦІЯ: Завантажуємо обрані товари користувача з бази даних в наш масив
+    if (currentUser.favorites) {
+        favorites = currentUser.favorites;
+        updateFavoritesUI(); // Оновлюємо сердечка на сайті під цього користувача
+    }
+    
     // Очищаємо поля форми на всяк випадок
     document.getElementById('auth-name').value = '';
     document.getElementById('auth-email').value = '';
