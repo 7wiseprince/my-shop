@@ -704,7 +704,86 @@ function toggleAuthTab(mode) {
     }
 }
 
+    
+let currentUser = null; // Поточний авторизований користувач (спочатку null)
 
+function handleAuth() {
+    const name = document.getElementById('auth-name').value.trim();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value.trim();
+
+    // Валідація полів
+    if (!email || !password) {
+        alert('Будь ласка, заповніть Email та Пароль!');
+        return;
+    }
+    if (currentAuthMode === 'register' && !name) {
+        alert('Будь ласка, вкажіть ваше ім\'я для реєстрації!');
+        return;
+    }
+
+    // Визначаємо, на який URL відправляти запит
+    const url = currentAuthMode === 'register' ? '/api/register' : '/api/login';
+    
+    // Формуємо дані для відправки
+    const authData = { email, password };
+    if (currentAuthMode === 'register') {
+        authData.name = name;
+    }
+
+    // Відправляємо запит на сервер
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(authData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Якщо сервер повернув помилку (наприклад, користувач вже є)
+            return response.json().then(err => { throw new Error(err.message); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message); // "Вхід успішний!" або "Реєстрація успішна!"
+        
+        currentUser = data.user; // Зберігаємо дані користувача в пам'ять сайту
+        
+        // Оновлюємо інтерфейс кабінету
+        showUserCabinet();
+    })
+    .catch(error => {
+        console.error('Помилка авторизації:', error);
+        alert(error.message || 'Щось пішло не так...');
+    });
+}
+
+// Функція, яка ховає форму входу і показує сам кабінет з даними користувача
+function showUserCabinet() {
+    if (!currentUser) return;
+
+    document.getElementById('auth-container').style.display = 'none'; // Ховаємо форму
+    document.getElementById('user-cabinet').style.display = 'block';  // Показуємо кабінет
+
+    // Підставляємо дані користувача в текст
+    document.getElementById('cabinet-user-name').innerText = `Привіт, ${currentUser.name}!`;
+    document.getElementById('cabinet-user-email').innerText = currentUser.email;
+
+    // Очищаємо поля форми на всяк випадок
+    document.getElementById('auth-name').value = '';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('auth-password').value = '';
+}
+
+// Функція виходу з акаунту
+function logout() {
+    currentUser = null;
+    document.getElementById('auth-container').style.display = 'block'; // Показуємо форму назад
+    document.getElementById('user-cabinet').style.display = 'none';   // Ховаємо кабінет
+    toggleAuthTab('login'); // Повертаємо на вкладку входу
+        }
+          
+    
     
         // Модальне вікно успішного замовлення
         function showSuccessModal() {
