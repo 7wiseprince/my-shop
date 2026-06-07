@@ -30,6 +30,16 @@ const productSchema = new mongoose.Schema({
 });
 const Product = mongoose.model('Product', productSchema);
 
+// СХЕМА КОРИСТУВАЧА
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true }, // unique гарантує, що імейли не будуть дублюватися
+    password: { type: String, required: true },
+    favorites: { type: Array, default: [] } // Тут зберігатимемо ID улюблених товарів
+});
+const User = mongoose.model('User', userSchema);
+
+
 // СХЕМА ЗАМОВЛЕННЯ
 const orderSchema = new mongoose.Schema({
     id: Number,
