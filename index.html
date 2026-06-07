@@ -29,6 +29,56 @@
         <div class="products-grid" id="featured-products"></div>
     </div>
 
+   
+    
+    <div id="page-profile" class="page">
+    <div id="auth-container" style="max-width: 400px; margin: 30px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center;">
+        
+        <div class="auth-tabs" style="display: flex; justify-content: center; gap: 20px; margin-bottom: 20px;">
+            <span id="tab-login" onclick="toggleAuthTab('login')" style="font-size: 18px; font-weight: bold; color: var(--primary-color); cursor: pointer; border-bottom: 2px solid var(--primary-color); padding-bottom: 5px;">Вхід</span>
+            <span id="tab-register" onclick="toggleAuthTab('register')" style="font-size: 18px; font-weight: bold; color: #7f8c8d; cursor: pointer; padding-bottom: 5px;">Реєстрація</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; text-align: left;">
+            <div id="auth-name-group" style="display: none;">
+                <label style="font-size: 14px; font-weight: 600; color: #2c3e50;">Твоє Ім'я:</label>
+                <input type="text" id="auth-name" placeholder="Good Prince" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 4px;">
+            </div>
+
+            <div>
+                <label style="font-size: 14px; font-weight: 600; color: #2c3e50;">Email:</label>
+                <input type="email" id="auth-email" placeholder="example@mail.com" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 4px;">
+            </div>
+
+            <div>
+                <label style="font-size: 14px; font-weight: 600; color: #2c3e50;">Пароль:</label>
+                <input type="password" id="auth-password" placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px; margin-top: 4px;">
+            </div>
+
+            <button id="btn-auth-submit" onclick="handleAuth()" style="width: 100%; padding: 12px; background: var(--primary-color); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px;">
+                Увійти
+            </button>
+        </div>
+    </div>
+
+    <div id="user-cabinet" style="display: none; max-width: 500px; margin: 20px auto; padding: 20px; text-align: center;">
+        <div style="width: 80px; height: 80px; background: #e0e0e0; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 32px;">👤</div>
+        <h2 id="cabinet-user-name" style="color: #2c3e50; margin-bottom: 5px;">Привіт, Користувачу!</h2>
+        <p id="cabinet-user-email" style="color: #7f8c8d; font-size: 14px; margin-bottom: 20px;">user@example.com</p>
+
+        <button onclick="logout()" style="padding: 8px 16px; background: #e74c3c; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 30px;">
+            Вийти з акаунту
+        </button>
+
+        <div style="text-align: left; border-top: 2px solid #ecf0f1; padding-top: 20px;">
+            <h3 style="color: #2c3e50; margin-bottom: 15px;">Твої збережені товари:</h3>
+            <div id="cabinet-favorites-grid"></div>
+        </div>
+    </div>
+    </div>
+    
+    
+    
     <div id="page-catalog" class="page">
         <div class="filters">
             <button class="filter-btn active" onclick="filterProducts('all', this)">Все</button>
@@ -46,12 +96,6 @@
      </div>
     
     
-    <div id="page-about" class="page">
-        <div class="about-section">
-            <h2>Про наш магазин ⚡ MyShop</h2>
-            <p>MyShop — це сучасний та швидкий internet-магазин.</p>
-        </div>
-    </div> 
 
     <div id="page-login" class="page">
         <div style="max-width: 400px; margin: 80px auto; padding: 30px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;">
@@ -626,7 +670,42 @@ function submitOrderCOD() {
                 }
             });
         }
+
+
+    
+let currentAuthMode = 'login'; // Поточний режим: або 'login', або 'register'
+
+function toggleAuthTab(mode) {
+    currentAuthMode = mode;
+    
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const nameGroup = document.getElementById('auth-name-group');
+    const submitBtn = document.getElementById('btn-auth-submit');
+
+    if (mode === 'register') {
+        // Налаштування для Реєстрації
+        tabRegister.style.color = 'var(--primary-color)';
+        tabRegister.style.borderBottom = '2px solid var(--primary-color)';
+        tabLogin.style.color = '#7f8c8d';
+        tabLogin.style.borderBottom = 'none';
         
+        if (nameGroup) nameGroup.style.display = 'block'; // Показуємо поле імені
+        if (submitBtn) submitBtn.innerText = 'Зареєструватися';
+    } else {
+        // Налаштування для Входу
+        tabLogin.style.color = 'var(--primary-color)';
+        tabLogin.style.borderBottom = '2px solid var(--primary-color)';
+        tabRegister.style.color = '#7f8c8d';
+        tabRegister.style.borderBottom = 'none';
+        
+        if (nameGroup) nameGroup.style.display = 'none'; // Ховаємо поле імені
+        if (submitBtn) submitBtn.innerText = 'Увійти';
+    }
+}
+
+
+    
         // Модальне вікно успішного замовлення
         function showSuccessModal() {
             toggleCart(false);
@@ -669,7 +748,7 @@ function submitOrderCOD() {
         <span class="nav-icon">❤️</span>
         <span class="nav-text">Обране</span>
     </div>
-    <div class="bottom-nav-item" onclick="openAdminModal()">
+    <div class="bottom-nav-item" onclick="switchPage('profile')">
         <span class="nav-icon">👤</span>
         <span class="nav-text">Кабінет</span>
     </div>
