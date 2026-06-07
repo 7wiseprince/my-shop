@@ -475,28 +475,55 @@ function updateCartUI() {
             renderPayPalButton(total);
         }
     }
+// Додай це в самий кінець функції updateCartUI, щоб сума завжди перераховувалась при видаленні товарів
+if (document.getElementById('main-checkout-btn') && document.getElementById('main-checkout-btn').style.display === 'block') {
+    handlePaymentMethodChange('cod');
+} else {
+    handlePaymentMethodChange('online');
+}
+    
+    
 }
 
 // 2. ФУНКЦІЯ ПЕРЕМИКАННЯ КНОПОК ОПЛАТИ
 function handlePaymentMethodChange(method) {
     const paypalContainer = document.getElementById('paypal-button-container');
     const codButton = document.getElementById('main-checkout-btn');
-    const codWarning = document.getElementById('cod-warning-text'); // Наша підказка
-    const total = cart.reduce((sum, item) => sum + Number(item.price), 0);
+    const codWarning = document.getElementById('cod-warning-text'); 
+    
+    // Рахуємо чисту суму товарів
+    const subtotal = cart.reduce((sum, item) => sum + Number(item.price), 0);
     
     if (cart.length === 0) return;
 
     if (method === 'online') {
         if (paypalContainer) paypalContainer.style.display = 'block';
         if (codButton) codButton.style.display = 'none';
-        if (codWarning) codWarning.style.display = 'none'; // Ховаємо попередження при PayPal
-        if (total > 0) renderPayPalButton(total);
+        if (codWarning) codWarning.style.display = 'none'; 
+        
+        // Виводим звичайну суму без комісії
+        document.getElementById('cart-total-price').innerText = `${subtotal} грн`;
+        if (subtotal > 0) renderPayPalButton(subtotal);
     } else {
         if (paypalContainer) paypalContainer.style.display = 'none';
         if (codButton) codButton.style.display = 'block';
-        if (codWarning) codWarning.style.display = 'block'; // Показуємо попередження при післяплаті
+        
+        // МАГІЯ: Рахуємо комісію післяплати (20 грн + 2%)
+        const commission = 20 + (subtotal * 0.02);
+        const totalWithCommission = subtotal + commission;
+
+        // Оновлюємо суму на екрані (заміни 'cart-total-price' на свій ID суми, якщо він інший)
+        const totalElement = document.getElementById('cart-total-price');
+        if (totalElement) totalElement.innerText = `${totalWithCommission.toFixed(0)} грн`;
+
+        // Виводимо красиву підказку про комісію
+        if (codWarning) {
+            codWarning.style.display = 'block';
+            codWarning.innerText = `⚠️ При післяплаті нараховується комісія: ${commission.toFixed(0)} грн (вже враховано в сумі)`;
+        }
     }
 }
+    
     
 
 // 3. ФУНКЦІЯ ВІДПРАВКИ ЗАМОВЛЕННЯ ПІСЛЯПЛАТОЮ
@@ -510,13 +537,23 @@ function submitOrderCOD() {
         return;
     }
 
+    // 1. Рахуємо суму з комісією для бази даних
+    const subtotal = cart.reduce((sum, item) => sum + Number(item.price), 0);
+    const commission = 20 + (subtotal * 0.02);
+    const finalTotal = subtotal + commission;
+
+    // 2. Формуємо дані (додаємо ім'я авторизованого користувача, якщо він є)
+    const buyerName = currentUser ? `${name} (${currentUser.name})` : name;
+
     const orderData = {
-        customerName: `${name} | Тел: ${phone} | Доставка: ${delivery}`,
+        customerName: `${buyerName} | Тел: ${phone} | Доставка: ${delivery}`,
         items: cart.map(item => ({ name: item.name, price: item.price })),
-        total: cart.reduce((sum, item) => sum + Number(item.price), 0),
-        status: "Післяплата"
+        total: Math.round(finalTotal), // Округляємо суму
+        paymentMethod: "післяплата", // Передаємо метод оплати для сервера
+        status: "Очікує оплати при отриманні"
     };
 
+    // 3. Відправляємо на сервер
     fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -537,6 +574,7 @@ function submitOrderCOD() {
         alert('Не вдалося зберегти замовлення.');
     });
     }
+                                  
     
 
         // Інтеграція PayPal
