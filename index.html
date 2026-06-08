@@ -661,30 +661,28 @@ const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * (item.qu
 
         // АДМІН-ПАНЕЛЬ
         // === АДМІН-ПАНЕЛЬ (ОНОВЛЕНО З ТОКЕНАМИ) ===
+// === АДМІН-ПАНЕЛЬ (РЕЖИМ ПОВНОЇ КОНСПІРАЦІЇ) ===
 function toggleAdmin() {
     const adminPage = document.getElementById('page-admin');
     
-    // Якщо ми вже в адмінці, то при натисканні повертаємо на головну
     if (adminPage && adminPage.classList.contains('active')) {
         switchPage('home');
         return;
     }
 
-    // 🔥 ПЕРЕВІРКА ПРАВ: Перевіряємо, чи поточний юзер є адміном
+    // 🔥 Пускає тільки тебе, для інших — повна тиша
     if (currentUser && currentUser.role === 'admin') {
-        // Якщо ти вже залогінений як адмін — пускаємо одразу без паролів!
         switchPage('admin'); 
         loadAdminOrders();
     } else {
-        // Якщо ти не залогінений або звичайний юзер, просимо увійти в адмін-акаунт
-        alert('Доступ заборонено. Будь ласка, увійдіть в акаунт адміністратора!');
-        switchPage('login'); // Перекидаємо на сторінку входу
-        
-        if (document.getElementById('login-error-msg')) {
-            document.getElementById('login-error-msg').style.display = 'none';
-        }
+        return; 
     }
 }
+
+function submitAdminLogin() {
+    toggleAdmin();
+}
+    
 
 // Залишаємо цю функцію як запасну, якщо захочеш зайти по старому паролю 1111
 function submitAdminLogin() {
