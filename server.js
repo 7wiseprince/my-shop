@@ -152,7 +152,7 @@ app.get('/api/orders', async (req, res) => {
 
 const bcrypt = require('bcrypt');
 
-// === МАРШРУТ РЕЄСТРАЦІЇ ===
+// === РЕЄСТРАЦІЯ КОРИСТУВАЧА (ОНОВЛЕНА З ТОКЕНОМ) ===
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
@@ -177,9 +177,18 @@ app.post('/api/register', async (req, res) => {
         // Зберігаємо в хмару
         await newUser.save();
 
+        // Створюємо JWT токен для нового користувача, щоб він одразу був залогінений
+        const token = jwt.sign(
+            { id: newUser._id }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '7d' }
+        );
+
+        // Повертаємо відповідь разом із токеном
         res.status(201).json({ 
             success: true,
             message: 'Реєстрація успішна!', 
+            token, // Передаємо токен на фронтенд
             user: { id: newUser._id, name: newUser.name, email: newUser.email, favorites: newUser.favorites } 
         });
     } catch (error) {
