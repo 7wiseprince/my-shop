@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
- 
+const jwt = require('jsonwebtoken');
 
 
 const app = express();
@@ -188,6 +188,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // === МАРШРУТ ВХОДУ ===
+// === ВХІД КОРИСТУВАЧА (ОНОВЛЕНИЙ З ТОКЕНОМ) ===
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -204,9 +205,19 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Неправильний Email або пароль!' });
         }
 
+        // 1. Створюємо JWT токен. Зашифровуємо в нього id користувача
+        // process.env.JWT_SECRET автоматично візьме те секретне слово, яке ти ввів у Render!
+        const token = jwt.sign(
+            { id: user._id }, 
+            process.env.JWT_SECRET, 
+            { expiresIn: '7d' } // Токен буде дійсним 7 днів
+        );
+
+        // 2. Повертаємо відповідь разом із токеном
         res.json({
             success: true,
             message: 'Вхід успішний!',
+            token, // Передаємо токен на фронтенд
             user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites }
         });
     } catch (error) {
