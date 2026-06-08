@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
-
+const bcrypt = require('bcrypt');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,10 +15,12 @@ app.use(express.static(__dirname)); // Роздаємо файли з голов
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("Успішно підключено до MongoDB Atlas! ☁️");
-        seedDatabase(); // 🔥 Залишаємо, щоб товари автоматично завантажувалися на вітрину
+        seedDatabase(); // 🔥 Автоматичне завантаження базових товарів
     })
     .catch(err => console.error("Помилка підключення до бази:", err));
 
+
+// ==================== СХЕМИ ДАНИХ (MODELS) ====================
 
 // СХЕМА ТОВАРУ
 const productSchema = new mongoose.Schema({
@@ -31,15 +33,15 @@ const productSchema = new mongoose.Schema({
 });
 const Product = mongoose.model('Product', productSchema);
 
-// СХЕМА КОРИСТУВАЧА
+// СХЕМА КОРИСТУВАЧА (🔥 ОНОВЛЕНО: Додано поле role)
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
-    email: { type: String, required: true, unique: true }, // unique гарантує, що імейли не будуть дублюватися
+    email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    favorites: { type: Array, default: [] } // Тут зберігатимемо ID улюблених товарів
+    favorites: { type: Array, default: [] },
+    role: { type: String, default: 'user' } // 🔥 'user' або 'admin'
 });
 const User = mongoose.model('User', userSchema);
-
 
 // СХЕМА ЗАМОВЛЕННЯ
 const orderSchema = new mongoose.Schema({
@@ -52,6 +54,39 @@ const orderSchema = new mongoose.Schema({
     date: String
 });
 const Order = mongoose.model('Order', orderSchema);
+
+
+// ==================== МІДЛВЕРИ БЕЗПЕКИ (MIDDLEWARES) ====================
+
+// 🔥 ЗАХИСНИЙ ЩИТ АДМІНІСТРАТОРА
+const isAdmin = (req, res, next) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; // Відсікаємо "Bearer"
+
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Доступ заборонено. Токен відсутній.' });
+        }
+
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                return res.status(403).json({ success: false, message: 'Сесія застаріла або токен невалідний.' });
+            }
+
+            // Перевіряємо, чи зашита в токені роль адміна
+            if (decoded.role !== 'admin') {
+                return res.status(403).json({ success: false, message: 'Доступ заборонено. Ви не є адміністратором!' });
+            }
+
+            req.userId = decoded.id;
+            req.userRole = decoded.role;
+            next(); // Пропускаємо запит далі, бо це справжній адмін!
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 
 // Наповнення бази даних
 async function seedDatabase() {
@@ -67,12 +102,24 @@ async function seedDatabase() {
     }
 }
 
-// ГОЛОВНА СТОРІНКА (Зверни увагу на велику літеру 'Index.html'!)
+
+// ==================== МАРШРУТИ ДЛЯ СТОРІНОК (FRONTEND) ====================
+
+// ГОЛОВНА СТОРІНКА
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// API ТОЧКИ
+// 🔥 СТОРІНКА КОНКРЕТНОГО ТОВАРУ (Динамічний роут)
+// Коли людина перейде на сайт.com/product/1 — їй віддасться файл product.html
+app.get('/product/:id', (req, res) => {
+    res.sendFile(path.join(__dirname, 'product.html'));
+});
+
+
+// ==================== МАРШРУТИ АПІ (API ENDPOINTS) ====================
+
+// Отримати всі товари
 app.get('/api/products', async (req, res) => {
     try {
         const products = await Product.find({});
@@ -82,7 +129,23 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-app.post('/api/products', async (req, res) => {
+// 🔥 Отримати ОДИН товар за його цифровим ID (для сторінки товару)
+app.get('/api/products/:id', async (req, res) => {
+    try {
+        const productId = Number(req.params.id);
+        const product = await Product.findOne({ id: productId });
+        
+        if (!product) {
+            return res.status(404).json({ success: false, message: "Товар не знайдено" });
+        }
+        res.json(product);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 🔥 Додати товар (ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ)
+app.post('/api/products', isAdmin, async (req, res) => {
     try {
         const { name, price, category, image, description } = req.body;
         const lastProduct = await Product.findOne().sort({ id: -1 });
@@ -98,24 +161,26 @@ app.post('/api/products', async (req, res) => {
         });
 
         await newProduct.save();
-        res.json({ success: true, message: "Товар успішно додано!" });
+        res.json({ success: true, message: "Товар успішно додано адміном!" });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
 
-app.delete('/api/products/:id', async (req, res) => {
+// 🔥 Видалити товар (ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ)
+app.delete('/api/products/:id', isAdmin, async (req, res) => {
     try {
         const productId = Number(req.params.id);
         await Product.deleteOne({ id: productId });
-        res.json({ success: true, message: "Товар успішно видалено!" });
+        res.json({ success: true, message: "Товар успішно видалено адміном!" });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+
+// Створити нове замовлення (доступно всім покупцям)
 app.post('/api/orders', async (req, res) => {
     try {
-        // 1. Додаємо paymentMethod, який прилетить із кошика
         const { items, total, customerName, status, paymentMethod } = req.body; 
         const lastOrder = await Order.findOne().sort({ id: -1 });
         const orderId = lastOrder ? lastOrder.id + 1 : 1001;
@@ -125,9 +190,8 @@ app.post('/api/orders', async (req, res) => {
             customerName: customerName || "Анонімний покупець",
             items,
             total,
-            // Якщо обрано післяплату, статус логічно зробити "Очікує оплати при отриманні"
             status: status || (paymentMethod === 'післяплата' ? "Очікує оплати при отриманні" : "Оплачено, очікує відправки"), 
-            paymentMethod: paymentMethod || "Не вказано", // 2. Записуємо метод оплати в базу
+            paymentMethod: paymentMethod || "Не вказано",
             date: new Date().toLocaleString('uk-UA')
         });
 
@@ -137,11 +201,9 @@ app.post('/api/orders', async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
-            
-    
 
-// ТЕПЕР МАРШРУТ GET СТОЇТЬ ОКРЕМО, ЯК САМОСТІЙНИЙ БЛОК:
-app.get('/api/orders', async (req, res) => {
+// Отримати всі замовлення (🔥 ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ — ніхто чужий не побачить список замовлень)
+app.get('/api/orders', isAdmin, async (req, res) => {
     try {
         const orders = await Order.find({}).sort({ id: -1 });
         res.json(orders);
@@ -150,132 +212,116 @@ app.get('/api/orders', async (req, res) => {
     }
 });
 
-const bcrypt = require('bcrypt');
 
-// === РЕЄСТРАЦІЯ КОРИСТУВАЧА (ОНОВЛЕНА З ТОКЕНОМ) ===
+// ==================== АВТЕНТИФІКАЦІЯ ТА ПРОФІЛЬ ====================
+
+// РЕЄСТРАЦІЯ КОРИСТУВАЧА
 app.post('/api/register', async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
-        // Перевіряємо, чи є вже такий користувач у базі MongoDB
         const userExists = await User.findOne({ email });
         if (userExists) {
             return res.status(400).json({ success: false, message: 'Користувач з таким Email вже існує!' });
         }
 
-        // Хешуємо пароль
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Створюємо новий документ
         const newUser = new User({
             name,
             email,
             password: hashedPassword,
-            favorites: []
+            favorites: [],
+            role: 'user' // Нові користувачі завжди реєструються як звичайні юзери
         });
 
-        // Зберігаємо в хмару
         await newUser.save();
 
-        // Створюємо JWT токен для нового користувача, щоб він одразу був залогінений
+        // 🔥 Зашифровуємо роль у токен
         const token = jwt.sign(
-            { id: newUser._id }, 
+            { id: newUser._id, role: newUser.role }, 
             process.env.JWT_SECRET, 
             { expiresIn: '7d' }
         );
 
-        // Повертаємо відповідь разом із токеном
         res.status(201).json({ 
             success: true,
             message: 'Реєстрація успішна!', 
-            token, // Передаємо токен на фронтенд
-            user: { id: newUser._id, name: newUser.name, email: newUser.email, favorites: newUser.favorites } 
+            token,
+            user: { id: newUser._id, name: newUser.name, email: newUser.email, favorites: newUser.favorites, role: newUser.role } 
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// === МАРШРУТ ВХОДУ ===
-// === ВХІД КОРИСТУВАЧА (ОНОВЛЕНИЙ З ТОКЕНОМ) ===
+// ВХІД КОРИСТУВАЧА
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Шукаємо в MongoDB за email
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ success: false, message: 'Неправильний Email або пароль!' });
         }
 
-        // Порівнюємо паролі
         const isPasswordCorrect = await bcrypt.compare(password, user.password);
         if (!isPasswordCorrect) {
             return res.status(400).json({ success: false, message: 'Неправильний Email або пароль!' });
         }
 
-        // 1. Створюємо JWT токен. Зашифровуємо в нього id користувача
-        // process.env.JWT_SECRET автоматично візьме те секретне слово, яке ти ввів у Render!
+        // 🔥 Зашифровуємо роль у токен, щоб фронтенд знав, чи пускати в адмінку
         const token = jwt.sign(
-            { id: user._id }, 
+            { id: user._id, role: user.role }, 
             process.env.JWT_SECRET, 
-            { expiresIn: '7d' } // Токен буде дійсним 7 днів
+            { expiresIn: '7d' }
         );
 
-        // 2. Повертаємо відповідь разом із токеном
         res.json({
             success: true,
             message: 'Вхід успішний!',
-            token, // Передаємо токен на фронтенд
-            user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites }
+            token,
+            user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites, role: user.role }
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-
-// === ЗБЕРЕЖЕННЯ ОБРАНОГО В ХМАРУ ===
+// СИНХРОНІЗАЦІЯ ОБРАНОГО
 app.post('/api/favorites', async (req, res) => {
     try {
         const { userId, favorites } = req.body;
-
-        // Знаходимо користувача за його ID та оновлюємо масив favorites
         await User.findByIdAndUpdate(userId, { favorites: favorites });
-
         res.json({ success: true, message: 'Обране синхронізовано з базою!' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
 
-// === АВТОМАТИЧНА ПЕРЕВІРКА ТОКЕНА (АВТОЛОГІН) ===
+// АВТОМАТИЧНА ПЕРЕВІРКА ТОКЕНА (🔥 ОНОВЛЕНО: повертає також роль користувача)
 app.get('/api/me', async (req, res) => {
     try {
-        // Беремо токен із заголовків запиту
         const authHeader = req.headers['authorization'];
-        const token = authHeader && authHeader.split(' ')[1]; // Відсікаємо слово "Bearer"
+        const token = authHeader && authHeader.split(' ')[1];
 
         if (!token) {
             return res.status(401).json({ success: false, message: 'Токен відсутній' });
         }
 
-        // Перевіряємо та розшифровуємо токен за допомогою нашого секрету з Render
         jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
             if (err) {
                 return res.status(403).json({ success: false, message: 'Невалідний токен' });
             }
 
-            // Якщо токен правильний, у decoded.id буде лежати ID користувача. Шукаємо його в базі
             const user = await User.findById(decoded.id);
             if (!user) {
                 return res.status(404).json({ success: false, message: 'Користувача не знайдено' });
             }
 
-            // Повертаємо дані користувача на фронтенд для автологіну
             res.json({
                 success: true,
-                user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites }
+                user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites, role: user.role }
             });
         });
     } catch (error) {
@@ -284,8 +330,6 @@ app.get('/api/me', async (req, res) => {
 });
 
 
-
 app.listen(PORT, () => {
-    console.log(`Сервер працює`);
+    console.log(`Сервер успішно запущений на порту ${PORT} 🚀`);
 });
-            
