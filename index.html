@@ -459,17 +459,27 @@ function updateCartUI() {
 
         // Виводимо товари
         cart.forEach((item, index) => {
-            total += Number(item.price);
-            listContainer.innerHTML += `
-                <div class="cart-item">
-                    <div class="cart-item-info">
-                        <div class="cart-item-title">${item.name}</div>
-                        <div class="cart-item-price">${item.price} грн</div>
-                    </div>
-                    <button class="btn-remove" onclick="removeFromCart(${index})">🗑️</button>
-                </div>
-            `;
-        });
+    // 1. Рахуємо загальну суму з урахуванням кількості товарів
+    total += Number(item.price) * (item.quantity || 1);
+
+    // 2. Створюємо напис кількості, якщо товарів більше ніж 1
+    const quantityText = item.quantity > 1 ? ` <span style="color: #666; font-weight: bold;">(x${item.quantity})</span>` : '';
+
+    // 3. Рахуємо фінальну ціну для цієї позиції (ціна * кількість)
+    const itemTotalPrice = Number(item.price) * (item.quantity || 1);
+
+    // 4. Виводимо в HTML (твоя рідна структура класів + нові змінні)
+    listContainer.innerHTML += `
+        <div class="cart-item">
+            <div class="cart-item-info">
+                <div class="cart-item-title">${item.name}${quantityText}</div>
+                <div class="cart-item-price">${itemTotalPrice} грн</div>
+            </div>
+            <button class="btn-remove" onclick="removeFromCart(${index})">🗑️</button>
+        </div>
+    `;
+});
+            
     }
     
     // Оновлюємо загальну суму
