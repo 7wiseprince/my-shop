@@ -749,9 +749,7 @@ const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * (item.qu
             });
         }
 
-
-    
-let currentAuthMode = 'login'; // Поточний режим: або 'login', або 'register'
+      let currentAuthMode = 'login'; // Поточний режим: або 'login', або 'register'
 
 function toggleAuthTab(mode) {
     currentAuthMode = mode;
@@ -762,35 +760,31 @@ function toggleAuthTab(mode) {
     const submitBtn = document.getElementById('btn-auth-submit');
 
     if (mode === 'register') {
-        // Налаштування для Реєстрації
         tabRegister.style.color = 'var(--primary-color)';
         tabRegister.style.borderBottom = '2px solid var(--primary-color)';
         tabLogin.style.color = '#7f8c8d';
         tabLogin.style.borderBottom = 'none';
         
-        if (nameGroup) nameGroup.style.display = 'block'; // Показуємо поле імені
+        if (nameGroup) nameGroup.style.display = 'block';
         if (submitBtn) submitBtn.innerText = 'Зареєструватися';
     } else {
-        // Налаштування для Входу
         tabLogin.style.color = 'var(--primary-color)';
         tabLogin.style.borderBottom = '2px solid var(--primary-color)';
         tabRegister.style.color = '#7f8c8d';
         tabRegister.style.borderBottom = 'none';
         
-        if (nameGroup) nameGroup.style.display = 'none'; // Ховаємо поле імені
+        if (nameGroup) nameGroup.style.display = 'none';
         if (submitBtn) submitBtn.innerText = 'Увійти';
     }
 }
 
-    
-let currentUser = null; // Поточний авторизований користувач (спочатку null)
+let currentUser = null; // Поточний авторизований користувач
 
 function handleAuth() {
     const name = document.getElementById('auth-name').value.trim();
     const email = document.getElementById('auth-email').value.trim();
     const password = document.getElementById('auth-password').value.trim();
 
-    // Валідація полів
     if (!email || !password) {
         alert('Будь ласка, заповніть Email та Пароль!');
         return;
@@ -800,16 +794,12 @@ function handleAuth() {
         return;
     }
 
-    // Визначаємо, на який URL відправляти запит
     const url = currentAuthMode === 'register' ? '/api/register' : '/api/login';
-    
-    // Формуємо дані для відправки
     const authData = { email, password };
     if (currentAuthMode === 'register') {
         authData.name = name;
     }
 
-    // Відправляємо запит на сервер
     fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -817,17 +807,19 @@ function handleAuth() {
     })
     .then(response => {
         if (!response.ok) {
-            // Якщо сервер повернув помилку (наприклад, користувач вже є)
             return response.json().then(err => { throw new Error(err.message); });
         }
         return response.json();
     })
     .then(data => {
-        alert(data.message); // "Вхід успішний!" або "Реєстрація успішна!"
+        alert(data.message);
         
-        currentUser = data.user; // Зберігаємо дані користувача в пам'ять сайту
+        // 🔥 НОВЕ: Якщо сервер повернув токен, надійно ховаємо його в браузер під ключем 'sneakers_token'
+        if (data.token) {
+            localStorage.setItem('sneakers_token', data.token);
+        }
         
-        // Оновлюємо інтерфейс кабінету
+        currentUser = data.user;
         showUserCabinet();
     })
     .catch(error => {
@@ -836,37 +828,74 @@ function handleAuth() {
     });
 }
 
-// Функція, яка ховає форму входу і показує сам кабінет з даними користувача
 function showUserCabinet() {
     if (!currentUser) return;
 
-    document.getElementById('auth-container').style.display = 'none'; // Ховаємо форму
-    document.getElementById('user-cabinet').style.display = 'block';  // Показуємо кабінет
+    document.getElementById('auth-container').style.display = 'none';
+    document.getElementById('user-cabinet').style.display = 'block';
 
-    // Підставляємо дані користувача в текст
     document.getElementById('cabinet-user-name').innerText = `Привіт, ${currentUser.name}!`;
     document.getElementById('cabinet-user-email').innerText = currentUser.email;
 
-     // СИНХРОНІЗАЦІЯ: Завантажуємо обрані товари користувача з бази даних в наш масив
-     if (currentUser.favorites) {
+    if (currentUser.favorites) {
         favorites = currentUser.favorites;
-        updateFavoritesUI(); // Оновлює велику вкладку "Обране"
-        updateCabinetFavoritesUI(); // 🔥 Оновлює список товарів СЕРЕДИНІ КАБІНЕТУ!
-        }
+        updateFavoritesUI();
+        updateCabinetFavoritesUI();
+    }
             
-    // Очищаємо поля форми на всяк випадок
     document.getElementById('auth-name').value = '';
     document.getElementById('auth-email').value = '';
     document.getElementById('auth-password').value = '';
 }
 
-// Функція виходу з акаунту
+// 🔥 ОНОВЛЕНО: Функція виходу з акаунту тепер чистить пам'ять
 function logout() {
     currentUser = null;
-    document.getElementById('auth-container').style.display = 'block'; // Показуємо форму назад
-    document.getElementById('user-cabinet').style.display = 'none';   // Ховаємо кабінет
-    toggleAuthTab('login'); // Повертаємо на вкладку входу
+    
+    // 🔥 НОВЕ: Видаляємо токен з пам'яті, щоб сайт забув користувача при виході
+    localStorage.removeItem('sneakers_token');
+    
+    document.getElementById('auth-container').style.display = 'block';
+    document.getElementById('user-cabinet').style.display = 'none';
+    toggleAuthTab('login');
+}
+
+// 🔥 НОВЕ: Функція для автоматичного входу при завантаженні сторінки
+function autoLogin() {
+    const token = localStorage.getItem('sneakers_token');
+    
+    // Якщо токена немає, людина просто гість, нічого не робимо
+    if (!token) return;
+
+    // Якщо токен знайшли, відправляємо його серверу на перевірку
+    fetch('/api/me', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}` // Передаємо токен у спеціальному заголовку
         }
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Якщо токен застарів або підроблений — видаляємо його
+            localStorage.removeItem('sneakers_token');
+            throw new Error('Сесія застаріла');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            currentUser = data.user; // Автоматично підставляємо користувача
+            showUserCabinet();       // Одразу відкриваємо кабінет без введення пароля!
+        }
+    })
+    .catch(err => console.log('Гість або помилка автологіну:', err.message));
+}
+
+// 🔥 НОВЕ: Викликаємо автологін одразу, як тільки завантажується цей JS-скрипт!
+autoLogin();
+                    
+    
+
           
     
     
