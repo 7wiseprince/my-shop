@@ -1,9 +1,9 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const mongoose = require('mongoose');
+ 
 
-// Твоє хмарне посилання (не забудь вписати свій пароль замість <db_password>!)
-const MONGO_URI = "mongodb+srv://admin:Goodprince7@cluster0.xtmklcd.mongodb.net/myShopDB?retryWrites=true&w=majority&appName=Cluster0";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,13 +11,14 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(__dirname)); // Роздаємо файли з головної папки
 
-// Підключення до хмари MongoDB Atlas
-mongoose.connect(MONGO_URI)
+// Підключення до MongoDB через секретну змінну оточення
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
-        console.log("Успішно підключено до хмарної бази MongoDB Atlas! ☁️");
-        seedDatabase(); 
+        console.log("Успішно підключено до MongoDB Atlas! ☁️");
+        seedDatabase(); // 🔥 Залишаємо, щоб товари автоматично завантажувалися на вітрину
     })
-    .catch(err => console.error("Помилка підключення до хмари:", err));
+    .catch(err => console.error("Помилка підключення до бази:", err));
+
 
 // СХЕМА ТОВАРУ
 const productSchema = new mongoose.Schema({
