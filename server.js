@@ -249,6 +249,39 @@ app.post('/api/favorites', async (req, res) => {
     }
 });
 
+// === АВТОМАТИЧНА ПЕРЕВІРКА ТОКЕНА (АВТОЛОГІН) ===
+app.get('/api/me', async (req, res) => {
+    try {
+        // Беремо токен із заголовків запиту
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1]; // Відсікаємо слово "Bearer"
+
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Токен відсутній' });
+        }
+
+        // Перевіряємо та розшифровуємо токен за допомогою нашого секрету з Render
+        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+            if (err) {
+                return res.status(403).json({ success: false, message: 'Невалідний токен' });
+            }
+
+            // Якщо токен правильний, у decoded.id буде лежати ID користувача. Шукаємо його в базі
+            const user = await User.findById(decoded.id);
+            if (!user) {
+                return res.status(404).json({ success: false, message: 'Користувача не знайдено' });
+            }
+
+            // Повертаємо дані користувача на фронтенд для автологіну
+            res.json({
+                success: true,
+                user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites }
+            });
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 
 
 
