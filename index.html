@@ -378,14 +378,13 @@ function openCloudinaryWidget() {
 
 // 🚀 ПРАВИЛЬНИЙ ОБРОБНИК ФОРМИ (БЕЗ БАГІВ)
 document.getElementById('addProductForm').addEventListener('submit', async (e) => {
-    e.preventDefault(); // Зупиняємо перезавантаження сторінки
+    e.preventDefault();
 
-    // Збираємо дані точно по id з твого HTML коду
     const productData = {
         name: document.getElementById('p-name').value,
         price: document.getElementById('p-price').value,
         category: document.getElementById('p-category').value,
-        images: uploadedImages, // Відправляємо наш масив фото (якщо порожній - сервер поставить заглушку)
+        images: uploadedImages, 
         description: document.getElementById('p-desc').value
     };
 
@@ -396,24 +395,29 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
             body: JSON.stringify(productData)
         });
 
+        // 🕵️‍♂️ Якщо сервер повернув помилку доступу (наприклад 401 або 403)
+        if (!response.ok) {
+            alert(`🔴 Помилка доступу! Статус сервера: ${response.status} (${response.statusText}). Спробуйте переувійти в аккаунт адміна.`);
+            return;
+        }
+
         const result = await response.json();
         
         if (result.success) {
             alert(result.message);
-            document.getElementById('addProductForm').reset(); // Очищаємо текстові поля
-            uploadedImages = []; // Очищаємо масив фото для наступного товару
-            
-            // Перевіряємо чи існують функції перед їх викликом, щоб код не падав
+            document.getElementById('addProductForm').reset();
+            uploadedImages = [];
             if (typeof loadProducts === 'function') loadProducts();
             if (typeof switchPage === 'function') switchPage('catalog');
         } else {
-            alert("Помилка сервера: " + result.error);
+            // Якщо сервер повернув JSON, але success: false
+            alert("Помилка сервера: " + (result.error || result.message || "Невідома помилка"));
         }
     } catch (err) {
-        console.error("Помилка відправки:", err);
-        alert("Не вдалося зв'язатися з сервером. Перевірте з'єднання.");
+        alert("Критична помилка мережі: " + err.message);
     }
 });
+    
     
     
 
