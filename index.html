@@ -349,11 +349,11 @@ let uploadedImages = [];
 // Функція для відкриття вікна завантаження файлів від Cloudinary
 function openCloudinaryWidget() {
     cloudinary.openUploadWidget({
-        cloudName: 'ДЛЯ_ТВОГО_ІМЕНІ_ХМАРИ', // Сюди пізніше вставимо твій cloudName
-        uploadPreset: 'ДЛЯ_ТВОГО_ПРЕСЕТУ', // Сюди пізніше вставимо твій preset
-        multiple: true,                     // Дозволяємо вибирати ДЕКІЛЬКА файлів за раз!
-        clientAllowedFormats: ["png", "jpeg", "jpg", "webp"], // Тільки картинки
-        maxFiles: 5                         // Максимум 5 фотографій на один товар
+    cloudName: 'dmjlqld7u', // Твій особистий Cloud Name
+    uploadPreset: 'ml_default', // Назва стандартного пресету, який став Unsigned!
+    multiple: true,
+    clientAllowedFormats: ["png", "jpeg", "jpg", "webp"],
+    maxFiles: 5
     }, (error, result) => {
         if (!error && result && result.event === "success") {
             console.log('Фото успішно завантажено в хмару:', result.info.secure_url);
