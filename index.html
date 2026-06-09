@@ -365,10 +365,12 @@
      
     
     function toggleFavorite(productId) {
-    const product = allProducts.find(p => p.id === productId);
+    // 🔍 ШУКАЄМО ТОВАР: враховуємо і p.id, і p._id (MongoDB)
+    const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
     if (!product) return;
 
-    const index = favorites.findIndex(item => item.id === productId);
+    // 🔍 ШУКАЄМО В ОБРАНОМУ: враховуємо формати ID
+    const index = favorites.findIndex(item => (item._id === productId || item.id === productId || item.id == productId));
 
     if (index === -1) {
         favorites.push(product);
@@ -377,15 +379,27 @@
     }
 
     // Оновлюємо зовнішній вигляд сайту
-    updateFavoritesUI(); 
-    updateCabinetFavoritesUI();
+    updateFavoritesUI();
+    if (typeof updateCabinetFavoritesUI === 'function') {
+        updateCabinetFavoritesUI();
+    }
+    
+    // ✨ ОНОВЛЕННЯ ВІТРИНИ: щоб після кліку сердечко відразу міняло колір з ❤️ на 🤍 або навпаки
+    if (typeof allProducts !== 'undefined' && allProducts.length > 0) {
+        renderProducts(allProducts, 'catalog-products');
+        renderProducts(allProducts.slice(0, 2), 'featured-products');
+    }
+
     // МАГІЯ: Якщо користувач авторизований, зберігаємо його обране на сервер
     if (currentUser) {
+        // Беремо ID користувача, підтримуючи формат MongoDB (_id)
+        const uId = currentUser._id || currentUser.id;
+        
         fetch('/api/favorites', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                userId: currentUser.id, // Передаємо ID користувача
+                userId: uId,     // Передаємо ID користувача
                 favorites: favorites    // Передаємо оновлений масив товарів
             })
         })
@@ -393,7 +407,8 @@
         .then(data => console.log(data.message))
         .catch(err => console.error('Помилка збереження обраного:', err));
     }
-        }
+            }
+                                  
     
     
     
@@ -411,11 +426,12 @@
     // Функції кошика
       
     function addToCart(productId) {
-    const product = allProducts.find(p => p.id === productId);
+    // 🔍 ШУКАЄМО ТОВАР: перевіряємо і p._id, і p.id
+    const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
     if (!product) return;
 
-    // Шукаємо, чи є вже цей товар у кошику
-    const cartItem = cart.find(item => item.id === productId);
+    // 🔍 ШУКАЄМО В КОШИКУ: так само гнучко перевіряємо ID товарів, що вже всередині
+    const cartItem = cart.find(item => (item._id === productId || item.id === productId || item.id == productId));
 
     if (cartItem) {
         // Якщо товар уже є, просто збільшуємо його кількість на 1
@@ -425,8 +441,12 @@
         cart.push({ ...product, quantity: 1 });
     }
 
-    updateCartUI(); 
-        }
+    // Оновлюємо інтерфейс кошика
+    if (typeof updateCartUI === 'function') {
+        updateCartUI();
+    }
+    }
+    
     
     
     
