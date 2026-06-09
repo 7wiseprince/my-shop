@@ -314,7 +314,8 @@
                 <button class="btn-favorite" onclick="event.stopPropagation(); toggleFavorite('${prodId}')">${heartIcon}</button>
                 
                 <div onclick="openProductPage('${prodId}')" style="cursor: pointer;">
-                    <img class="product-image" src="${product.image || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                    <img class="product-image" src="${(product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/150')}" alt="${product.name}">
+    
                     <div class="product-title">${product.name}</div>
                     <div class="product-desc">${product.description || ''}</div>
                 </div>
@@ -1050,8 +1051,6 @@ function openProductPage(productId) {
     const container = document.getElementById('product-detail-container');
     if (!container) return;
 
-    // Шукаємо потрібний кросівок у масиві всіх товарів за його ID
-    // Перевіряємо як _id (MongoDB), так і звичайний id
     const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
 
     if (!product) {
@@ -1059,11 +1058,32 @@ function openProductPage(productId) {
         return;
     }
 
-    // Заповнюємо шаблон даними цього конкретного кросівка
-    container.innerHTML = `
-        <div style="text-align: center; margin-top: 15px;">
-            <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}" style="width: 100%; max-width: 350px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: cover;">
+    // 📸 ПЕРЕВІРКА КАРТИНОК: Створюємо масив фотографій. 
+    // Підтримуємо і новий масив product.images, і старі товари з одиночним product.image
+    let photos = [];
+    if (Array.isArray(product.images) && product.images.length > 0) {
+        photos = product.images;
+    } else if (product.image) {
+        photos = [product.image];
+    } else {
+        photos = ['https://via.placeholder.com/350'];
+    }
+
+    // Генеруємо HTML для кожної картинки в слайдері
+    let sliderHtml = photos.map(imgUrl => `
+        <div style="min-width: 100%; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 0 10px;">
+            <img src="${imgUrl}" alt="${product.name}" style="width: 100%; max-width: 350px; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: cover;">
         </div>
+    `).join('');
+
+    // Якщо картинок більше однієї, додамо маленьку підказку для користувача
+    let hintHtml = photos.length > 1 ? `<p style="text-align:center; color:#95a5a6; font-size:12px; margin-top:5px;">↔️ Гортайте фото пальцем</p>` : '';
+
+    container.innerHTML = `
+        <div style="width: 100%; overflow-x: auto; display: flex; scroll-snap-type: x mandatory; scroll-behavior: smooth; margin-top: 15px; padding-bottom: 5px;" class="product-gallery-slider">
+            ${sliderHtml}
+        </div>
+        ${hintHtml}
 
         <h1 style="font-size: 24px; color: #2c3e50; margin: 20px 0 10px 0;">${product.name}</h1>
         <p style="font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 15px 0;">Категорія: ${product.category || 'Взуття'}</p>
@@ -1075,18 +1095,24 @@ function openProductPage(productId) {
         <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
             <h3 style="margin-top: 0; color: #34495e; font-size: 16px;">Опис товару</h3>
             <p style="color: #5d6d7e; line-height: 1.6; font-size: 15px; margin-bottom: 0;">
-                ${product.description || 'Опис для цієї моделі кросівок поки що відсутній, але вони точно топ!'}
+                ${product.description || 'Опис для цієї моделі поки що відсутній.'}
             </p>
         </div>
 
-        <button onclick="addToCart('${product._id || product.id}')" style="width: 100%; background: #27ae60; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2); transition: 0.2s;">
+        <button onclick="addToCart('${product._id || product.id}'); alert('👟 Товар додано в кошик!')" style="width: 100%; background: #27ae60; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2); transition: 0.2s;">
             🛒 Додати в кошик
         </button>
     `;
 
-    // Перемикаємо екран на сторінку товару
     switchPage('product');
-}
+    
+    // Скидаємо скролл слайдера на початок при відкритті нової сторінки
+    setTimeout(() => {
+        const slider = document.querySelector('.product-gallery-slider');
+        if (slider) slider.scrollLeft = 0;
+    }, 50);
+            }
+    
     
 
 
