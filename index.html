@@ -392,6 +392,7 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
         const response = await fetch('/api/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
             body: JSON.stringify(productData)
         });
 
@@ -1143,7 +1144,8 @@ function openProductPage(productId) {
 
     try {
         const response = await fetch(`/api/products/${productId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
         });
 
         const result = await response.json();
