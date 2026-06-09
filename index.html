@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MyShop — Мій Магазин</title>
     <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD"></script>
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
    <link rel="stylesheet" href="style.css">
     
@@ -144,10 +146,13 @@
                         <option value="accessories">Аксесуари</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Посилання на картинку:</label>
-                    <input type="url" id="p-image" placeholder="https://example.com/photo.jpg">
+                <div style="margin-bottom: 15px;">
+    <label style="display:block; margin-bottom:5px; font-weight:bold;">Фотографії товару:</label>
+    <button type="button" onclick="openCloudinaryWidget()" style="background: #3498db; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;">
+        🖼️ Завантажити фотографії з телефона (можна декілька)
+    </button>
                 </div>
+                
                 <div class="form-group">
                     <label>Опис товару:</label>
                     <textarea id="p-desc" rows="3" required placeholder="Короткий опис товару..."></textarea>
@@ -337,30 +342,60 @@
         }
 
         // Додавання товару з адмінки
-        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        // 📸 Створюємо тимчасовий масив, куди будемо зберігати посилання на завантажені фото
+let uploadedImages = [];
 
-            const productData = {
-                name: document.getElementById('p-name').value,
-                price: document.getElementById('p-price').value,
-                category: document.getElementById('p-category').value,
-                image: document.getElementById('p-image').value,
-                description: document.getElementById('p-desc').value
-            };
+// Функція для відкриття вікна завантаження файлів від Cloudinary
+function openCloudinaryWidget() {
+    cloudinary.openUploadWidget({
+        cloudName: 'ДЛЯ_ТВОГО_ІМЕНІ_ХМАРИ', // Сюди пізніше вставимо твій cloudName
+        uploadPreset: 'ДЛЯ_ТВОГО_ПРЕСЕТУ', // Сюди пізніше вставимо твій preset
+        multiple: true,                     // Дозволяємо вибирати ДЕКІЛЬКА файлів за раз!
+        clientAllowedFormats: ["png", "jpeg", "jpg", "webp"], // Тільки картинки
+        maxFiles: 5                         // Максимум 5 фотографій на один товар
+    }, (error, result) => {
+        if (!error && result && result.event === "success") {
+            console.log('Фото успішно завантажено в хмару:', result.info.secure_url);
+            
+            // Додаємо посилання на фото в наш масив
+            uploadedImages.push(result.info.secure_url);
+            
+            // Показуємо адміну маленьке повідомлення прямо на екрані
+            alert(`📸 Фото завантажено! Всього додано: ${uploadedImages.length} шт.`);
+        }
+    });
+}
+// ОБРОБНИК ВІДПРАВКИ ФОРМИ
+document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-            const response = await fetch('/api/products', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(productData)
-            });
-            const result = await response.json();
-            if (result.success) {
-                alert(result.message);
-                document.getElementById('addProductForm').reset();
-                loadProducts();
-                switchPage('catalog');
-            }
-        });
+    const productData = {
+        name: document.getElementById('p-name').value,
+        price: document.getElementById('p-price').value,
+        category: document.getElementById('p-category').value,
+        images: uploadedImages, // 📸 ВІДПРАВЛЯЄМО НА СЕРВЕР НАШ МАСИВ КАРТИНОК замість одного поля image
+        description: document.getElementById('p-desc').value
+    };
+
+    const response = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productData)
+    });
+    const result = await response.json();
+    if (result.success) {
+        alert(result.message);
+        document.getElementById('addProductForm').reset();
+        
+        // Очищаємо масив завантажених фото для наступного товару
+        uploadedImages = []; 
+        
+        loadProducts();
+        switchPage('catalog');
+    }
+});
+    
+    
 
      
     
