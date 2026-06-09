@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+,<!DOCTYPE html>
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
@@ -94,6 +94,16 @@
     
     <div id="favorites-products"></div>
      </div>
+
+
+    <div id="page-product" class="page" style="padding: 20px 15px; text-align: left; max-width: 600px; margin: 0 auto; padding-bottom: 90px;">
+    <button onclick="switchPage('catalog')" style="background: none; border: none; font-size: 16px; color: #34495e; cursor: pointer; padding: 10px 0; display: flex; align-items: center; gap: 5px;">
+        ⬅️ Назад до каталогу
+    </button>
+
+    <div id="product-detail-container">
+        </div>
+    </div>
     
     
 
@@ -285,23 +295,33 @@
     }
 
     products.forEach(product => {
+        // Отримуємо правильний ID з бази даних (підтримуємо MongoDB _id та звичайний id)
+        const prodId = product._id || product.id;
+
         // Перевіряємо, чи цей товар уже є в обраному, щоб правильно зафарбувати сердечко
-        const isFavorite = favorites.some(item => item.id === product.id);
+        const isFavorite = favorites.some(item => (item._id === prodId || item.id === prodId || item.id == prodId));
         const heartIcon = isFavorite ? '❤️' : '🤍';
 
+        // Формуємо картку. Додаємо onclick="openProductPage" на елементи всередині, 
+        // щоб кнопки "Купити" та "Сердечко" не конфліктували з переходом на сторінку
         container.innerHTML += `
-            <div class="product-card">
-                <button class="btn-favorite" onclick="toggleFavorite(${product.id})">${heartIcon}</button>
+            <div class="product-card" style="position: relative;">
+                <button class="btn-favorite" onclick="event.stopPropagation(); toggleFavorite('${prodId}')">${heartIcon}</button>
                 
-                <img class="product-image" src="${product.image}" alt="${product.name}">
-                <div class="product-title">${product.name}</div>
-                <div class="product-desc">${product.description}</div>
+                <div onclick="openProductPage('${prodId}')" style="cursor: pointer;">
+                    <img class="product-image" src="${product.image || 'https://via.placeholder.com/150'}" alt="${product.name}">
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-desc">${product.description || ''}</div>
+                </div>
+
                 <div class="product-price">${product.price} грн</div>
-                <button class="btn-add-to-cart" onclick="addToCart(${product.id})">Додати в кошик</button>
+                
+                <button class="btn-add-to-cart" onclick="event.stopPropagation(); addToCart('${prodId}')">Додати в кошик</button>
             </div>
         `;
     });
-        }
+    }
+    
     
 
         // Фільтрація товарів за категоріями
@@ -968,6 +988,51 @@ function updateCabinetFavoritesUI() {
     });
 }
 
+
+
+    // Функція для відкриття детальної сторінки кросівка
+function openProductPage(productId) {
+    const container = document.getElementById('product-detail-container');
+    if (!container) return;
+
+    // Шукаємо потрібний кросівок у масиві всіх товарів за його ID
+    // Перевіряємо як _id (MongoDB), так і звичайний id
+    const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
+
+    if (!product) {
+        alert("Товар не знайдено!");
+        return;
+    }
+
+    // Заповнюємо шаблон даними цього конкретного кросівка
+    container.innerHTML = `
+        <div style="text-align: center; margin-top: 15px;">
+            <img src="${product.image || 'https://via.placeholder.com/300'}" alt="${product.name}" style="width: 100%; max-width: 350px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: cover;">
+        </div>
+
+        <h1 style="font-size: 24px; color: #2c3e50; margin: 20px 0 10px 0;">${product.name}</h1>
+        <p style="font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 15px 0;">Категорія: ${product.category || 'Взуття'}</p>
+        
+        <div style="font-size: 22px; font-weight: bold; color: #e74c3c; margin-bottom: 20px;">
+            ${product.price} грн
+        </div>
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+            <h3 style="margin-top: 0; color: #34495e; font-size: 16px;">Опис товару</h3>
+            <p style="color: #5d6d7e; line-height: 1.6; font-size: 15px; margin-bottom: 0;">
+                ${product.description || 'Опис для цієї моделі кросівок поки що відсутній, але вони точно топ!'}
+            </p>
+        </div>
+
+        <button onclick="addToCart('${product._id || product.id}')" style="width: 100%; background: #27ae60; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2); transition: 0.2s;">
+            🛒 Додати в кошик
+        </button>
+    `;
+
+    // Перемикаємо екран на сторінку товару
+    switchPage('product');
+}
+    
 
 
     
