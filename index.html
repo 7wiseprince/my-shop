@@ -406,14 +406,14 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
     };
 
     try {
-        // 🔑 Отримуємо токен, який зберігся при логіні (перевір як він у тебе називається в localStorage: 'token' чи 'jwt')
-        const token = localStorage.getItem('token') || localStorage.getItem('jwt');
+        // 🔑 БЕРЕМО ПРАВИЛЬНИЙ ТОКЕН З ТВОГО СХОВИЩА:
+        const token = localStorage.getItem('sneakers_token');
 
         const response = await fetch('/api/products', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}` // 🚀 Передаємо токен адміна серверу!
+                'Authorization': `Bearer ${token}` 
             },
             body: JSON.stringify(productData)
         });
@@ -432,12 +432,13 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
             if (typeof loadProducts === 'function') loadProducts();
             if (typeof switchPage === 'function') switchPage('catalog');
         } else {
-            alert("Помилка сервера: " + (result.error || result.message || "Невідома помилка"));
+            alert("Помилка сервера: " + (result.error || result.message || "Невідома搬лка"));
         }
     } catch (err) {
         alert("Критична помилка мережі: " + err.message);
     }
 });
+    
     
     
     
@@ -960,17 +961,28 @@ function handleAuth() {
         }
         return response.json();
     })
+    // Заміни фінальну частину .then(data => { ... }) всередині handleAuth на цю:
     .then(data => {
         alert(data.message);
         
-        // 🔥 НОВЕ: Якщо сервер повернув токен, надійно ховаємо його в браузер під ключем 'sneakers_token'
         if (data.token) {
-            localStorage.setItem('sneakers_token', data.token);
+            localStorage.setItem('sneakers_token', data.token); // Твій токен
+        }
+        if (data.user) {
+            localStorage.setItem('currentUser', JSON.stringify(data.user)); // Твій користувач для кнопок
         }
         
         currentUser = data.user;
+        window.currentUser = data.user; // Дублюємо в глобальну змінну
+
+        // Оновлюємо каталог, щоб одразу з'явилися кнопки видалення, якщо зайшов адмін
+        if (typeof products !== 'undefined' && typeof loadProducts === 'function') {
+            loadProducts();
+        }
+
         showUserCabinet();
     })
+        
     .catch(error => {
         console.error('Помилка авторизації:', error);
         alert(error.message || 'Щось пішло не так...');
@@ -1158,18 +1170,17 @@ function openProductPage(productId) {
     }, 50);
             }
     
-
 async function deleteProduct(productId) {
     if (!confirm("⚠️ Ви впевнені, що хочете назавжди видалити цей товар з бази даних?")) return;
 
     try {
-        // 🔑 Отримуємо токен з локального сховища
-        const token = localStorage.getItem('token') || localStorage.getItem('jwt');
+        // 🔑 БЕРЕМО ПРАВИЛЬНИЙ ТОКЕН:
+        const token = localStorage.getItem('sneakers_token');
 
         const response = await fetch(`/api/products/${productId}`, {
             method: 'DELETE',
             headers: {
-                'Authorization': `Bearer ${token}` // 🚀 Передаємо токен для підтвердження прав адміна!
+                'Authorization': `Bearer ${token}`
             }
         });
 
@@ -1191,6 +1202,8 @@ async function deleteProduct(productId) {
         alert("Не вдалося видалити товар. Сервер недоступний.");
     }
 }
+    
+
     
 
     
