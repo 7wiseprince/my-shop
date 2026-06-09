@@ -219,7 +219,6 @@ app.get('/api/orders', isAdmin, async (req, res) => {
     }
 });
 
-
 // ==================== АВТЕНТИФІКАЦІЯ ТА ПРОФІЛЬ ====================
 
 // РЕЄСТРАЦІЯ КОРИСТУВАЧА
@@ -244,9 +243,11 @@ app.post('/api/register', async (req, res) => {
 
         await newUser.save();
 
-        // 🔥 Зашифровуємо роль у токен
+        // 🔥 Гарантуємо наявність ролі при створенні токена
+        const userRole = newUser.role || 'user';
+
         const token = jwt.sign(
-            { id: newUser._id, role: newUser.role }, 
+            { id: newUser._id, role: userRole }, 
             process.env.JWT_SECRET, 
             { expiresIn: '7d' }
         );
@@ -255,7 +256,7 @@ app.post('/api/register', async (req, res) => {
             success: true,
             message: 'Реєстрація успішна!', 
             token,
-            user: { id: newUser._id, name: newUser.name, email: newUser.email, favorites: newUser.favorites, role: newUser.role } 
+            user: { id: newUser._id, name: newUser.name, email: newUser.email, favorites: newUser.favorites, role: userRole } 
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -277,9 +278,12 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Неправильний Email або пароль!' });
         }
 
-        // 🔥 Зашифровуємо роль у токен, щоб фронтенд знав, чи пускати в адмінку
+        // 🔥 ПЕРЕВІРКА: беремо роль з бази, якщо її немає (або раптом записано через isAdmin) — підстраховуємось
+        const userRole = (user.role === 'admin' || user.isAdmin === true) ? 'admin' : (user.role || 'user');
+
+        // Зашифровуємо точну роль у токен
         const token = jwt.sign(
-            { id: user._id, role: user.role }, 
+            { id: user._id, role: userRole }, 
             process.env.JWT_SECRET, 
             { expiresIn: '7d' }
         );
@@ -288,7 +292,7 @@ app.post('/api/login', async (req, res) => {
             success: true,
             message: 'Вхід успішний!',
             token,
-            user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites, role: user.role }
+            user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites, role: userRole }
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -306,7 +310,7 @@ app.post('/api/favorites', async (req, res) => {
     }
 });
 
-// АВТОМАТИЧНА ПЕРЕВІРКА ТОКЕНА (🔥 ОНОВЛЕНО: повертає також роль користувача)
+// АВТОМАТИЧНА ПЕРЕВІРКА ТОКЕНА
 app.get('/api/me', async (req, res) => {
     try {
         const authHeader = req.headers['authorization'];
@@ -326,15 +330,19 @@ app.get('/api/me', async (req, res) => {
                 return res.status(404).json({ success: false, message: 'Користувача не знайдено' });
             }
 
+            // 🔥 Тут також віддаємо підстраховану роль користувача
+            const userRole = (user.role === 'admin' || user.isAdmin === true) ? 'admin' : (user.role || 'user');
+
             res.json({
                 success: true,
-                user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites, role: user.role }
+                user: { id: user._id, name: user.name, email: user.email, favorites: user.favorites, role: userRole }
             });
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+             
 
 
 app.listen(PORT, () => {
