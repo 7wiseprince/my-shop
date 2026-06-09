@@ -307,8 +307,7 @@
         const isFavorite = favorites.some(item => (item._id === prodId || item.id === prodId || item.id == prodId));
         const heartIcon = isFavorite ? '❤️' : '🤍';
 
-        // Формуємо картку. Додаємо onclick="openProductPage" на елементи всередині, 
-        // щоб кнопки "Купити" та "Сердечко" не конфліктували з переходом на сторінку
+        // Формуємо картку з твоєю детальною логікою
         container.innerHTML += `
             <div class="product-card" style="position: relative;">
                 <button class="btn-favorite" onclick="event.stopPropagation(); toggleFavorite('${prodId}')">${heartIcon}</button>
@@ -323,10 +322,22 @@
                 <div class="product-price">${product.price} грн</div>
                 
                 <button class="btn-add-to-cart" onclick="event.stopPropagation(); addToCart('${prodId}')">Додати в кошик</button>
+
+                <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${product.id || prodId}')" style="display: none; width: 100%; background: #e74c3c; color: white; border: none; padding: 8px; margin-top: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
+                    🗑️ Видалити товар (Адмін)
+                </button>
             </div>
         `;
     });
+
+    // 🕵️‍♂️ ПЕРЕВІРКА НА АДМІНА: якщо зайшов адмін, робимо кнопки видалення видимими
+    if (window.currentUser && window.currentUser.isAdmin) {
+        container.querySelectorAll('.btn-delete-admin').forEach(btn => {
+            btn.style.display = 'block';
+        });
     }
+    }
+    
     
     
 
@@ -344,55 +355,63 @@
 
         // Додавання товару з адмінки
         // 📸 Створюємо тимчасовий масив, куди будемо зберігати посилання на завантажені фото
+
+    // 📸 Створюємо масив для збереження посилань на фотографії
 let uploadedImages = [];
 
-// Функція для відкриття вікна завантаження файлів від Cloudinary
+// Функція для відкриття віджета Cloudinary
 function openCloudinaryWidget() {
     cloudinary.openUploadWidget({
-    cloudName: 'dmjlqld7u', // Твій особистий Cloud Name
-    uploadPreset: 'ml_default', // Назва стандартного пресету, який став Unsigned!
-    multiple: true,
-    clientAllowedFormats: ["png", "jpeg", "jpg", "webp"],
-    maxFiles: 5
+        cloudName: 'dmjlqld7u',       // Твій особистий Cloud Name
+        uploadPreset: 'ml_default',   // Твій пресет (який ти зробив Unsigned)
+        multiple: true,
+        clientAllowedFormats: ["png", "jpeg", "jpg", "webp"],
+        maxFiles: 5
     }, (error, result) => {
         if (!error && result && result.event === "success") {
-            console.log('Фото успішно завантажено в хмару:', result.info.secure_url);
-            
-            // Додаємо посилання на фото в наш масив
+            console.log('Фото успішно додано:', result.info.secure_url);
             uploadedImages.push(result.info.secure_url);
-            
-            // Показуємо адміну маленьке повідомлення прямо на екрані
             alert(`📸 Фото завантажено! Всього додано: ${uploadedImages.length} шт.`);
         }
     });
 }
-// ОБРОБНИК ВІДПРАВКИ ФОРМИ
-document.getElementById('addProductForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
 
+// 🚀 ПРАВИЛЬНИЙ ОБРОБНИК ФОРМИ (БЕЗ БАГІВ)
+document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+    e.preventDefault(); // Зупиняємо перезавантаження сторінки
+
+    // Збираємо дані точно по id з твого HTML коду
     const productData = {
         name: document.getElementById('p-name').value,
         price: document.getElementById('p-price').value,
         category: document.getElementById('p-category').value,
-        images: uploadedImages, // 📸 ВІДПРАВЛЯЄМО НА СЕРВЕР НАШ МАСИВ КАРТИНОК замість одного поля image
+        images: uploadedImages, // Відправляємо наш масив фото (якщо порожній - сервер поставить заглушку)
         description: document.getElementById('p-desc').value
     };
 
-    const response = await fetch('/api/products', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(productData)
-    });
-    const result = await response.json();
-    if (result.success) {
-        alert(result.message);
-        document.getElementById('addProductForm').reset();
+    try {
+        const response = await fetch('/api/products', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(productData)
+        });
+
+        const result = await response.json();
         
-        // Очищаємо масив завантажених фото для наступного товару
-        uploadedImages = []; 
-        
-        loadProducts();
-        switchPage('catalog');
+        if (result.success) {
+            alert(result.message);
+            document.getElementById('addProductForm').reset(); // Очищаємо текстові поля
+            uploadedImages = []; // Очищаємо масив фото для наступного товару
+            
+            // Перевіряємо чи існують функції перед їх викликом, щоб код не падав
+            if (typeof loadProducts === 'function') loadProducts();
+            if (typeof switchPage === 'function') switchPage('catalog');
+        } else {
+            alert("Помилка сервера: " + result.error);
+        }
+    } catch (err) {
+        console.error("Помилка відправки:", err);
+        alert("Не вдалося зв'язатися з сервером. Перевірте з'єднання.");
     }
 });
     
@@ -1113,6 +1132,30 @@ function openProductPage(productId) {
     }, 50);
             }
     
+
+    async function deleteProduct(productId) {
+    // Питаємо підтвердження, щоб випадково не видалити
+    if (!confirm("⚠️ Ви впевнені, що хочете назавжди видалити цей товар з бази даних?")) return;
+
+    try {
+        const response = await fetch(`/api/products/${productId}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("🗑️ " + result.message);
+            // Перезавантажуємо товари, щоб видалений кросівок миттєво зник з екрана
+            if (typeof loadProducts === 'function') loadProducts(); 
+        } else {
+            alert("Помилка видалення: " + result.error);
+        }
+    } catch (err) {
+        console.error("Помилка при видаленні товару:", err);
+        alert("Не вдалося видалити товар. Сервер недоступний.");
+    }
+    }
     
 
 
