@@ -28,7 +28,7 @@ const productSchema = new mongoose.Schema({
     name: String,
     price: Number,
     category: String,
-    image: String,
+    images: [String],
     description: String
 });
 const Product = mongoose.model('Product', productSchema);
@@ -147,16 +147,23 @@ app.get('/api/products/:id', async (req, res) => {
 // 🔥 Додати товар (ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.post('/api/products', isAdmin, async (req, res) => {
     try {
-        const { name, price, category, image, description } = req.body;
+        // 📸 Замість image витягуємо images з req.body
+        const { name, price, category, images, description } = req.body;
         const lastProduct = await Product.findOne().sort({ id: -1 });
         const newId = lastProduct ? lastProduct.id + 1 : 1;
+
+        // Перевіряємо, чи нам прийшов масив і чи він не порожній. 
+        // Якщо порожній — ставимо стандартну картинку всередину масиву.
+        const finalImages = (Array.isArray(images) && images.length > 0) 
+            ? images 
+            : ["https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500"];
 
         const newProduct = new Product({
             id: newId,
             name,
             price: Number(price),
             category,
-            image: image || "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500",
+            images: finalImages, // 📸 Зберігаємо масив посилань у базу даних
             description
         });
 
@@ -166,7 +173,7 @@ app.post('/api/products', isAdmin, async (req, res) => {
         res.status(500).json({ success: false, error: err.message });
     }
 });
-
+            
 // 🔥 Видалити товар (ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.delete('/api/products/:id', isAdmin, async (req, res) => {
     try {
