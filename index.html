@@ -330,8 +330,25 @@
         `;
     });
 
-    // 🕵️‍♂️ ПЕРЕВІРКА НА АДМІНА: якщо зайшов адмін, робимо кнопки видалення видимими
+    // 🕵️‍♂️ ОНОВЛЕНА ПЕРЕВІРКА НА АДМІНА (шукає всюди: і в пам'яті, і в локальному сховищі браузера)
+    const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
+    let isUserAdmin = false;
+
     if (window.currentUser && window.currentUser.isAdmin) {
+        isUserAdmin = true;
+    } else if (userJson) {
+        try {
+            const parsedUser = JSON.parse(userJson);
+            if (parsedUser.isAdmin || parsedUser.role === 'admin') {
+                isUserAdmin = true;
+            }
+        } catch (e) {
+            console.error("Не вдалося прочитати дані користувача з localStorage", e);
+        }
+    }
+
+    // Якщо перевірка підтвердила, що ти адмін — вмикаємо червоні кнопки видалення!
+    if (isUserAdmin) {
         container.querySelectorAll('.btn-delete-admin').forEach(btn => {
             btn.style.display = 'block';
         });
@@ -389,16 +406,20 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
     };
 
     try {
+        // 🔑 Отримуємо токен, який зберігся при логіні (перевір як він у тебе називається в localStorage: 'token' чи 'jwt')
+        const token = localStorage.getItem('token') || localStorage.getItem('jwt');
+
         const response = await fetch('/api/products', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // 🚀 Передаємо токен адміна серверу!
+            },
             body: JSON.stringify(productData)
         });
 
-        // 🕵️‍♂️ Якщо сервер повернув помилку доступу (наприклад 401 або 403)
         if (!response.ok) {
-            alert(`🔴 Помилка доступу! Статус сервера: ${response.status} (${response.statusText}). Спробуйте переувійти в аккаунт адміна.`);
+            alert(`🔴 Помилка доступу! Статус сервера: ${response.status}. Перевірте, чи ви авторизовані як адмін.`);
             return;
         }
 
@@ -411,13 +432,13 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
             if (typeof loadProducts === 'function') loadProducts();
             if (typeof switchPage === 'function') switchPage('catalog');
         } else {
-            // Якщо сервер повернув JSON, але success: false
             alert("Помилка сервера: " + (result.error || result.message || "Невідома помилка"));
         }
     } catch (err) {
         alert("Критична помилка мережі: " + err.message);
     }
 });
+    
     
     
     
@@ -1138,21 +1159,29 @@ function openProductPage(productId) {
             }
     
 
-    async function deleteProduct(productId) {
-    // Питаємо підтвердження, щоб випадково не видалити
+async function deleteProduct(productId) {
     if (!confirm("⚠️ Ви впевнені, що хочете назавжди видалити цей товар з бази даних?")) return;
 
     try {
+        // 🔑 Отримуємо токен з локального сховища
+        const token = localStorage.getItem('token') || localStorage.getItem('jwt');
+
         const response = await fetch(`/api/products/${productId}`, {
             method: 'DELETE',
-            credentials: 'include'
+            headers: {
+                'Authorization': `Bearer ${token}` // 🚀 Передаємо токен для підтвердження прав адміна!
+            }
         });
+
+        if (!response.ok) {
+            alert(`🔴 Не вдалося видалити. Статус сервера: ${response.status}`);
+            return;
+        }
 
         const result = await response.json();
 
         if (result.success) {
             alert("🗑️ " + result.message);
-            // Перезавантажуємо товари, щоб видалений кросівок миттєво зник з екрана
             if (typeof loadProducts === 'function') loadProducts(); 
         } else {
             alert("Помилка видалення: " + result.error);
@@ -1161,9 +1190,8 @@ function openProductPage(productId) {
         console.error("Помилка при видаленні товару:", err);
         alert("Не вдалося видалити товар. Сервер недоступний.");
     }
-    }
+}
     
-
 
     
         // Старт додатка
