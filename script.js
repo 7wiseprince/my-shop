@@ -948,18 +948,18 @@ async function deleteProduct(productId) {
 }
     
 function updateCartBadge() {
-    // 1. Дістаємо кошик із localStorage
-    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    // Якщо у тебе в script.js глобальний масив називається cart, беремо його.
+    // Якщо він порожній або не існує, пробуємо взяти з localStorage
+    const currentCart = (typeof cart !== 'undefined') ? cart : (JSON.parse(localStorage.getItem('cart')) || []);
     
-    // 2. Рахуємо загальну кількість кросівок
-    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    // Рахуємо загальну кількість
+    const totalItems = currentCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     
-    // 3. Знаходимо наш кружечок
     const badge = document.getElementById('cart-count-badge');
     if (badge) {
         badge.innerText = totalItems;
         
-        // Якщо кошик порожній — ховаємо кружечок
+        // Повністю ховаємо або показуємо кружечок
         if (totalItems === 0) {
             badge.style.display = 'none';
         } else {
@@ -968,16 +968,15 @@ function updateCartBadge() {
     }
 }
 
-// Запускаємо автоматично при завантаженні сторінки
-document.addEventListener('DOMContentLoaded', updateCartBadge);
-            
-    
-
     
         // Старт додатка
         document.addEventListener("DOMContentLoaded", () => {
             loadProducts();
             loadAdminOrders(); 
-        });
-    
-                     
+    if (typeof updateCartUI === 'function') {
+        updateCartUI(); 
+    } else {
+        updateCartBadge();
+    }
+});
+                
