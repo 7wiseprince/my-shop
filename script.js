@@ -1,4 +1,4 @@
-,
+
         let allProducts = [];
         let cart = [];
         let favorites = []; // Масив для зберігання улюблених товарів
