@@ -686,5 +686,42 @@ header .search-container {
     box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
     }
     
+/* Контейнер для кнопки кошика */
+.cart-header-btn {
+    position: relative; /* Критично важливо для вирівнювання кружечка */
+    background: none;
+    border: none;
+    font-size: 24px; /* Розмір смайлика кошика */
+    cursor: pointer;
+    padding: 8px;
+    margin-left: 15px; /* Відступ від рядка пошуку */
+    display: flex;
+    align-items: center;
+}
+
+/* 🔴 Стиль червоного кружечка */
+.cart-badge {
+    position: absolute;
+    top: -2px;       /* Зміщуємо трохи вгору */
+    right: -2px;     /* Зміщуємо трохи праворуч */
+    background-color: #ff3838; /* Яскраво-червоний колір */
+    color: white;    /* Білий колір цифри */
+    font-size: 11px; /* Маленький шрифт */
+    font-weight: bold;
+    border-radius: 50%; /* Робимо ідеальне коло */
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Легка тінь для краси */
+    transition: transform 0.2s ease; /* Анімація для майбутнього */
+}
+
+/* Якщо кошик порожній, можна сховати кружечок (опціонально) */
+.cart-badge.hidden {
+    display: none;
+}
 
 
