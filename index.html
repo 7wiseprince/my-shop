@@ -16,9 +16,10 @@
 <header>
 <span class="logo" id="secret-bag" onclick="toggleAdmin()">🛍️ MyShop</span>
     
-    
-    <div class="header-right-panel">
-        <input type="text" id="search-input" placeholder="Пошук товарів..." />
+
+        <div class="header-right-panel">
+    <input type="text" id="search-input" placeholder="Пошук товарів..." oninput="handleSearch()" />
+        </div>
         
         <button class="cart-header-btn" onclick="toggleCart(true)">
     <span class="cart-icon">🛒</span>
