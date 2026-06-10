@@ -282,7 +282,7 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
             updateCartUI();
         }
 
-        Function toggleCart(show) {
+        function toggleCart(show) {
             // Підлаштовано під назву твого ID вікна кошика (cartModal)
             const cartModal = document.getElementById('cartModal');
             if (cartModal) {
