@@ -1,4 +1,4 @@
-<script>
+
         let allProducts = [];
         let cart = [];
         let favorites = []; // Масив для зберігання улюблених товарів
@@ -524,4 +524,437 @@ const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * (item.qu
                 }
             }).render('#paypal-button-container');
             }
+
+        // АДМІН-ПАНЕЛЬ
+        // === АДМІН-ПАНЕЛЬ (ОНОВЛЕНО З ТОКЕНАМИ) ===
+// === АДМІН-ПАНЕЛЬ (РЕЖИМ ПОВНОЇ КОНСПІРАЦІЇ) ===
+function toggleAdmin() {
+    const adminPage = document.getElementById('page-admin');
+    
+    if (adminPage && adminPage.classList.contains('active')) {
+        switchPage('home');
+        return;
+    }
+
+    // 🔥 Пускає тільки тебе, для інших — повна тиша
+    if (currentUser && currentUser.role === 'admin') {
+        switchPage('admin'); 
+        loadAdminOrders();
+    } else {
+        return; 
+    }
+}
+
+function submitAdminLogin() {
+    toggleAdmin();
+}
+    
+
+// Залишаємо цю функцію як запасну, якщо захочеш зайти по старому паролю 1111
+function submitAdminLogin() {
+    const passwordInput = document.getElementById('admin-password-input').value;
+    const errorMsg = document.getElementById('login-error-msg');
+
+    if (passwordInput === "1111") { 
+        if (errorMsg) errorMsg.style.display = 'none';
+        switchPage('admin'); 
+        loadAdminOrders();
+    } else {
+        if (errorMsg) errorMsg.style.display = 'block';
+    }
+}
+    
+async function loadAdminOrders() {
+    const container = document.getElementById('admin-orders-list');
+    if (!container) return;
+
+    try {
+        // 🔥 Отримуємо токен з пам'яті телефону
+        const token = localStorage.getItem('sneakers_token');
+
+        // Робимо запит на сервер і прикріплюємо токен адміна
+        const response = await fetch('/api/orders', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // 🔥 Обов'язковий захист сервера
+            }
+        });
+
+        // Якщо сервер відмовив (наприклад, токен застарів)
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Не вдалося завантажити замовлення');
+        }
+
+        const orders = await response.json();
+
+        if (!orders || orders.length === 0) {
+            container.innerHTML = '<p style="color: #7f8c8d; text-align:center; padding: 20px;">📦 Замовлень поки немає</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        orders.forEach(order => {
+            let itemsHtml = '';
+            if (order.items && Array.isArray(order.items)) {
+                itemsHtml = order.items.map(item => `<li>${item.name} — ${item.price} грн</li>`).join('');
+            } else {
+                itemsHtml = '<li>Товари не вказані</li>';
+            }
+            
+            container.innerHTML += `
+                <div style="background: #f8f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 5px solid #27ae60; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; color: #2c3e50; margin-bottom: 8px;">
+                        <span>Замовлення №${order.id || '---'}</span>
+                        <span style="color: #27ae60;">${order.status || 'Оплачено'}</span>
+                    </div>
+                    <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Покупець:</strong> ${order.customerName || 'Невідомо'}</p>
+                    <p style="margin: 5px 0; font-size: 14px; color: #566573;"><strong>Дата:</strong> ${order.date || '---'}</p>
+                    <div style="margin-top: 10px; padding-left: 15px; font-size: 14px;">
+                        <strong>Товари:</strong>
+                        <ul style="margin: 5px 0; padding-left: 20px;">${itemsHtml}</ul>
+                    </div>
+                    <div style="text-align: right; font-weight: bold; margin-top: 10px; color: #2c3e50;">
+                        Разом: ${order.total || 0} грн
+                    </div>
+                </div>
+            `;
+        });
+    } catch (err) {
+        console.error("Помилка завантаження замовлень:", err);
+        container.innerHTML = `<p style="color: #e74c3c; text-align:center; padding: 20px;">❌ Помилка: ${err.message}</p>`;
+    }
+}
+    
+
+        // ПОШУК ТОВАРІВ
+        function handleSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const productCards = document.querySelectorAll('.product-card');
+
+            productCards.forEach(card => {
+                const title = card.querySelector('.product-title').innerText.toLowerCase();
+                if (title.includes(query)) {
+                    card.style.display = 'flex'; 
+                } else {
+                    card.style.display = 'none'; 
+                }
+            });
+        }
+
+      let currentAuthMode = 'login'; // Поточний режим: або 'login', або 'register'
+
+function toggleAuthTab(mode) {
+    currentAuthMode = mode;
+    
+    const tabLogin = document.getElementById('tab-login');
+    const tabRegister = document.getElementById('tab-register');
+    const nameGroup = document.getElementById('auth-name-group');
+    const submitBtn = document.getElementById('btn-auth-submit');
+
+    if (mode === 'register') {
+        tabRegister.style.color = 'var(--primary-color)';
+        tabRegister.style.borderBottom = '2px solid var(--primary-color)';
+        tabLogin.style.color = '#7f8c8d';
+        tabLogin.style.borderBottom = 'none';
+        
+        if (nameGroup) nameGroup.style.display = 'block';
+        if (submitBtn) submitBtn.innerText = 'Зареєструватися';
+    } else {
+        tabLogin.style.color = 'var(--primary-color)';
+        tabLogin.style.borderBottom = '2px solid var(--primary-color)';
+        tabRegister.style.color = '#7f8c8d';
+        tabRegister.style.borderBottom = 'none';
+        
+        if (nameGroup) nameGroup.style.display = 'none';
+        if (submitBtn) submitBtn.innerText = 'Увійти';
+    }
+}
+
+let currentUser = null; // Поточний авторизований користувач
+
+function handleAuth() {
+    const name = document.getElementById('auth-name').value.trim();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value.trim();
+
+    if (!email || !password) {
+        alert('Будь ласка, заповніть Email та Пароль!');
+        return;
+    }
+    if (currentAuthMode === 'register' && !name) {
+        alert('Будь ласка, вкажіть ваше ім\'я для реєстрації!');
+        return;
+    }
+
+    const url = currentAuthMode === 'register' ? '/api/register' : '/api/login';
+    const authData = { email, password };
+    if (currentAuthMode === 'register') {
+        authData.name = name;
+    }
+
+    fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(authData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.message); });
+        }
+        return response.json();
+    })
+    // Заміни фінальну частину .then(data => { ... }) всередині handleAuth на цю:
+    .then(data => {
+        alert(data.message);
+        
+        if (data.token) {
+            localStorage.setItem('sneakers_token', data.token); // Твій токен
+        }
+        if (data.user) {
+            localStorage.setItem('currentUser', JSON.stringify(data.user)); // Твій користувач для кнопок
+        }
+        
+        currentUser = data.user;
+        window.currentUser = data.user; // Дублюємо в глобальну змінну
+
+        // Оновлюємо каталог, щоб одразу з'явилися кнопки видалення, якщо зайшов адмін
+        if (typeof products !== 'undefined' && typeof loadProducts === 'function') {
+            loadProducts();
+        }
+
+        showUserCabinet();
+    })
+        
+    .catch(error => {
+        console.error('Помилка авторизації:', error);
+        alert(error.message || 'Щось пішло не так...');
+    });
+}
+
+function showUserCabinet() {
+    if (!currentUser) return;
+
+    document.getElementById('auth-container').style.display = 'none';
+    document.getElementById('user-cabinet').style.display = 'block';
+
+    document.getElementById('cabinet-user-name').innerText = `Привіт, ${currentUser.name}!`;
+    document.getElementById('cabinet-user-email').innerText = currentUser.email;
+
+    if (currentUser.favorites) {
+        favorites = currentUser.favorites;
+        updateFavoritesUI();
+        updateCabinetFavoritesUI();
+    }
+            
+    document.getElementById('auth-name').value = '';
+    document.getElementById('auth-email').value = '';
+    document.getElementById('auth-password').value = '';
+}
+
+// 🔥 ОНОВЛЕНО: Функція виходу з акаунту тепер чистить пам'ять
+function logout() {
+    currentUser = null;
+    
+    // 🔥 НОВЕ: Видаляємо токен з пам'яті, щоб сайт забув користувача при виході
+    localStorage.removeItem('sneakers_token');
+    
+    document.getElementById('auth-container').style.display = 'block';
+    document.getElementById('user-cabinet').style.display = 'none';
+    toggleAuthTab('login');
+}
+
+// 🔥 НОВЕ: Функція для автоматичного входу при завантаженні сторінки
+function autoLogin() {
+    const token = localStorage.getItem('sneakers_token');
+    
+    // Якщо токена немає, людина просто гість, нічого не робимо
+    if (!token) return;
+
+    // Якщо токен знайшли, відправляємо його серверу на перевірку
+    fetch('/api/me', {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}` // Передаємо токен у спеціальному заголовку
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            // Якщо токен застарів або підроблений — видаляємо його
+            localStorage.removeItem('sneakers_token');
+            throw new Error('Сесія застаріла');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            currentUser = data.user; // Автоматично підставляємо користувача
+            showUserCabinet();       // Одразу відкриваємо кабінет без введення пароля!
+        }
+    })
+    .catch(err => console.log('Гість або помилка автологіну:', err.message));
+}
+
+// 🔥 НОВЕ: Викликаємо автологін одразу, як тільки завантажується цей JS-скрипт!
+autoLogin();
+                    
+    
+
+          
+    
+    
+        // Модальне вікно успішного замовлення
+        function showSuccessModal() {
+            toggleCart(false);
+            const successModal = document.getElementById('success-modal');
+            if (successModal) successModal.style.display = 'flex';
+        }
+
+        function closeSuccessModal() {
+            const successModal = document.getElementById('success-modal');
+            if (successModal) successModal.style.display = 'none';
+            cart = [];
+            updateCartUI();
+            switchPage('home'); 
+        }
+
+
+function updateCabinetFavoritesUI() {
+    const cabinetList = document.getElementById('cabinet-favorites-list');
+    if (!cabinetList) return; // Якщо такого контейнера немає в HTML, зупиняємо роботу
+
+    cabinetList.innerHTML = ''; // Очищаємо контейнер від старого тексту
+
+    if (favorites.length === 0) {
+        cabinetList.innerHTML = '<p class="no-items">У тебе поки немає збережених товарів.</p>';
+        return;
+    }
+
+    // Пробігаємося по кожному улюбленому товару і створюємо для нього HTML-картку
+    favorites.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.innerHTML = `
+            <img src="${product.image}" alt="${product.name}">
+            <h4>${product.name}</h4>
+            <p class="price">${product.price} грн</p>
+            <button onclick="addToCart(${product.id})" class="btn-buy">Додати в кошик</button>
+        `;
+        cabinetList.appendChild(productCard);
+    });
+}
+
+
+
+    // Функція для відкриття детальної сторінки кросівка
+function openProductPage(productId) {
+    const container = document.getElementById('product-detail-container');
+    if (!container) return;
+
+    const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
+
+    if (!product) {
+        alert("Товар не знайдено!");
+        return;
+    }
+
+    // 📸 ПЕРЕВІРКА КАРТИНОК: Створюємо масив фотографій. 
+    // Підтримуємо і новий масив product.images, і старі товари з одиночним product.image
+    let photos = [];
+    if (Array.isArray(product.images) && product.images.length > 0) {
+        photos = product.images;
+    } else if (product.image) {
+        photos = [product.image];
+    } else {
+        photos = ['https://via.placeholder.com/350'];
+    }
+
+    // Генеруємо HTML для кожної картинки в слайдері
+    let sliderHtml = photos.map(imgUrl => `
+        <div style="min-width: 100%; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 0 10px;">
+            <img src="${imgUrl}" alt="${product.name}" style="width: 100%; max-width: 350px; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: cover;">
+        </div>
+    `).join('');
+
+    // Якщо картинок більше однієї, додамо маленьку підказку для користувача
+    let hintHtml = photos.length > 1 ? `<p style="text-align:center; color:#95a5a6; font-size:12px; margin-top:5px;">↔️ Гортайте фото пальцем</p>` : '';
+
+    container.innerHTML = `
+        <div style="width: 100%; overflow-x: auto; display: flex; scroll-snap-type: x mandatory; scroll-behavior: smooth; margin-top: 15px; padding-bottom: 5px;" class="product-gallery-slider">
+            ${sliderHtml}
+        </div>
+        ${hintHtml}
+
+        <h1 style="font-size: 24px; color: #2c3e50; margin: 20px 0 10px 0;">${product.name}</h1>
+        <p style="font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 15px 0;">Категорія: ${product.category || 'Взуття'}</p>
+        
+        <div style="font-size: 22px; font-weight: bold; color: #e74c3c; margin-bottom: 20px;">
+            ${product.price} грн
+        </div>
+
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
+            <h3 style="margin-top: 0; color: #34495e; font-size: 16px;">Опис товару</h3>
+            <p style="color: #5d6d7e; line-height: 1.6; font-size: 15px; margin-bottom: 0;">
+                ${product.description || 'Опис для цієї моделі поки що відсутній.'}
+            </p>
+        </div>
+
+        <button onclick="addToCart('${product._id || product.id}'); alert('👟 Товар додано в кошик!')" style="width: 100%; background: #27ae60; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2); transition: 0.2s;">
+            🛒 Додати в кошик
+        </button>
+    `;
+
+    switchPage('product');
+    
+    // Скидаємо скролл слайдера на початок при відкритті нової сторінки
+    setTimeout(() => {
+        const slider = document.querySelector('.product-gallery-slider');
+        if (slider) slider.scrollLeft = 0;
+    }, 50);
+            }
+    
+async function deleteProduct(productId) {
+    if (!confirm("⚠️ Ви впевнені, що хочете назавжди видалити цей товар з бази даних?")) return;
+
+    try {
+        // 🔑 БЕРЕМО ПРАВИЛЬНИЙ ТОКЕН:
+        const token = localStorage.getItem('sneakers_token');
+
+        const response = await fetch(`/api/products/${productId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            alert(`🔴 Не вдалося видалити. Статус сервера: ${response.status}`);
+            return;
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            alert("🗑️ " + result.message);
+            if (typeof loadProducts === 'function') loadProducts(); 
+        } else {
+            alert("Помилка видалення: " + result.error);
+        }
+    } catch (err) {
+        console.error("Помилка при видаленні товару:", err);
+        alert("Не вдалося видалити товар. Сервер недоступний.");
+    }
+}
+    
+
+    
+
+    
+        // Старт додатка
+        document.addEventListener("DOMContentLoaded", () => {
+            loadProducts();
+            loadAdminOrders(); 
+        });
+    
                      
