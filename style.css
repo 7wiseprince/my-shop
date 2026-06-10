@@ -724,4 +724,73 @@ header .search-container {
     display: none;
 }
 
+/* Робимо головну шапку гнучкою (все в один рядок) */
+header {
+    display: flex;
+    justify-content: space-between; /* Логотип зліва, пошук і кошик справа */
+    align-items: center;            /* Вирівнювання по центру по вертикалі */
+    padding: 10px 15px;
+    background-color: #1a242f;      /* Твій темний колір шапки */
+    gap: 10px;                      /* Відступи між блоками */
+}
+
+/* Напис MyShop робимо акуратним */
+.logo {
+    font-size: 18px;                /* Трохи зменшуємо, щоб не був величезним */
+    font-weight: bold;
+    color: white;
+    white-space: nowrap;            /* Щоб напис не переносився на новий рядок */
+    cursor: pointer;
+}
+
+/* Блок, де лежать пошук + кошик */
+.header-right-panel {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;                   /* Дозволяє цьому блоку займати вільний простір */
+    justify-content: flex-end;      /* Притискає вміст до правого краю */
+    max-width: 70%;                 /* Щоб пошук не налізав на логотип на смартфонах */
+}
+
+/* Твоє поле пошуку */
+#search-input {
+    width: 100%;                    /* Тепер він буде адаптивним і красивим */
+    padding: 8px 12px;
+    border-radius: 20px;            /* Округлі краї, як у сучасних додатках */
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* Кнопка кошика (оновлена) */
+.cart-header-btn {
+    position: relative;
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    padding: 6px;
+    margin-left: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;                    /* Піднімаємо кнопку вище, щоб вона точно натискалася */
+}
+
+/* Наш улюблений червоний кружечок */
+.cart-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background-color: #ff3b30;
+    color: white;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 50%;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
 
