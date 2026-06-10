@@ -631,18 +631,23 @@ async function loadAdminOrders() {
 
         // ПОШУК ТОВАРІВ
         function handleSearch() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const productCards = document.querySelectorAll('.product-card');
+    const query = document.getElementById('search-input').value.toLowerCase();
+    const productCards = document.querySelectorAll('.product-card');
 
-            productCards.forEach(card => {
-                const title = card.querySelector('.product-title').innerText.toLowerCase();
-                if (title.includes(query)) {
-                    card.style.display = 'flex'; 
-                } else {
-                    card.style.display = 'none'; 
-                }
-            });
+    productCards.forEach(card => {
+        const titleElement = card.querySelector('.product-title');
+        if (titleElement) {
+            const title = titleElement.innerText.toLowerCase();
+            // Якщо текст збігається, показуємо картку (у тебе в CSS для карток використовується block)
+            if (title.includes(query)) {
+                card.style.display = 'block'; 
+            } else {
+                card.style.display = 'none'; 
+            }
         }
+    });
+        }
+
 
       let currentAuthMode = 'login'; // Поточний режим: або 'login', або 'register'
 
