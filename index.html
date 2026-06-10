@@ -13,24 +13,19 @@
     
 </head>
 <body>
-    <header>
-        <span class="logo" id="secret-bag" onclick="toggleAdmin()" style="cursor: pointer;">🛍️</span>
-        
-        <div class="search-container">
-    <input type="text" id="search-input" placeholder="Пошук товарів..." oninput="handleSearch()">
-            <div class="header-right-panel">
-    <input type="text" placeholder="Пошук товарів..." class="search-input" />
+<header>
+    <span class="logo" id="secret-bag" onclick="toggleAdminPanel()">🛍️ MyShop</span>
 
-    <button class="cart-header-btn" onclick="openCartModal()">
-        <span class="cart-icon">🛒</span> 
+    <div class="header-right-panel">
+        <input type="text" id="search-input" placeholder="Пошук товарів..." />
         
-        <span id="cart-count-badge" class="cart-badge">0</span>
-    </button>
-            </div>
-            
-        </div>
-
-    </header>
+        <button class="cart-header-btn" onclick="openCartModal()">
+            <span class="cart-icon">🛒</span>
+            <span id="cart-count-badge" class="cart-badge">0</span>
+        </button>
+    </div>
+</header>
+    
 
     <div id="page-home" class="page active">
         <div class="hero">
