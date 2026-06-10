@@ -367,7 +367,7 @@ if (document.getElementById('main-checkout-btn') && document.getElementById('mai
 } else {
     handlePaymentMethodChange('online');
 }
-    
+   updateCartBadge(); 
     
 }
 
@@ -947,7 +947,30 @@ async function deleteProduct(productId) {
     }
 }
     
+function updateCartBadge() {
+    // 1. Дістаємо кошик із localStorage
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    
+    // 2. Рахуємо загальну кількість кросівок
+    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    
+    // 3. Знаходимо наш кружечок
+    const badge = document.getElementById('cart-count-badge');
+    if (badge) {
+        badge.innerText = totalItems;
+        
+        // Якщо кошик порожній — ховаємо кружечок
+        if (totalItems === 0) {
+            badge.style.display = 'none';
+        } else {
+            badge.style.display = 'flex';
+        }
+    }
+}
 
+// Запускаємо автоматично при завантаженні сторінки
+document.addEventListener('DOMContentLoaded', updateCartBadge);
+            
     
 
     
