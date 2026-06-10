@@ -188,7 +188,9 @@ app.delete('/api/products/:id', isAdmin, async (req, res) => {
 // Створити нове замовлення (доступно всім покупцям)
 app.post('/api/orders', async (req, res) => {
     try {
-        const { items, total, customerName, status, paymentMethod } = req.body; 
+        // 1. Твої змінні, які приходять з фронтенду
+        const { items, total, customerName, phone, status, paymentMethod } = req.body; 
+        
         const lastOrder = await Order.findOne().sort({ id: -1 });
         const orderId = lastOrder ? lastOrder.id + 1 : 1001;
 
@@ -202,12 +204,45 @@ app.post('/api/orders', async (req, res) => {
             date: new Date().toLocaleString('uk-UA')
         });
 
+        // 🔥 БЛОК ВІДПРАВКИ В DISCORD (Тепер змінні узгоджені!)
+        const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
+
+        if (discordWebhookUrl) {
+            const itemsList = items && items.length > 0 
+                ? items.map(item => `• ${item.name} (${item.quantity || 1} шт.)`).join('\n')
+                : 'Товари не вказані';
+
+            const discordMessage = {
+                content: "🚨 **НА САЙТІ НОВЕ ЗАМОВЛЕННЯ!** 🚨",
+                embeds: [{
+                    title: `📦 Замовлення №${orderId}`,
+                    color: 3066993, // Зелений колір рамки
+                    fields: [
+                        { name: "👤 Покупець", value: customerName || 'Анонімний покупець', inline: true },
+                        { name: "📞 Телефон клієнта", value: phone || "Не вказано", inline: true },
+                        { name: "💰 Сума", value: `${total || 0} грн`, inline: true },
+                        { name: "💳 Спосіб оплати", value: paymentMethod || "Не вказано", inline: false },
+                        { name: "👟 Товари", value: itemsList, inline: false }
+                    ],
+                    timestamp: new Date()
+                }]
+            };
+
+            fetch(discordWebhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(discordMessage)
+            }).catch(err => console.error("Помилка Discord:", err));
+        }
+
+        // Збереження в базу та відповідь
         await newOrder.save();
         res.json({ success: true, orderId: orderId });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }
 });
+    
 
 // Отримати всі замовлення (🔥 ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ — ніхто чужий не побачить список замовлень)
 app.get('/api/orders', isAdmin, async (req, res) => {
