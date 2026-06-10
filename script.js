@@ -1,4 +1,4 @@
-
+,
         let allProducts = [];
         let cart = [];
         let favorites = []; // Масив для зберігання улюблених товарів
@@ -282,13 +282,19 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
             updateCartUI();
         }
 
-        function toggleCart(show) {
-            // Підлаштовано під назву твого ID вікна кошика (cartModal)
-            const cartModal = document.getElementById('cartModal');
-            if (cartModal) {
-                cartModal.style.display = show ? 'flex' : 'none';
-            }
+        function toggleCart() {
+    const cartModal = document.getElementById('cartModal');
+    if (cartModal) {
+        // Якщо зараз кошик схований або взагалі немає стилю, то показуємо його (flex)
+        if (cartModal.style.display === 'none' || cartModal.style.display === '') {
+            cartModal.style.display = 'flex';
+        } else {
+            // Якщо він уже відкритий — ховаємо
+            cartModal.style.display = 'none';
         }
+    }
+        }
+
 // 1. ГОЛОВНА ФУНКЦІЯ ОНОВЛЕННЯ КОШИКА
 function updateCartUI() {
     const listContainer = document.getElementById('cart-items-container');
