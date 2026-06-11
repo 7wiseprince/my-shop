@@ -970,6 +970,13 @@ function updateCartBadge() {
         }
     }
 }
+function toggleBurgerMenu() {
+    const menu = document.getElementById('burger-menu');
+    if (menu) {
+        menu.classList.toggle('active');
+    }
+}
+
 
     
         // Старт додатка
