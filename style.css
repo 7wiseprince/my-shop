@@ -793,4 +793,69 @@ header {
     justify-content: center;
     box-shadow: 0 1px 4px rgba(0,0,0,0.4);
 }
+/* Стиль для кнопки-тризуба в шапці */
+.burger-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white; /* Зміни на колір тексту твоєї шапки, якщо він інший */
+    cursor: pointer;
+    margin-right: 12px; /* Щоб кнопка не липла до логотипу MyShop */
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
+/* Саме висувне меню */
+.side-menu {
+    position: fixed;
+    top: 0;
+    left: -260px; /* Заховане ліворуч за межами екрана */
+    width: 260px;
+    height: 100%;
+    background-color: #1a1a1a; /* Гарний темний фон */
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+    z-index: 10000; /* Перекриває абсолютно все на сторінці */
+    transition: left 0.3s ease; /* Ефект плавного висування */
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Клас-активатор, який додаватиме JS */
+.side-menu.active {
+    left: 0; /* Меню виїжджає на екран */
+}
+
+/* Хрестик для закриття всередині меню */
+.close-btn {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 32px;
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    cursor: pointer;
+}
+
+/* Навігація всередині меню */
+.side-menu-nav {
+    display: flex;
+    flex-direction: column;
+    margin-top: 60px; /* Відступ від хрестика */
+}
+
+.side-menu-nav a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 16px 0;
+    border-bottom: 1px solid #2a2a2a; /* Акуратна лінія-розділювач */
+    transition: color 0.2s;
+}
+
+.side-menu-nav a:hover {
+    color: #00bcd4; /* Колір при наведенні (можеш змінити під свій стиль) */
+}
+
 
