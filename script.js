@@ -44,38 +44,7 @@
         return;
     }
 
-    products.forEach(product => {
-        // Отримуємо правильний ID з бази даних (підтримуємо MongoDB _id та звичайний id)
-        const prodId = product._id || product.id;
-
-        // Перевіряємо, чи цей товар уже є в обраному, щоб правильно зафарбувати сердечко
-        const isFavorite = favorites.some(item => (item._id === prodId || item.id === prodId || item.id == prodId));
-        const heartIcon = isFavorite ? '❤️' : '🤍';
-
-        // Формуємо картку з твоєю детальною логікою
-        container.innerHTML += `
-            <div class="product-card" style="position: relative;">
-                <button class="btn-favorite" onclick="event.stopPropagation(); toggleFavorite('${prodId}')">${heartIcon}</button>
-                
-                <div onclick="openProductPage('${prodId}')" style="cursor: pointer;">
-                    <img class="product-image" src="${(product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/150')}" alt="${product.name}">
-    
-                    <div class="product-title">${product.name}</div>
-                    <div class="product-desc">${product.description || ''}</div>
-                </div>
-
-                <div class="product-price">${product.price} грн</div>
-                
-                <button class="btn-add-to-cart" onclick="event.stopPropagation(); addToCart('${prodId}')">Додати в кошик</button>
-
-                <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${product.id || prodId}')" style="display: none; width: 100%; background: #e74c3c; color: white; border: none; padding: 8px; margin-top: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
-                    🗑️ Видалити товар (Адмін)
-                </button>
-            </div>
-        `;
-    });
-
-    // 🕵️‍♂️ ОНОВЛЕНА ПЕРЕВІРКА НА АДМІНА (шукає всюди: і в пам'яті, і в локальному сховищі браузера)
+    // 🕵️‍♂️ ПЕРЕВІРКА НА АДМІНА (робимо ОДИН раз на самому початку)
     const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
     let isUserAdmin = false;
 
@@ -92,14 +61,42 @@
         }
     }
 
-    // Якщо перевірка підтвердила, що ти адмін — вмикаємо червоні кнопки видалення!
-    if (isUserAdmin) {
-        container.querySelectorAll('.btn-delete-admin').forEach(btn => {
-            btn.style.display = 'block';
-        });
-    }
-    }
+    products.forEach(product => {
+        const prodId = product._id || product.id;
+        const isFavorite = favorites.some(item => (item._id === prodId || item.id === prodId || item.id == prodId));
+        const heartIcon = isFavorite ? '❤️' : '🤍';
+
+        // Шаблон кнопки видалення: якщо адмін — створюємо її код, якщо ні — залишаємо порожній рядок
+        let adminDeleteButtonHTML = '';
+        if (isUserAdmin) {
+            adminDeleteButtonHTML = `
+                <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${product.id || prodId}')" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 8px; margin-top: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
+                    🗑️ Видалити товар (Адмін)
+                </button>
+            `;
+        }
+
+        container.innerHTML += `
+            <div class="product-card" style="position: relative;">
+                <button class="btn-favorite" onclick="event.stopPropagation(); toggleFavorite('${prodId}')">${heartIcon}</button>
+                
+                <div onclick="openProductPage('${prodId}')" style="cursor: pointer;">
+                    <img class="product-image" src="${(product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/150')}" alt="${product.name}">
     
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-desc">${product.description || ''}</div>
+                </div>
+
+                <div class="product-price">${product.price} грн</div>
+                
+                <button class="btn-add-to-cart" onclick="event.stopPropagation(); addToCart('${prodId}')">Додати в кошик</button>
+
+                ${adminDeleteButtonHTML}
+            </div>
+        `;
+    });
+        }
+
     
     
 
