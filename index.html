@@ -14,24 +14,17 @@
 </head>
 <body>
 <header>
-
-        <div class="header-left-panel" style="display: flex; align-items: center;">
-        
+    <div class="header-left-panel" style="display: flex; align-items: center;">
         <button id="burger-menu-btn" class="burger-btn" onclick="toggleBurgerMenu()">☰</button>
-    
-    <span class="logo" id="secret-bag" onclick="toggleAdmin()">🛍️ MyShop</span>
-    
-
-        <div class="header-right-panel">
-    <input type="text" id="search-input" placeholder="Пошук товарів..." oninput="handleSearch()" />
-        </div>
+        <span class="logo" id="secret-bag" onclick="toggleAdmin()">🛍️ MyShop</span>
+    </div> <div class="header-right-panel" style="display: flex; align-items: center; gap: 10px;">
+        <input type="text" id="search-input" placeholder="Пошук товарів..." oninput="handleSearch()" />
         
         <button class="cart-header-btn" onclick="toggleCart(true)">
-    <span class="cart-icon">🛒</span>
-    <span id="cart-count-badge" class="cart-badge">0</span>
+            <span class="cart-icon">🛒</span>
+            <span id="cart-count-badge" class="cart-badge">0</span>
         </button>
-        
-    </div>
+    </div> 
 </header>
     
     <div id="burger-menu" class="side-menu">
