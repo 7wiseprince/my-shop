@@ -14,7 +14,12 @@
 </head>
 <body>
 <header>
-<span class="logo" id="secret-bag" onclick="toggleAdmin()">🛍️ MyShop</span>
+
+        <div class="header-left-panel" style="display: flex; align-items: center;">
+        
+        <button id="burger-menu-btn" class="burger-btn" onclick="toggleBurgerMenu()">☰</button>
+    
+    <span class="logo" id="secret-bag" onclick="toggleAdmin()">🛍️ MyShop</span>
     
 
         <div class="header-right-panel">
@@ -29,7 +34,15 @@
     </div>
 </header>
     
-    
+    <div id="burger-menu" class="side-menu">
+    <button class="close-btn" onclick="toggleBurgerMenu()">×</button>
+    <nav class="side-menu-nav">
+        <a href="#about">ℹ️ Про нас</a>
+        <a href="#delivery">📦 Доставка та оплата</a>
+        <a href="#contacts">📞 Контакти</a>
+        <a href="#instagram" target="_blank">📸 Наш Instagram</a>
+    </nav>
+    </div>
 
     <div id="page-home" class="page active">
         <div class="hero">
