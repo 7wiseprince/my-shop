@@ -827,7 +827,7 @@ header {
     backdrop-filter: blur(15px); /* Трішки посилили розмиття для гарного ефекту */
     -webkit-backdrop-filter: blur(15px); 
     
-    box-shadow: 5px 0 25px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
     z-index: 10000;
     transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1); 
     padding: 30px 24px;
