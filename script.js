@@ -262,33 +262,13 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
 
 function updateCabinetFavoritesUI() {
     const cabinetList = document.getElementById('cabinet-favorites-list');
-    if (!cabinetList) return; 
+    if (!cabinetList) return; // Якщо такого контейнера немає в HTML, зупиняємо роботу
 
-    cabinetList.innerHTML = ''; 
-
-    if (favorites.length === 0) {
-        // Прибираємо клас сітки, якщо товарів немає, щоб текст був по центру
-        cabinetList.className = ''; 
-        cabinetList.innerHTML = '<p class="no-items">У тебе поки немає збережених товарів.</p>';
-        return;
-    }
-
-    // 4. ОБОК'ЯЗКОВО перетворюємо контейнер у кабінеті на нашу двійкову сітку!
-    cabinetList.className = 'products-grid';
-
-    // Пробігаємося по кожному улюбленому товару
-    favorites.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name}">
-            <h4>${product.name}</h4>
-            <p class="price">${product.price} грн</p>
-            <button onclick="addToCart(${product.id})" class="btn-buy">Додати в кошик</button>
-        `;
-        cabinetList.appendChild(productCard);
-    });
+    // Замість старого довгого циклу з купою тексту просто викликаємо наш готовий рендер!
+    // Він сам додасть сітку, сам намалює красиві картки, кнопки і сердечка.
+    renderProducts(favorites, 'cabinet-favorites-list');
 }
+
 
      
     // Функції кошика
