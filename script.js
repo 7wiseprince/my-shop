@@ -40,6 +40,8 @@ async function loadProducts() {
     }
 }
 
+    // ==================== ОНОВЛЕНА СИСТЕМА ПОПУЛЯРНИХ ТОВАРІВ (БАЗА ДАНИХ) ====================
+
 function renderProducts(products, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -72,12 +74,13 @@ function renderProducts(products, containerId) {
     }
 
     products.forEach(product => {
-        const prodId = product._id || product.id;
-        const isFavorite = favorites.some(item => (item._id === prodId || item.id === prodId || item.id == prodId));
+        // Оскільки на бекенді ми шукаємо за цифровим id:
+        const prodId = product.id; 
+        const isFavorite = favorites.some(item => (item.id == prodId || item._id == product._id));
         const heartIcon = isFavorite ? '❤️' : '🤍';
 
-        const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
-        const isFeatured = featuredIds.includes(prodId);
+        // 🔥 ТЕПЕР БЕРЕМО СТАТУС ПРЯМО З БАЗИ ДАНИХ СЕРВЕРА
+        const isFeatured = product.isFeatured || false;
         const starIcon = isFeatured ? '⭐ У топі' : '☆ Зробити популярним';
 
         let adminButtonsHTML = '';
@@ -87,7 +90,7 @@ function renderProducts(products, containerId) {
                     <button class="btn-toggle-featured" onclick="event.stopPropagation(); toggleFeatured('${prodId}')" style="width: 100%; background: #f1c40f; color: #2c3e50; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(241, 196, 15, 0.2);">
                         ${starIcon}
                     </button>
-                    <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${product.id || prodId}')" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
+                    <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${prodId}')" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
                         🗑️ Видалити товар (Адмін)
                     </button>
                 </div>
@@ -113,26 +116,80 @@ function renderProducts(products, containerId) {
     });
 }
 
-function updateFeaturedProductsUI() {
-    const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]').map(String);
-    
-    // Фільтруємо товари, приводячи всі ID до рядка
-    const featuredProducts = allProducts.filter(product => {
-        const prodId = String(product._id || product.id);
-        return featuredIds.includes(prodId);
-    });
+// 🔥 НАДСИЛАЄМО ЗМІНИ НА СЕРВЕР З ТОКЕНОМ АДМІНА
+async function toggleFeatured(productId) {
+    try {
+        // Беремо токен адміна, який зберігся при вході (перевіряємо обидва ключі про всяк випадок)
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
 
-    // Якщо адмін нічого не вибрав — показуємо перші 2 товари
+        if (!token) {
+            alert("Помилка авторизації! Увійдіть в акаунт адміна знову.");
+            return;
+        }
+
+        // Робимо POST-запит на наш новий серверний маршрут
+        const response = await fetch(`/api/products/toggle-featured/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // 🔥 Передаємо щит безпеки для бекенду
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || 'Не вдалося оновити статус на сервері');
+        }
+
+        // Оновлюємо статус цього товару в нашому локальному масиві allProducts в пам'яті фронтенду
+        allProducts = allProducts.map(p => {
+            if (p.id == productId) {
+                return { ...p, isFeatured: data.product.isFeatured };
+            }
+            return p;
+        });
+
+        // 🔥 Перемальовуємо головну сторінку та каталог на льоту!
+        updateFeaturedProductsUI();
+        
+        const activeFilterBtn = document.querySelector('.filter-btn.active');
+        if (activeFilterBtn) {
+            // Симулюємо клік по активній категорії, щоб вона перерендерилась із сортуванням
+            const categoryText = activeFilterBtn.innerText.trim();
+            // Якщо у тебе логіка filterProducts зав'язана на кастомні назви категорій:
+            if (categoryText.includes("Взуття")) filterProducts('shoes', activeFilterBtn);
+            else if (categoryText.includes("Одяг")) filterProducts('clothes', activeFilterBtn);
+            else if (categoryText.includes("Аксесуари")) filterProducts('accessories', activeFilterBtn);
+            else filterProducts('all', activeFilterBtn);
+        } else {
+            const sortedProducts = getSortedProductsForCatalog(allProducts);
+            renderProducts(sortedProducts, 'catalog-products');
+        }
+
+    } catch (error) {
+        console.error("Помилка перемикання популярності:", error);
+        alert(error.message || "Не вдалося зберегти зміни на сервері.");
+    }
+}
+
+// 🔥 ОНОВЛЕННЯ ГОЛОВНОЇ СТОРІНКИ ДЛЯ ВСІХ КОРИСТУВАЧІВ ТА ІНКОГНІТО
+function updateFeaturedProductsUI() {
+    if (!allProducts || allProducts.length === 0) return;
+
+    // Фільтруємо товари, які бекенд позначив як isFeatured === true
+    const featuredProducts = allProducts.filter(product => product.isFeatured === true);
+
     if (featuredProducts.length === 0) {
+        // Якщо адмін ще нічого не вибрав, показуємо перші 2 як запасні
         renderProducts(allProducts.slice(0, 2), 'featured-products');
     } else {
-        // Якщо вибрав — виводимо суто їх!
+        // Якщо в базі є популярні товари — вони летять на головну абсолютно ВСІМ
         renderProducts(featuredProducts, 'featured-products');
     }
-            }
-        
+}
 
-// Фільтрація товарів за категоріями + АВТО-СОРТУВАННЯ В ТОП 🔝
+// ФІЛЬТРАЦІЯ З СОРТУВАННЯМ ПОПУЛЯРНИХ ВГОРУ
 function filterProducts(category, button) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
@@ -142,25 +199,20 @@ function filterProducts(category, button) {
         filtered = allProducts.filter(p => p.category === category);
     }
     
-    // Пропускаємо товари через сортувалку, щоб зірочки завжди були вгорі!
+    // Сортуємо відфільтровані товари, щоб зірочки були на самому верху категорії
     const sortedAndFiltered = getSortedProductsForCatalog(filtered);
     renderProducts(sortedAndFiltered, 'catalog-products');
 }
 
+// СОРТУВАЛКА ДЛЯ КАТАЛОГУ
 function getSortedProductsForCatalog(productsList) {
-    const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
-
     return [...productsList].sort((a, b) => {
-        const aId = a._id || a.id;
-        const bId = b._id || b.id;
-        
-        const aFeatured = featuredIds.includes(aId) ? 1 : 0;
-        const bFeatured = featuredIds.includes(bId) ? 1 : 0;
-
-        return bFeatured - aFeatured; 
+        const aFeatured = a.isFeatured ? 1 : 0;
+        const bFeatured = b.isFeatured ? 1 : 0;
+        return bFeatured - aFeatured; // Товари із зірочкою (1) завжди йдуть першими
     });
-                                }
-                                                                                                        
+                }
+                
 
         // Додавання товару з адмінки
         // 📸 Створюємо тимчасовий масив, куди будемо зберігати посилання на завантажені фото
