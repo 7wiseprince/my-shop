@@ -22,24 +22,25 @@ mongoose.connect(process.env.MONGO_URI)
 
 // ==================== СХЕМИ ДАНИХ (MODELS) ====================
 
-// СХЕМА ТОВАРУ
+// СХЕМА ТОВАРУ (🔥 ОНОВЛЕНО: Додано поле isFeatured)
 const productSchema = new mongoose.Schema({
     id: Number,
     name: String,
     price: Number,
     category: String,
     images: [String],
-    description: String
+    description: String,
+    isFeatured: { type: Boolean, default: false } // 🔥 true — відображається на головній та в топі категорії
 });
 const Product = mongoose.model('Product', productSchema);
 
-// СХЕМА КОРИСТУВАЧА (🔥 ОНОВЛЕНО: Додано поле role)
+// СХЕМА КОРИСТУВАЧА
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     favorites: { type: Array, default: [] },
-    role: { type: String, default: 'user' } // 🔥 'user' або 'admin'
+    role: { type: String, default: 'user' } // 'user' або 'admin'
 });
 const User = mongoose.model('User', userSchema);
 
@@ -80,7 +81,7 @@ const isAdmin = (req, res, next) => {
 
             req.userId = decoded.id;
             req.userRole = decoded.role;
-            next(); // Пропускаємо запит далі, бо це справжній адмін!
+            next(); // Пропускаємо запит далі, бо це справжній admin!
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -93,9 +94,9 @@ async function seedDatabase() {
     const count = await Product.countDocuments();
     if (count === 0) {
         const defaultProducts = [
-            { id: 1, name: "Спортивні кросівки", price: 300, category: "shoes", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500", description: "Легкі професійні кросівки для бігу." },
-            { id: 2, name: "Стильна футболка", price: 150, category: "clothes", image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500", description: "100% натуральна бавовна." },
-            { id: 3, name: "Спортивна кепка", price: 100, category: "accessories", image: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500", description: "Стильний захист від сонця." }
+            { id: 1, name: "Спортивні кросівки", price: 300, category: "shoes", images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"], description: "Легкі професійні кросівки для бігу.", isFeatured: false },
+            { id: 2, name: "Стильна футболка", price: 150, category: "clothes", images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500"], description: "100% натуральна бавовна.", isFeatured: false },
+            { id: 3, name: "Спортивна кепка", price: 100, category: "accessories", images: ["https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500"], description: "Стильний захист від сонця.", isFeatured: false }
         ];
         await Product.insertMany(defaultProducts);
         console.log("Базові товари успішно завантажені в хмару!");
@@ -110,8 +111,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// 🔥 СТОРІНКА КОНКРЕТНОГО ТОВАРУ (Динамічний роут)
-// Коли людина перейде на сайт.com/product/1 — їй віддасться файл product.html
+// СТОРІНКА КОНКРЕТНОГО ТОВАРУ (Динамічний роут)
 app.get('/product/:id', (req, res) => {
     res.sendFile(path.join(__dirname, 'product.html'));
 });
@@ -129,7 +129,7 @@ app.get('/api/products', async (req, res) => {
     }
 });
 
-// 🔥 Отримати ОДИН товар за його цифровим ID (для сторінки товару)
+// Отримати ОДИН товар за його цифровим ID
 app.get('/api/products/:id', async (req, res) => {
     try {
         const productId = Number(req.params.id);
@@ -144,16 +144,33 @@ app.get('/api/products/:id', async (req, res) => {
     }
 });
 
-// 🔥 Додати товар (ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ)
+// 🔥 НОВИЙ МАРШРУТ: Перемикання статусу популярності товару (ЗАХИЩЕНО ДЛЯ АДМІНІВ)
+app.post('/api/products/toggle-featured/:id', isAdmin, async (req, res) => {
+    try {
+        const productId = Number(req.params.id);
+        const product = await Product.findOne({ id: productId });
+        
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Товар не знайдено' });
+        }
+        
+        // Змінюємо прапорець на протилежний
+        product.isFeatured = !product.isFeatured;
+        await product.save();
+        
+        res.json({ success: true, message: "Статус популярності оновлено в базі!", product });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Додати товар (ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.post('/api/products', isAdmin, async (req, res) => {
     try {
-        // 📸 Замість image витягуємо images з req.body
         const { name, price, category, images, description } = req.body;
         const lastProduct = await Product.findOne().sort({ id: -1 });
         const newId = lastProduct ? lastProduct.id + 1 : 1;
 
-        // Перевіряємо, чи нам прийшов масив і чи він не порожній. 
-        // Якщо порожній — ставимо стандартну картинку всередину масиву.
         const finalImages = (Array.isArray(images) && images.length > 0) 
             ? images 
             : ["https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500"];
@@ -163,8 +180,9 @@ app.post('/api/products', isAdmin, async (req, res) => {
             name,
             price: Number(price),
             category,
-            images: finalImages, // 📸 Зберігаємо масив посилань у базу даних
-            description
+            images: finalImages,
+            description,
+            isFeatured: false // Нові товари спочатку йдуть як звичайні
         });
 
         await newProduct.save();
@@ -174,7 +192,7 @@ app.post('/api/products', isAdmin, async (req, res) => {
     }
 });
             
-// 🔥 Видалити товар (ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ)
+// Видалити товар (ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.delete('/api/products/:id', isAdmin, async (req, res) => {
     try {
         const productId = Number(req.params.id);
@@ -185,10 +203,9 @@ app.delete('/api/products/:id', isAdmin, async (req, res) => {
     }
 });
 
-// Створити нове замовлення (доступно всім покупцям)
+// Створити нове замовлення
 app.post('/api/orders', async (req, res) => {
     try {
-        // 1. Твої змінні, які приходять з фронтенду
         const { items, total, customerName, phone, status, paymentMethod } = req.body; 
         
         const lastOrder = await Order.findOne().sort({ id: -1 });
@@ -204,7 +221,6 @@ app.post('/api/orders', async (req, res) => {
             date: new Date().toLocaleString('uk-UA')
         });
 
-        // 🔥 БЛОК ВІДПРАВКИ В DISCORD (Тепер змінні узгоджені!)
         const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
 
         if (discordWebhookUrl) {
@@ -216,7 +232,7 @@ app.post('/api/orders', async (req, res) => {
                 content: "🚨 **НА САЙТІ НОВЕ ЗАМОВЛЕННЯ!** 🚨",
                 embeds: [{
                     title: `📦 Замовлення №${orderId}`,
-                    color: 3066993, // Зелений колір рамки
+                    color: 3066993,
                     fields: [
                         { name: "👤 Покупець", value: customerName || 'Анонімний покупець', inline: true },
                         { name: "📞 Телефон клієнта", value: phone || "Не вказано", inline: true },
@@ -235,7 +251,6 @@ app.post('/api/orders', async (req, res) => {
             }).catch(err => console.error("Помилка Discord:", err));
         }
 
-        // Збереження в базу та відповідь
         await newOrder.save();
         res.json({ success: true, orderId: orderId });
     } catch (err) {
@@ -243,8 +258,7 @@ app.post('/api/orders', async (req, res) => {
     }
 });
     
-
-// Отримати всі замовлення (🔥 ТЕПЕР ЗАХИЩЕНО ДЛЯ АДМІНІВ — ніхто чужий не побачить список замовлень)
+// Отримати всі замовлення (ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.get('/api/orders', isAdmin, async (req, res) => {
     try {
         const orders = await Order.find({}).sort({ id: -1 });
@@ -273,12 +287,11 @@ app.post('/api/register', async (req, res) => {
             email,
             password: hashedPassword,
             favorites: [],
-            role: 'user' // Нові користувачі завжди реєструються як звичайні юзери
+            role: 'user'
         });
 
         await newUser.save();
 
-        // 🔥 Гарантуємо наявність ролі при створенні токена
         const userRole = newUser.role || 'user';
 
         const token = jwt.sign(
@@ -313,10 +326,8 @@ app.post('/api/login', async (req, res) => {
             return res.status(400).json({ success: false, message: 'Неправильний Email або пароль!' });
         }
 
-        // 🔥 ПЕРЕВІРКА: беремо роль з бази, якщо її немає (або раптом записано через isAdmin) — підстраховуємось
         const userRole = (user.role === 'admin' || user.isAdmin === true) ? 'admin' : (user.role || 'user');
 
-        // Зашифровуємо точну роль у токен
         const token = jwt.sign(
             { id: user._id, role: userRole }, 
             process.env.JWT_SECRET, 
@@ -365,7 +376,6 @@ app.get('/api/me', async (req, res) => {
                 return res.status(404).json({ success: false, message: 'Користувача не знайдено' });
             }
 
-            // 🔥 Тут також віддаємо підстраховану роль користувача
             const userRole = (user.role === 'admin' || user.isAdmin === true) ? 'admin' : (user.role || 'user');
 
             res.json({
@@ -377,9 +387,8 @@ app.get('/api/me', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
-             
-
 
 app.listen(PORT, () => {
     console.log(`Сервер успішно запущений на порту ${PORT} 🚀`);
 });
+            
