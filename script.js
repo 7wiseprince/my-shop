@@ -1078,39 +1078,73 @@ function toggleBurgerMenu() {
 
 async function toggleFeatured(productId) {
     try {
-        // Шлемо запит на сервер, щоб змінити статус у базі даних
+        // 🔥 ПЕРЕВІРКА ВСІХ МОЖЛИВИХ КЛЮЧІВ ТОКЕНА
+        const token = localStorage.getItem('token') || 
+                      localStorage.getItem('adminToken') || 
+                      localStorage.getItem('jwt');
+
+        // Додатково перевіримо, чи є токен всередині збереженого об'єкта користувача
+        let userToken = null;
+        const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
+        if (userJson) {
+            try {
+                const parsedUser = JSON.parse(userJson);
+                userToken = parsedUser.token; // Іноді токен ховається всередині об'єкта user
+            } catch(e) {}
+        }
+
+        // Фінальний токен, який ми знайшли
+        const finalToken = token || userToken;
+
+        if (!finalToken) {
+            console.error("Авторизація відхилена: Токен відсутній у localStorage");
+            alert("Помилка авторизації! Будь ласка, вийдіть з акаунта і зайдіть як адмін знову.");
+            return;
+        }
+
+        // Шлемо запит на сервер
         const response = await fetch(`/api/products/toggle-featured/${productId}`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${finalToken}` // Передаємо знайдений токен
             }
         });
 
-        if (!response.ok) throw new Error('Не вдалося оновити статус на сервері');
-        
-        const updatedProduct = await response.json();
+        const data = await response.json();
 
-        // Оновлюємо статус товару в нашому локальному масиві allProducts в пам'яті
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || `Сервер повернув помилку: ${response.status}`);
+        }
+
+        console.log("Статус успішно оновлено в базі даних!", data.product);
+
+        // Оновлюємо статус у локальному масиві на фронтенді
         allProducts = allProducts.map(p => {
-            const pId = p._id || p.id;
-            return pId === productId ? updatedProduct : p;
+            if (p.id == productId) {
+                return { ...p, isFeatured: data.product.isFeatured };
+            }
+            return p;
         });
 
-        // 🔥 МИТТЄВО ОНОВЛЮЄМО ІНТЕРФЕЙС ДЛЯ АДМІНА:
-        updateFeaturedProductsUI(); // Оновлюємо головну сторінку
+        // Миттєво перемальовуємо сторінку
+        updateFeaturedProductsUI();
         
-        // Перемальовуємо каталог, щоб зірочка змінила колір і товар перемістився
         const activeFilterBtn = document.querySelector('.filter-btn.active');
         if (activeFilterBtn) {
-            activeFilterBtn.click(); // якщо вибрано категорію, симулюємо клік
+            const categoryText = activeFilterBtn.innerText.trim();
+            if (categoryText.includes("Взуття")) filterProducts('shoes', activeFilterBtn);
+            else if (categoryText.includes("Одяг")) filterProducts('clothes', activeFilterBtn);
+            else if (categoryText.includes("Аксесуари")) filterProducts('accessories', activeFilterBtn);
+            else filterProducts('all', activeFilterBtn);
         } else {
             const sortedProducts = getSortedProductsForCatalog(allProducts);
             renderProducts(sortedProducts, 'catalog-products');
         }
 
     } catch (error) {
-        console.error("Помилка перемикання популярності:", error);
-        alert("Не вдалося зберегти зміни. Спробуйте ще раз.");
+        console.error("Детальна помилка toggleFeatured:", error);
+        alert(error.message || "Не вдалося зберегти зміни. Спробуйте ще раз.");
     }
 }
 
