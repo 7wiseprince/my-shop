@@ -22,18 +22,25 @@
         }
 
         // Завантаження товарів із сервера
-        async function loadProducts() {
-            try {
-                const response = await fetch('/api/products');
-                allProducts = await response.json();
-                renderProducts(allProducts, 'catalog-products');
-                renderProducts(allProducts.slice(0, 2), 'featured-products');
-            } catch (error) {
-                console.error("Помилка завантаження товарів:", error);
-            }
-        }
+// Завантаження товарів із сервера
+async function loadProducts() {
+    try {
+        const response = await fetch('/api/products');
+        allProducts = await response.json();
+        
+        // ЧЕТКО: Сортуємо глобальний масив і виводимо в каталог
+        const sortedProducts = getSortedProductsForCatalog(allProducts);
+        renderProducts(sortedProducts, 'catalog-products');
+        
+        // ОБОВ'ЯЗКОВО: Оновлюємо популярні товари на головній сторінці при завантаженні
+        updateFeaturedProductsUI();
+            
+    } catch (error) {
+        console.error("Помилка завантаження товарів:", error);
+    }
+}
 
-   function renderProducts(products, containerId) {
+function renderProducts(products, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
@@ -47,7 +54,7 @@
     // 📱 ВМИКАЄМО НАШУ УНІВЕРСАЛЬНУ ДВІЙКОВУ СІТКУ!
     container.className = 'products-grid';
 
-    // 🕵️‍♂️ ПЕРЕВІРКА НА АДМІНА (робимо ОДИН раз на самому початку)
+    // 🕵️‍♂️ ПЕРЕВІРКА НА АДМІНА
     const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
     let isUserAdmin = false;
 
@@ -69,13 +76,21 @@
         const isFavorite = favorites.some(item => (item._id === prodId || item.id === prodId || item.id == prodId));
         const heartIcon = isFavorite ? '❤️' : '🤍';
 
-        // Шаблон кнопки видалення: якщо адмін — створюємо її код, якщо ні — залишаємо порожній рядок
-        let adminDeleteButtonHTML = '';
+        const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
+        const isFeatured = featuredIds.includes(prodId);
+        const starIcon = isFeatured ? '⭐ У топі' : '☆ Зробити популярним';
+
+        let adminButtonsHTML = '';
         if (isUserAdmin) {
-            adminDeleteButtonHTML = `
-                <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${product.id || prodId}')" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 8px; margin-top: 8px; border-radius: 5px; cursor: pointer; font-size: 12px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
-                    🗑️ Видалити товар (Адмін)
-                </button>
+            adminButtonsHTML = `
+                <div class="admin-controls-panel" style="margin-top: 8px; display: flex; flex-direction: column; gap: 5px;">
+                    <button class="btn-toggle-featured" onclick="event.stopPropagation(); toggleFeatured('${prodId}')" style="width: 100%; background: #f1c40f; color: #2c3e50; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(241, 196, 15, 0.2);">
+                        ${starIcon}
+                    </button>
+                    <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${product.id || prodId}')" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
+                        🗑️ Видалити товар (Адмін)
+                    </button>
+                </div>
             `;
         }
 
@@ -85,34 +100,63 @@
                 
                 <div onclick="openProductPage('${prodId}')" style="cursor: pointer;">
                     <img class="product-image" src="${(product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/150')}" alt="${product.name}">
-    
                     <div class="product-title">${product.name}</div>
                     <div class="product-desc">${product.description || ''}</div>
                 </div>
 
                 <div class="product-price">${product.price} грн</div>
-                
                 <button class="btn-add-to-cart" onclick="event.stopPropagation(); addToCart('${prodId}')">Додати в кошик</button>
 
-                ${adminDeleteButtonHTML}
+                ${adminButtonsHTML}
             </div>
         `;
     });
-   }
+}
 
+function updateFeaturedProductsUI() {
+    const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
     
+    const featuredProducts = allProducts.filter(product => {
+        const prodId = product._id || product.id;
+        return featuredIds.includes(prodId);
+    });
 
-        // Фільтрація товарів за категоріями
-        function filterProducts(category, button) {
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-            if (category === 'all') {
-                renderProducts(allProducts, 'catalog-products');
-            } else {
-                const filtered = allProducts.filter(p => p.category === category);
-                renderProducts(filtered, 'catalog-products');
-            }
-        }
+    if (featuredProducts.length === 0) {
+        renderProducts(allProducts.slice(0, 2), 'featured-products');
+    } else {
+        renderProducts(featuredProducts, 'featured-products');
+    }
+}
+
+// Фільтрація товарів за категоріями + АВТО-СОРТУВАННЯ В ТОП 🔝
+function filterProducts(category, button) {
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    button.classList.add('active');
+    
+    let filtered = allProducts;
+    if (category !== 'all') {
+        filtered = allProducts.filter(p => p.category === category);
+    }
+    
+    // Пропускаємо товари через сортувалку, щоб зірочки завжди були вгорі!
+    const sortedAndFiltered = getSortedProductsForCatalog(filtered);
+    renderProducts(sortedAndFiltered, 'catalog-products');
+}
+
+function getSortedProductsForCatalog(productsList) {
+    const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
+
+    return [...productsList].sort((a, b) => {
+        const aId = a._id || a.id;
+        const bId = b._id || b.id;
+        
+        const aFeatured = featuredIds.includes(aId) ? 1 : 0;
+        const bFeatured = featuredIds.includes(bId) ? 1 : 0;
+
+        return bFeatured - aFeatured; 
+    });
+                                }
+                                                                                                        
 
         // Додавання товару з адмінки
         // 📸 Створюємо тимчасовий масив, куди будемо зберігати посилання на завантажені фото
@@ -973,6 +1017,30 @@ function toggleBurgerMenu() {
     const menu = document.getElementById('burger-menu');
     if (menu) {
         menu.classList.toggle('active');
+    }
+}
+
+function toggleFeatured(productId) {
+    let featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
+    
+    if (featuredIds.includes(productId)) {
+        // Якщо товар вже був популярним — прибираємо його
+        featuredIds = featuredIds.filter(id => id !== productId);
+    } else {
+        // Якщо не був — додаємо в масив популярних
+        featuredIds.push(productId);
+    }
+    
+    // Зберігаємо оновлений список у сховище
+    localStorage.setItem('featuredProductIds', JSON.stringify(featuredIds));
+    
+    // Перерендерюємо сторінки, щоб зміни миттєво відобразилися
+    if (typeof updateFavoritesUI === 'function') {
+        updateFavoritesUI();
+    } else {
+        // Якщо функції відрізняються, просто онови поточні сторінки:
+        renderProducts(allProducts, 'catalog-products');
+        updateFeaturedProductsUI();
     }
 }
 
