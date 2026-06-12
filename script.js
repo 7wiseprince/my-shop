@@ -173,21 +173,34 @@ async function toggleFeatured(productId) {
     }
 }
 
-// 🔥 ОНОВЛЕННЯ ГОЛОВНОЇ СТОРІНКИ ДЛЯ ВСІХ КОРИСТУВАЧІВ ТА ІНКОГНІТО
+// ОНОВЛЕНА ЛОГІКА: БЕЗ ЗАПАСНИХ ТОВАРІВ, ЯКЩО ТОП ПОРОЖНІЙ
 function updateFeaturedProductsUI() {
-    if (!allProducts || allProducts.length === 0) return;
+    const featuredContainer = document.getElementById('featured-products');
+    if (!featuredContainer) return;
 
-    // Фільтруємо товари, які бекенд позначив як isFeatured === true
+    if (!allProducts || allProducts.length === 0) {
+        featuredContainer.innerHTML = '<p class="empty-message">Товарів не знайдено</p>';
+        return;
+    }
+
+    // Фільтруємо ТІЛЬКИ ті товари, які адмін дійсно позначив зірочкою в базі
     const featuredProducts = allProducts.filter(product => product.isFeatured === true);
 
     if (featuredProducts.length === 0) {
-        // Якщо адмін ще нічого не вибрав, показуємо перші 2 як запасні
-        renderProducts(allProducts.slice(0, 2), 'featured-products');
+        // Якщо адмін зняв зірочки з усіх товарів — красиво повідомляємо, а не підсовуємо рандомні
+        featuredContainer.className = ''; // Прибираємо сітку для центрування тексту
+        featuredContainer.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #7f8c8d; font-style: italic;">
+                ✨ Список популярних товарів зараз оновлюється адміністратором...
+            </div>
+        `;
     } else {
-        // Якщо в базі є популярні товари — вони летять на головну абсолютно ВСІМ
+        // Якщо в базі є товари із зірочкою — вмикаємо сітку і рендеримо їх
+        featuredContainer.className = 'products-grid';
         renderProducts(featuredProducts, 'featured-products');
     }
 }
+
 
 // ФІЛЬТРАЦІЯ З СОРТУВАННЯМ ПОПУЛЯРНИХ ВГОРУ
 function filterProducts(category, button) {
