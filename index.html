@@ -29,20 +29,33 @@
 
 
         
-<div id="burger-menu" class="side-menu">
-    <button class="close-btn" onclick="toggleBurgerMenu()">×</button>
-    
-    <div style="font-size: 20px; font-weight: bold; color: #333333; margin-bottom: 20px; margin-left: 10px; display: flex; align-items: center; gap: 8px;">
-        🛍️ <span>Навігація</span>
+<div id="page-home" class="page active">
+    <div class="promo-banner">
+        <div class="promo-content">
+            <span class="promo-badge">АКЦІЯ 🔥</span>
+            <h2>ГАРЯЧИЙ РОЗПРОДАЖ!</h2>
+            <p>Знижки до <strong>-50%</strong> на весь асортимент взуття та одягу!</p>
+        </div>
+        <button onclick="switchPage('catalog')" class="btn-promo">Перейти ➔</button>
     </div>
 
-    <nav class="side-menu-nav">
-        <a href="#about">ℹ️ &nbsp; Про нас</a>
-        <a href="#delivery">📦 &nbsp; Доставка та оплата</a>
-        <a href="#contacts">📞 &nbsp; Контакти</a>
-        <a href="#instagram" target="_blank">📸 &nbsp; Наш Instagram</a>
-    </nav>
+    <h3 class="section-title">Популярні категорії</h3>
+    <div class="categories-scroll">
+        <div class="category-card" onclick="filterByCategory('Взуття')" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400');">
+            <span>Взуття</span>
+        </div>
+        <div class="category-card" onclick="filterByCategory('Одяг')" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400');">
+            <span>Одяг</span>
+        </div>
+        <div class="category-card" onclick="filterByCategory('Аксесуари')" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400');">
+            <span>Аксесуари</span>
+        </div>
+    </div>
+
+    <h3 class="section-title">Популярні товари</h3>
+    <div class="products-grid" id="featured-products"></div>
 </div>
+    
     
 
 
