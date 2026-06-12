@@ -879,4 +879,36 @@ header {
     color: #007bff; /* Колір посилання при натисканні (можеш змінити під свій) */
     padding-left: 20px;
         }
-    
+    /* УНІВЕРСАЛЬНА СІТКА ДЛЯ ТОВАРІВ */
+.products-grid {
+    display: grid;
+    /* На телефонах: рівно 2 стовпчики (1fr 1fr). На великих екранах автоматично додасться більше */
+    grid-template-columns: repeat(2, 1fr); 
+    /* Відступ між картками: 16px вгору/вниз та 12px вліво/вправо */
+    gap: 16px 12px; 
+    padding: 12px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Налаштування картки товару, щоб вона займала весь виділений їй простір */
+.product-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Кнопки та ціни завжди будуть внизу на одному рівні */
+    box-sizing: border-box;
+    width: 100%; /* Картка сама підлаштується під ширину сітки */
+}
+
+/* Адаптивність: якщо користувач зайде з комп'ютера чи планшета */
+@media (min-width: 768px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Картки стануть у 3, 4 або більше рядів */
+        gap: 20px;
+        padding: 20px;
+    }
+}
+
