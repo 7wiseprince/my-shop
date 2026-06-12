@@ -33,16 +33,19 @@
             }
         }
 
-        // Відображення карток товарів
-        function renderProducts(products, containerId) {
+   function renderProducts(products, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
     container.innerHTML = '';
     
     if (products.length === 0) {
+        container.className = ''; // Прибираємо сітку, щоб повідомлення було по центру
         container.innerHTML = '<p class="empty-message">Товарів не знайдено</p>';
         return;
     }
+
+    // 📱 ВМИКАЄМО НАШУ УНІВЕРСАЛЬНУ ДВІЙКОВУ СІТКУ!
+    container.className = 'products-grid';
 
     // 🕵️‍♂️ ПЕРЕВІРКА НА АДМІНА (робимо ОДИН раз на самому початку)
     const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
@@ -95,9 +98,8 @@
             </div>
         `;
     });
-        }
+   }
 
-    
     
 
         // Фільтрація товарів за категоріями
