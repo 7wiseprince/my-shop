@@ -114,19 +114,23 @@ function renderProducts(products, containerId) {
 }
 
 function updateFeaturedProductsUI() {
-    const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
+    const featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]').map(String);
     
+    // Фільтруємо товари, приводячи всі ID до рядка
     const featuredProducts = allProducts.filter(product => {
-        const prodId = product._id || product.id;
+        const prodId = String(product._id || product.id);
         return featuredIds.includes(prodId);
     });
 
+    // Якщо адмін нічого не вибрав — показуємо перші 2 товари
     if (featuredProducts.length === 0) {
         renderProducts(allProducts.slice(0, 2), 'featured-products');
     } else {
+        // Якщо вибрав — виводимо суто їх!
         renderProducts(featuredProducts, 'featured-products');
     }
-}
+            }
+        
 
 // Фільтрація товарів за категоріями + АВТО-СОРТУВАННЯ В ТОП 🔝
 function filterProducts(category, button) {
@@ -1023,26 +1027,37 @@ function toggleBurgerMenu() {
 function toggleFeatured(productId) {
     let featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
     
-    if (featuredIds.includes(productId)) {
-        // Якщо товар вже був популярним — прибираємо його
-        featuredIds = featuredIds.filter(id => id !== productId);
+    // Перевіряємо рядок це чи число, щоб не було конфліктів типів даних
+    const pId = String(productId);
+    
+    // Твоя логіка додавання/видалення
+    if (featuredIds.map(String).includes(pId)) {
+        featuredIds = featuredIds.map(String).filter(id => id !== pId);
     } else {
-        // Якщо не був — додаємо в масив популярних
-        featuredIds.push(productId);
+        featuredIds.push(pId);
     }
     
     // Зберігаємо оновлений список у сховище
     localStorage.setItem('featuredProductIds', JSON.stringify(featuredIds));
     
-    // Перерендерюємо сторінки, щоб зміни миттєво відобразилися
-    if (typeof updateFavoritesUI === 'function') {
-        updateFavoritesUI();
+    // 🔥 МАГІЯ ОНОВЛЕННЯ СТОЛІНОК НАЖИВУ:
+    
+    // 1. Оновлюємо Головну сторінку (блок популярних товарів)
+    updateFeaturedProductsUI();
+    
+    // 2. Оновлюємо Каталог товарів (щоб перерендерити кнопки зірочок та сортування)
+    // Перевіряємо, чи у нас увімкнена якась категорія, якщо ні — рендеримо всі сортовані товари
+    const activeFilterBtn = document.querySelector('.filter-btn.active');
+    if (activeFilterBtn) {
+        // Якщо є активна кнопка фільтру (наприклад, "Взуття"), симулюємо клік по ній, щоб оновити список
+        activeFilterBtn.click();
     } else {
-        // Якщо функції відрізняються, просто онови поточні сторінки:
-        renderProducts(allProducts, 'catalog-products');
-        updateFeaturedProductsUI();
+        // Якщо кнопок немає, просто перемальовуємо весь каталог із новим сортуванням
+        const sortedProducts = getSortedProductsForCatalog(allProducts);
+        renderProducts(sortedProducts, 'catalog-products');
     }
 }
+
 
 
     
