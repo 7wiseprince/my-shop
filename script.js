@@ -235,18 +235,60 @@ document.getElementById('addProductForm').addEventListener('submit', async (e) =
                                   
     
     
-    
-     function updateFavoritesUI() {
-    // Рендеримо товари з масиву обраного в контейнер сторінки обраного.
-    // Припускаємо, що твій контейнер на сторінки обраного має ID 'favorites-products'
+    function updateFavoritesUI() {
+    // 1. Отримуємо контейнер сторінки обраного і додаємо йому клас сітки
+    const favoritesContainer = document.getElementById('favorites-products');
+    if (favoritesContainer) favoritesContainer.className = 'products-grid';
+
+    // Рендеримо товари з масиву обраного
     renderProducts(favorites, 'favorites-products');
     
-    // Також оновлюємо товари на головній та в каталозі, щоб сердечка синхронно міняли колір
+    // Також оновлюємо товари на головній та в каталозі
     if (allProducts.length > 0) {
+        // 2. Отримуємо контейнер каталогу і теж даємо йому клас сітки
+        const catalogContainer = document.getElementById('catalog-products');
+        if (catalogContainer) catalogContainer.className = 'products-grid';
+
+        // 3. Контейнер популярних товарів (featured) на головній теж стає сіткою
+        const featuredContainer = document.getElementById('featured-products');
+        if (featuredContainer) featuredContainer.className = 'products-grid';
+
         renderProducts(allProducts, 'catalog-products');
         renderProducts(allProducts.slice(0, 2), 'featured-products');
     }
-     }
+}
+
+function updateCabinetFavoritesUI() {
+    const cabinetList = document.getElementById('cabinet-favorites-list');
+    if (!cabinetList) return; 
+
+    cabinetList.innerHTML = ''; 
+
+    if (favorites.length === 0) {
+        // Прибираємо клас сітки, якщо товарів немає, щоб текст був по центру
+        cabinetList.className = ''; 
+        cabinetList.innerHTML = '<p class="no-items">У тебе поки немає збережених товарів.</p>';
+        return;
+    }
+
+    // 4. ОБОК'ЯЗКОВО перетворюємо контейнер у кабінеті на нашу двійкову сітку!
+    cabinetList.className = 'products-grid';
+
+    // Пробігаємося по кожному улюбленому товару
+    favorites.forEach(product => {
+        const productCard = document.createElement('div');
+        productCard.className = 'product-card';
+        productCard.innerHTML = `
+            <img src="${product.image}" alt="${product.name}">
+            <h4>${product.name}</h4>
+            <p class="price">${product.price} грн</p>
+            <button onclick="addToCart(${product.id})" class="btn-buy">Додати в кошик</button>
+        `;
+        cabinetList.appendChild(productCard);
+    });
+}
+
+     
     // Функції кошика
       
     function addToCart(productId) {
@@ -822,31 +864,6 @@ autoLogin();
             switchPage('home'); 
         }
 
-
-function updateCabinetFavoritesUI() {
-    const cabinetList = document.getElementById('cabinet-favorites-list');
-    if (!cabinetList) return; // Якщо такого контейнера немає в HTML, зупиняємо роботу
-
-    cabinetList.innerHTML = ''; // Очищаємо контейнер від старого тексту
-
-    if (favorites.length === 0) {
-        cabinetList.innerHTML = '<p class="no-items">У тебе поки немає збережених товарів.</p>';
-        return;
-    }
-
-    // Пробігаємося по кожному улюбленому товару і створюємо для нього HTML-картку
-    favorites.forEach(product => {
-        const productCard = document.createElement('div');
-        productCard.className = 'product-card';
-        productCard.innerHTML = `
-            <img src="${product.image}" alt="${product.name}">
-            <h4>${product.name}</h4>
-            <p class="price">${product.price} грн</p>
-            <button onclick="addToCart(${product.id})" class="btn-buy">Додати в кошик</button>
-        `;
-        cabinetList.appendChild(productCard);
-    });
-}
 
 
 
