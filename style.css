@@ -911,4 +911,106 @@ header {
         padding: 20px;
     }
 }
+/* АКЦІЙНИЙ БАНЕР (КОМПАКТНИЙ) */
+.promo-banner {
+    background: linear-gradient(135deg, #ff416c, #ff4b2b); /* Яскравий червоно-рожевий градієнт */
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin: 15px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 15px rgba(255, 75, 43, 0.3);
+}
+
+.promo-content {
+    flex: 1;
+    padding-right: 10px;
+}
+
+.promo-badge {
+    background: rgba(255, 255, 255, 0.25);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.promo-banner h2 {
+    font-size: 18px;
+    margin: 5px 0 2px 0;
+    font-weight: 800;
+}
+
+.promo-banner p {
+    font-size: 13px;
+    margin: 0;
+    opacity: 0.9px;
+}
+
+.btn-promo {
+    background: #ffffff;
+    color: #ff4b2b;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.2s;
+}
+
+.btn-promo:active {
+    transform: scale(0.95);
+}
+
+/* ЗАГОЛОВКИ СЕКЦІЙ */
+.section-title {
+    font-size: 18px;
+    color: #2c3e50;
+    margin: 20px 12px 10px 12px;
+    font-weight: 700;
+}
+
+/* СТРІЧКА ШВИДКИХ КАТЕГОРІЙ З СВУЙПОМ */
+.categories-scroll {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto; /* Дозволяє гортати пальцем вліво-вправо на мобілках */
+    padding: 5px 12px 15px 12px;
+    scrollbar-width: none; /* Ховаємо повзунок на Firefox */
+}
+
+.categories-scroll::-webkit-scrollbar {
+    display: none; /* Ховаємо повзунок на Chrome/Safari */
+}
+
+.category-card {
+    min-width: 130px;
+    height: 90px;
+    border-radius: 10px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.category-card span {
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6); /* Щоб текст читався на будь-якому фоні */
+}
+
+.category-card:active {
+    transform: scale(0.95);
+}
 
