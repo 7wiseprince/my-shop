@@ -1078,36 +1078,48 @@ function toggleBurgerMenu() {
 
 async function toggleFeatured(productId) {
     try {
-        // 🔥 ПЕРЕВІРКА ВСІХ МОЖЛИВИХ КЛЮЧІВ ТОКЕНА
-        const token = localStorage.getItem('token') || 
-                      localStorage.getItem('adminToken') || 
-                      localStorage.getItem('jwt');
+        // 1. Пробуємо знайти токен у всіх можливих стандартних ключах
+        let token = localStorage.getItem('token') || 
+                    localStorage.getItem('adminToken') || 
+                    localStorage.getItem('jwt') ||
+                    localStorage.getItem('userToken');
 
-        // Додатково перевіримо, чи є токен всередині збереженого об'єкта користувача
-        let userToken = null;
-        const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
-        if (userJson) {
-            try {
-                const parsedUser = JSON.parse(userJson);
-                userToken = parsedUser.token; // Іноді токен ховається всередині об'єкта user
-            } catch(e) {}
+        // 2. Якщо не знайшли, шукаємо всередині збережених об'єктів користувача
+        if (!token) {
+            const userKeys = ['user', 'currentUser', 'admin', 'currentAdmin'];
+            for (const key of userKeys) {
+                const storedData = localStorage.getItem(key);
+                if (storedData) {
+                    try {
+                        const parsed = JSON.parse(storedData);
+                        // Шукаємо токен всередині об'єкта (він може називатися token або jwt)
+                        if (parsed && (parsed.token || parsed.jwt)) {
+                            token = parsed.token || parsed.jwt;
+                            break;
+                        }
+                    } catch (e) {
+                        // Якщо це був просто рядок, а не JSON-об'єкт — ігноруємо помилку
+                    }
+                }
+            }
         }
 
-        // Фінальний токен, який ми знайшли
-        const finalToken = token || userToken;
+        // 3. Якщо взагалі ніде немає чистого токена, спробуємо дістати хоча б сам об'єкт, 
+        // який підтверджує, що ми залогінені
+        const finalToken = token;
 
         if (!finalToken) {
-            console.error("Авторизація відхилена: Токен відсутній у localStorage");
-            alert("Помилка авторизації! Будь ласка, вийдіть з акаунта і зайдіть як адмін знову.");
+            console.error("Фронтенд не зміг знайти ключ токена у localStorage");
+            alert("Помилка авторизації: Не вдалося знайти токен сесії. Будь ласка, вийдіть з акаунта та увійдіть в адмінку знову, щоб оновити сесію.");
             return;
         }
 
-        // Шлемо запит на сервер
+        // Шлемо авторизований запит на бекенд
         const response = await fetch(`/api/products/toggle-featured/${productId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${finalToken}` // Передаємо знайдений токен
+                'Authorization': `Bearer ${finalToken}` // Передаємо знайдений токен бекенду
             }
         });
 
@@ -1117,7 +1129,7 @@ async function toggleFeatured(productId) {
             throw new Error(data.message || `Сервер повернув помилку: ${response.status}`);
         }
 
-        console.log("Статус успішно оновлено в базі даних!", data.product);
+        console.log("Успішно оновлено статус популярності в базі даних!", data.product);
 
         // Оновлюємо статус у локальному масиві на фронтенді
         allProducts = allProducts.map(p => {
@@ -1127,7 +1139,7 @@ async function toggleFeatured(productId) {
             return p;
         });
 
-        // Миттєво перемальовуємо сторінку
+        // Миттєво перемальовуємо інтерфейс
         updateFeaturedProductsUI();
         
         const activeFilterBtn = document.querySelector('.filter-btn.active');
@@ -1146,8 +1158,8 @@ async function toggleFeatured(productId) {
         console.error("Детальна помилка toggleFeatured:", error);
         alert(error.message || "Не вдалося зберегти зміни. Спробуйте ще раз.");
     }
-}
-
+                    }
+                    
 
 
     
