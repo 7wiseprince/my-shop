@@ -1076,37 +1076,41 @@ function toggleBurgerMenu() {
     }
 }
 
-function toggleFeatured(productId) {
-    let featuredIds = JSON.parse(localStorage.getItem('featuredProductIds') || '[]');
-    
-    // Перевіряємо рядок це чи число, щоб не було конфліктів типів даних
-    const pId = String(productId);
-    
-    // Твоя логіка додавання/видалення
-    if (featuredIds.map(String).includes(pId)) {
-        featuredIds = featuredIds.map(String).filter(id => id !== pId);
-    } else {
-        featuredIds.push(pId);
-    }
-    
-    // Зберігаємо оновлений список у сховище
-    localStorage.setItem('featuredProductIds', JSON.stringify(featuredIds));
-    
-    // 🔥 МАГІЯ ОНОВЛЕННЯ СТОЛІНОК НАЖИВУ:
-    
-    // 1. Оновлюємо Головну сторінку (блок популярних товарів)
-    updateFeaturedProductsUI();
-    
-    // 2. Оновлюємо Каталог товарів (щоб перерендерити кнопки зірочок та сортування)
-    // Перевіряємо, чи у нас увімкнена якась категорія, якщо ні — рендеримо всі сортовані товари
-    const activeFilterBtn = document.querySelector('.filter-btn.active');
-    if (activeFilterBtn) {
-        // Якщо є активна кнопка фільтру (наприклад, "Взуття"), симулюємо клік по ній, щоб оновити список
-        activeFilterBtn.click();
-    } else {
-        // Якщо кнопок немає, просто перемальовуємо весь каталог із новим сортуванням
-        const sortedProducts = getSortedProductsForCatalog(allProducts);
-        renderProducts(sortedProducts, 'catalog-products');
+async function toggleFeatured(productId) {
+    try {
+        // Шлемо запит на сервер, щоб змінити статус у базі даних
+        const response = await fetch(`/api/products/toggle-featured/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error('Не вдалося оновити статус на сервері');
+        
+        const updatedProduct = await response.json();
+
+        // Оновлюємо статус товару в нашому локальному масиві allProducts в пам'яті
+        allProducts = allProducts.map(p => {
+            const pId = p._id || p.id;
+            return pId === productId ? updatedProduct : p;
+        });
+
+        // 🔥 МИТТЄВО ОНОВЛЮЄМО ІНТЕРФЕЙС ДЛЯ АДМІНА:
+        updateFeaturedProductsUI(); // Оновлюємо головну сторінку
+        
+        // Перемальовуємо каталог, щоб зірочка змінила колір і товар перемістився
+        const activeFilterBtn = document.querySelector('.filter-btn.active');
+        if (activeFilterBtn) {
+            activeFilterBtn.click(); // якщо вибрано категорію, симулюємо клік
+        } else {
+            const sortedProducts = getSortedProductsForCatalog(allProducts);
+            renderProducts(sortedProducts, 'catalog-products');
+        }
+
+    } catch (error) {
+        console.error("Помилка перемикання популярності:", error);
+        alert("Не вдалося зберегти зміни. Спробуйте ще раз.");
     }
 }
 
