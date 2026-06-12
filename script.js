@@ -1078,48 +1078,21 @@ function toggleBurgerMenu() {
 
 async function toggleFeatured(productId) {
     try {
-        // 1. Пробуємо знайти токен у всіх можливих стандартних ключах
-        let token = localStorage.getItem('token') || 
-                    localStorage.getItem('adminToken') || 
-                    localStorage.getItem('jwt') ||
-                    localStorage.getItem('userToken');
+        // 🔥 БЕРЕМО ТОЧНИЙ КЛЮЧ ТОКЕНА, ЯКИЙ ПРАЦЮЄ У ТВОЄМУ ДОДАТКУ!
+        const token = localStorage.getItem('sneakers_token');
 
-        // 2. Якщо не знайшли, шукаємо всередині збережених об'єктів користувача
         if (!token) {
-            const userKeys = ['user', 'currentUser', 'admin', 'currentAdmin'];
-            for (const key of userKeys) {
-                const storedData = localStorage.getItem(key);
-                if (storedData) {
-                    try {
-                        const parsed = JSON.parse(storedData);
-                        // Шукаємо токен всередині об'єкта (він може називатися token або jwt)
-                        if (parsed && (parsed.token || parsed.jwt)) {
-                            token = parsed.token || parsed.jwt;
-                            break;
-                        }
-                    } catch (e) {
-                        // Якщо це був просто рядок, а не JSON-об'єкт — ігноруємо помилку
-                    }
-                }
-            }
-        }
-
-        // 3. Якщо взагалі ніде немає чистого токена, спробуємо дістати хоча б сам об'єкт, 
-        // який підтверджує, що ми залогінені
-        const finalToken = token;
-
-        if (!finalToken) {
-            console.error("Фронтенд не зміг знайти ключ токена у localStorage");
-            alert("Помилка авторизації: Не вдалося знайти токен сесії. Будь ласка, вийдіть з акаунта та увійдіть в адмінку знову, щоб оновити сесію.");
+            console.error("Токен sneakers_token не знайдено в localStorage");
+            alert("Помилка безпеки: Токен сесії відсутній. Будь ласка, перезайдіть в адмінку.");
             return;
         }
 
-        // Шлемо авторизований запит на бекенд
+        // Шлемо повноцінний авторизований запит на бекенд
         const response = await fetch(`/api/products/toggle-featured/${productId}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${finalToken}` // Передаємо знайдений токен бекенду
+                'Authorization': `Bearer ${token}` // Передаємо твій діючий токен
             }
         });
 
@@ -1129,7 +1102,7 @@ async function toggleFeatured(productId) {
             throw new Error(data.message || `Сервер повернув помилку: ${response.status}`);
         }
 
-        console.log("Успішно оновлено статус популярності в базі даних!", data.product);
+        console.log("Успішно оновлено в базі даних MongoDB!", data.product);
 
         // Оновлюємо статус у локальному масиві на фронтенді
         allProducts = allProducts.map(p => {
@@ -1155,11 +1128,11 @@ async function toggleFeatured(productId) {
         }
 
     } catch (error) {
-        console.error("Детальна помилка toggleFeatured:", error);
+        console.error("Помилка toggleFeatured:", error);
         alert(error.message || "Не вдалося зберегти зміни. Спробуйте ще раз.");
     }
-                    }
-                    
+}
+
 
 
     
