@@ -127,6 +127,60 @@
      </div>
 
 
+<div class="product-page-container">
+    
+    <div class="product-media-gallery">
+        <div class="main-image-wrapper">
+            <img id="mainProductImage" src="https://via.placeholder.com/400" alt="Головне фото">
+        </div>
+        <div class="thumbnails-container" id="thumbnailsContainer">
+            </div>
+    </div>
+
+    <div class="product-info-order">
+        <h1 class="single-product-title" id="productName">Назва товару</h1>
+        
+        <div class="product-status-badge">
+            <span class="status-dot"></span> В наявності
+        </div>
+
+        <div class="single-product-price" id="productPrice">0 грн</div>
+
+        <div class="size-selector-section">
+            <div class="section-label">Оберіть розмір:</div>
+            <div class="sizes-grid" id="sizesGrid">
+                </div>
+        </div>
+
+        <button class="btn-main-buy" id="mainBuyBtn">
+            <span>Додати в кошик</span>
+        </button>
+    </div>
+
+</div>
+
+<div class="product-details-tabs">
+    <div class="tabs-header">
+        <button class="tab-btn active" onclick="switchTab(event, 'tab-description')">Опис</button>
+        <button class="tab-btn" onclick="switchTab(event, 'tab-specs')">Характеристики</button>
+    </div>
+    
+    <div class="tab-content active" id="tab-description">
+        <p id="productLongDesc">Тут буде детальний та красивий опис товару...</p>
+    </div>
+    
+    <div class="tab-content" id="tab-specs">
+        <ul class="specs-list" id="productSpecs">
+            </ul>
+    </div>
+</div>
+    
+
+
+
+
+    
+
     <div id="page-product" class="page" style="padding: 20px 15px; text-align: left; max-width: 600px; margin: 0 auto; padding-bottom: 90px;">
     <button onclick="switchPage('catalog')" style="background: none; border: none; font-size: 16px; color: #34495e; cursor: pointer; padding: 10px 0; display: flex; align-items: center; gap: 5px; font-weight: 600;">
         ⬅️ Назад до каталогу
@@ -134,6 +188,10 @@
 
     <div id="product-detail-container"></div>
     </div>
+
+
+
+
     
     
 
