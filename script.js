@@ -969,71 +969,145 @@ autoLogin();
 
 
     // Функція для відкриття детальної сторінки кросівка
-function openProductPage(productId) {
+// Знайди свою функцію (наприклад, функцію детального перегляду) і онови її логіку:
+function renderProductDetailPage(product) {
     const container = document.getElementById('product-detail-container');
     if (!container) return;
 
-    const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
+    // 1. Збираємо масив картинок (якщо їх кілька)
+    const images = product.images && product.images.length > 0 
+        ? product.images 
+        : [product.image || 'https://via.placeholder.com/400'];
 
-    if (!product) {
-        alert("Товар не знайдено!");
-        return;
+    // Геренуємо HTML для міні-прев'ю зображень
+    let thumbnailsHTML = '';
+    if (images.length > 1) {
+        images.forEach((imgUrl, index) => {
+            thumbnailsHTML += `
+                <img class="thumb-img ${index === 0 ? 'active' : ''}" 
+                     src="${imgUrl}" 
+                     alt="Прев'ю ${index + 1}" 
+                     onclick="changeMainImage(this, '${imgUrl}')">
+            `;
+        });
     }
 
-    // 📸 ПЕРЕВІРКА КАРТИНОК: Створюємо масив фотографій. 
-    // Підтримуємо і новий масив product.images, і старі товари з одиночним product.image
-    let photos = [];
-    if (Array.isArray(product.images) && product.images.length > 0) {
-        photos = product.images;
-    } else if (product.image) {
-        photos = [product.image];
-    } else {
-        photos = ['https://via.placeholder.com/350'];
-    }
+    // 2. Розраховуємо плиточки розмірів (наприклад, якщо у товару є масив sizes: [40, 41, 42])
+    let sizesHTML = '';
+    const availableSizes = product.sizes || [39, 40, 41, 42, 43]; // Дефолтні розміри, якщо в базі немає
 
-    // Генеруємо HTML для кожної картинки в слайдері
-    let sliderHtml = photos.map(imgUrl => `
-        <div style="min-width: 100%; box-sizing: border-box; display: flex; justify-content: center; align-items: center; padding: 0 10px;">
-            <img src="${imgUrl}" alt="${product.name}" style="width: 100%; max-width: 350px; height: auto; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); object-fit: cover;">
-        </div>
-    `).join('');
+    availableSizes.forEach(size => {
+        sizesHTML += `
+            <button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>
+        `;
+    });
 
-    // Якщо картинок більше однієї, додамо маленьку підказку для користувача
-    let hintHtml = photos.length > 1 ? `<p style="text-align:center; color:#95a5a6; font-size:12px; margin-top:5px;">↔️ Гортайте фото пальцем</p>` : '';
-
-    container.innerHTML = `
-        <div style="width: 100%; overflow-x: auto; display: flex; scroll-snap-type: x mandatory; scroll-behavior: smooth; margin-top: 15px; padding-bottom: 5px;" class="product-gallery-slider">
-            ${sliderHtml}
-        </div>
-        ${hintHtml}
-
-        <h1 style="font-size: 24px; color: #2c3e50; margin: 20px 0 10px 0;">${product.name}</h1>
-        <p style="font-size: 14px; color: #7f8c8d; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 15px 0;">Категорія: ${product.category || 'Взуття'}</p>
-        
-        <div style="font-size: 22px; font-weight: bold; color: #e74c3c; margin-bottom: 20px;">
-            ${product.price} грн
-        </div>
-
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px;">
-            <h3 style="margin-top: 0; color: #34495e; font-size: 16px;">Опис товару</h3>
-            <p style="color: #5d6d7e; line-height: 1.6; font-size: 15px; margin-bottom: 0;">
-                ${product.description || 'Опис для цієї моделі поки що відсутній.'}
-            </p>
-        </div>
-
-        <button onclick="addToCart('${product._id || product.id}'); alert('👟 Товар додано в кошик!')" style="width: 100%; background: #27ae60; color: white; border: none; padding: 15px; font-size: 18px; font-weight: bold; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2); transition: 0.2s;">
-            🛒 Додати в кошик
-        </button>
-    `;
-
-    switchPage('product');
+    // 3. Формуємо характеристики (матеріал, колір, бренд тощо)
+    const specs = product.specs || {
+        "Категорія": product.category || "Спорт",
+        "Бренд": product.brand || "UABrand",
+        "Наявність": "На складі"
+    };
     
-    // Скидаємо скролл слайдера на початок при відкритті нової сторінки
-    setTimeout(() => {
-        const slider = document.querySelector('.product-gallery-slider');
-        if (slider) slider.scrollLeft = 0;
-    }, 50);
-            }
+    let specsHTML = '';
+    for (let key in specs) {
+        specsHTML += `<li><strong>${key}:</strong> <span>${specs[key]}</span></li>`;
+    }
+
+    // 4. Вливаємо преміальну структуру в наш контейнер
+    container.innerHTML = `
+        <div class="product-page-container">
+            
+            <div class="product-media-gallery">
+                <div class="main-image-wrapper">
+                    <img id="mainProductImage" src="${images[0]}" alt="${product.name}">
+                </div>
+                <div class="thumbnails-container">
+                    ${thumbnailsHTML}
+                </div>
+            </div>
+
+            <div class="product-info-order">
+                <h1 class="single-product-title">${product.name}</h1>
+                
+                <div class="product-status-badge">
+                    <span class="status-dot"></span> В наявності
+                </div>
+
+                <div class="single-product-price">${product.price} грн</div>
+
+                <div class="size-selector-section">
+                    <div class="section-label">Оберіть розмір:</div>
+                    <div class="sizes-grid">
+                        ${sizesHTML}
+                    </div>
+                </div>
+
+                <button class="btn-main-buy" onclick="addToCartFromPage('${product.id}')">
+                    <span>🛒 Додати в кошик</span>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="product-details-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab(event, 'tab-description')">Опис</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-specs')">Характеристики</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-description">
+                <p>${product.description || 'Опис цього товару незабаром з\'явиться.'}</p>
+            </div>
+            
+            <div class="tab-content" id="tab-specs">
+                <ul class="specs-list">
+                    ${specsHTML}
+                </ul>
+            </div>
+        </div>
+    `;
+}
+
+// --- ВСЕОХОПЛЮЮЧІ ДОПОМІЖНІ ФУНКЦІЇ ДЛЯ ІНТЕРАКТИВY ---
+
+// 1. Гортання картинок при кліку на маленькі прев'ю
+function changeMainImage(thumbElement, newSrc) {
+    document.getElementById('mainProductImage').src = newSrc;
+    document.querySelectorAll('.thumb-img').forEach(img => img.classList.remove('active'));
+    thumbElement.classList.add('active');
+}
+
+// 2. Вибір розміру (активна плиточка)
+let selectedProductSize = null;
+function selectSize(buttonElement, size) {
+    document.querySelectorAll('.size-chip').forEach(btn => btn.classList.remove('selected'));
+    buttonElement.classList.add('selected');
+    selectedProductSize = size; // Записуємо вибраний розмір
+}
+
+// 3. Перемикання вкладок Опис / Характеристики
+function switchTab(event, tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+// 4. Функція покупки зі сторінки товару
+function addToCartFromPage(productId) {
+    // Якщо хочеш зробити обов'язковий вибір розміру:
+    // if (!selectedProductSize) { alert('Будь ласка, оберіть розмір!'); return; }
+    
+    if (typeof addToCart === 'function') {
+        addToCart(productId);
+        // Тут можна додати красиве спливаюче сповіщення "Товар додано!"
+    }
+}
+
+
+
+
     
 async function deleteProduct(productId) {
     if (!confirm("⚠️ Ви впевнені, що хочете назавжди видалити цей товар з бази даних?")) return;
