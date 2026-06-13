@@ -1175,6 +1175,17 @@ function animateAndAddToCart(buttonElement, productId) {
     }, 450);
 }
 
+function switchTab(event, tabId) {
+    // 1. Сховуємо всі вкладки
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    // 2. Показуємо потрібну
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+
+
 
     
         // Старт додатка
