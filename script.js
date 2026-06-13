@@ -1155,27 +1155,26 @@ async function toggleFeatured(productId) {
 
 // Функція, яка запускає візуальний ефект додавання та викликає твій стандартний кошик
 function animateAndAddToCart(buttonElement, productId) {
-    // Якщо анімація вже йде — ігноруємо повторні кліки
     if (buttonElement.classList.contains('added-pulse')) return;
 
-    // 1. Вмикаємо анімацію
+    // 1. Вмикаємо підстрибування
     buttonElement.classList.add('added-pulse');
     
-    // Тимчасово змінюємо іконку на галочку для крутого відгуку
     const iconSpan = buttonElement.querySelector('.cart-icon-symbol');
     if (iconSpan) iconSpan.innerText = '✔️';
 
-    // 2. Викликаємо твою стандартну логіку додавання до кошика
+    // 2. Додаємо в кошик
     if (typeof addToCart === 'function') {
         addToCart(productId);
     }
 
-    // 3. Через 400 мілісекунд (коли анімація закінчиться) повертаємо все назад
+    // 3. Повертаємо початковий стан точно в момент приземлення (450 мілісекунд)
     setTimeout(() => {
         buttonElement.classList.remove('added-pulse');
         if (iconSpan) iconSpan.innerText = '🛒';
-    }, 400);
+    }, 450);
 }
+
 
     
         // Старт додатка
