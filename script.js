@@ -469,6 +469,7 @@ function submitOrderCOD() {
     });
 }
     
+
 function renderPayPalButton(totalUah) {
     const usdRate = 40;
     const totalUsd = (totalUah / usdRate).toFixed(2);
@@ -478,39 +479,6 @@ function renderPayPalButton(totalUah) {
         onClick: function(data, actions) {
             const name = document.getElementById('order-name').value.trim();
             const phone = document.getElementById('order-phone').value.trim();
-            const delivery = document.getElementById('order-delivery').value.trim();
-
-            if (!name || !phone || !delivery) {
-                alert('Будь ласка, заповніть всі поля для доставки перед оплатою!');
-                return actions.reject();
-            }
-            return actions.resolve();
-        },
-        createOrder: function(data, actions) {
-            return actions.order.create({ purchase_units: [{ amount: { value: totalUsd } }] });
-        },
-        onApprove: function(data, actions) {
-            return actions.order.capture().then(function(details) {
-                const name = document.getElementById('order-name').value.trim();
-                const phone = document.getElementById('order-phone').value.trim();
-                const delivery = document.getElementById('order-delivery').value.trim();
-
-                const orderData = {
-                    customerName: `${name} | Тел: ${phone} | Доставка: ${delivery}`,
-                    items: cart.map(item => ({ name: item.name, price: item.price })),
-                    total: totalUah
-                };
-
-                fetch('/api/orders', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(orderData)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    showSuccessModal();
-                    document.getElementById('order-name').value = '';
-                    document.getElementById('order-phone').value.trim();
             const delivery = document.getElementById('order-delivery').value.trim();
 
             if (!name || !phone || !delivery) {
@@ -556,8 +524,8 @@ function renderPayPalButton(totalUah) {
             });
         }
     }).render('#paypal-button-container');
-                            }
-                    
+}
+
 
 
                                             
