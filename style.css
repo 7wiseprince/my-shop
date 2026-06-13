@@ -221,50 +221,55 @@ nav a.active, nav a:hover {
 }
 
 /* --- НОВА КРYГЛА КНОПКА-КОШИК --- */
+/* --- КНОПКА-КОШИК: СМАРАГДОВИЙ ГРАФІТ --- */
 .btn-cart-icon {
-    background-color: var(--primary-color);
+    background-color: #243232; /* Глибокий, дорогий смарагдово-чорний тон */
     color: white;
     border: none;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;       /* Робить кнопку ідеально круглою */
+    width: 38px;  /* Трохи збільшили, щоб зручніше влучати пальцем */
+    height: 38px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 16px;
     cursor: pointer;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 3px 8px rgba(36, 50, 50, 0.15);
     transition: background-color 0.2s, transform 0.1s;
     position: relative;
-    overflow: hidden;
 }
 
+/* При наведенні або активності кнопка злегка освіжається */
 .btn-cart-icon:hover {
-    background-color: var(--primary-hover);
+    background-color: #1d2929;
 }
 
+/* Фізичне стискання при дотику пальця */
 .btn-cart-icon:active {
-    transform: scale(0.9);    /* Легке стискання при фізичному натисканні */
+    transform: scale(0.9);
 }
 
-/* --- 🔥 МІКРО-АНІМАЦІЯ ПУЛЬСАЦІЇ ТА ЗМІНИ КОЛЬОРУ --- */
+/* --- 🔥 НОВА АНІМАЦІЯ: ПІДСТРИБУВАННЯ (BOUNCE) --- */
 .btn-cart-icon.added-pulse {
-    animation: cartPulse 0.4s ease-in-out;
-    background-color: #27ae60 !important; /* На мить стає приємно-зеленим */
+    animation: cartBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Пружний рух */
+    background-color: #2da44e !important; /* Приємний соковитий зелений під час підстрибування */
 }
 
-@keyframes cartPulse {
+@keyframes cartBounce {
     0% {
-        transform: scale(1);
+        transform: scale(1) translateY(0);
     }
-    50% {
-        transform: scale(1.25); /* Ефект вистрибування */
-        box-shadow: 0 4px 10px rgba(39, 174, 96, 0.4);
+    30% {
+        transform: scale(0.85) translateY(4px); /* Стискається перед стрибком вниз */
+    }
+    60% {
+        transform: scale(1.15) translateY(-10px); /* Вистрибує вгору і злегка розширюється */
     }
     100% {
-        transform: scale(1);
+        transform: scale(1) translateY(0); /* Повертається на місце */
     }
 }
+
 
 /* --- СТОРІНКА ПРО НАС --- */
 .about-section { 
