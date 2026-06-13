@@ -968,106 +968,6 @@ autoLogin();
 
 
 
-    // Функція для відкриття детальної сторінки кросівка
-// Знайди свою функцію (наприклад, функцію детального перегляду) і онови її логіку:
-function renderProductDetailPage(product) {
-    const container = document.getElementById('product-detail-container');
-    if (!container) return;
-
-    // 1. Збираємо масив картинок (якщо їх кілька)
-    const images = product.images && product.images.length > 0 
-        ? product.images 
-        : [product.image || 'https://via.placeholder.com/400'];
-
-    // Геренуємо HTML для міні-прев'ю зображень
-    let thumbnailsHTML = '';
-    if (images.length > 1) {
-        images.forEach((imgUrl, index) => {
-            thumbnailsHTML += `
-                <img class="thumb-img ${index === 0 ? 'active' : ''}" 
-                     src="${imgUrl}" 
-                     alt="Прев'ю ${index + 1}" 
-                     onclick="changeMainImage(this, '${imgUrl}')">
-            `;
-        });
-    }
-
-    // 2. Розраховуємо плиточки розмірів (наприклад, якщо у товару є масив sizes: [40, 41, 42])
-    let sizesHTML = '';
-    const availableSizes = product.sizes || [39, 40, 41, 42, 43]; // Дефолтні розміри, якщо в базі немає
-
-    availableSizes.forEach(size => {
-        sizesHTML += `
-            <button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>
-        `;
-    });
-
-    // 3. Формуємо характеристики (матеріал, колір, бренд тощо)
-    const specs = product.specs || {
-        "Категорія": product.category || "Спорт",
-        "Бренд": product.brand || "UABrand",
-        "Наявність": "На складі"
-    };
-    
-    let specsHTML = '';
-    for (let key in specs) {
-        specsHTML += `<li><strong>${key}:</strong> <span>${specs[key]}</span></li>`;
-    }
-
-    // 4. Вливаємо преміальну структуру в наш контейнер
-    container.innerHTML = `
-        <div class="product-page-container">
-            
-            <div class="product-media-gallery">
-                <div class="main-image-wrapper">
-                    <img id="mainProductImage" src="${images[0]}" alt="${product.name}">
-                </div>
-                <div class="thumbnails-container">
-                    ${thumbnailsHTML}
-                </div>
-            </div>
-
-            <div class="product-info-order">
-                <h1 class="single-product-title">${product.name}</h1>
-                
-                <div class="product-status-badge">
-                    <span class="status-dot"></span> В наявності
-                </div>
-
-                <div class="single-product-price">${product.price} грн</div>
-
-                <div class="size-selector-section">
-                    <div class="section-label">Оберіть розмір:</div>
-                    <div class="sizes-grid">
-                        ${sizesHTML}
-                    </div>
-                </div>
-
-                <button class="btn-main-buy" onclick="addToCartFromPage('${product.id}')">
-                    <span>🛒 Додати в кошик</span>
-                </button>
-            </div>
-
-        </div>
-
-        <div class="product-details-tabs">
-            <div class="tabs-header">
-                <button class="tab-btn active" onclick="switchTab(event, 'tab-description')">Опис</button>
-                <button class="tab-btn" onclick="switchTab(event, 'tab-specs')">Характеристики</button>
-            </div>
-            
-            <div class="tab-content active" id="tab-description">
-                <p>${product.description || 'Опис цього товару незабаром з\'явиться.'}</p>
-            </div>
-            
-            <div class="tab-content" id="tab-specs">
-                <ul class="specs-list">
-                    ${specsHTML}
-                </ul>
-            </div>
-        </div>
-    `;
-}
 
 // --- ВСЕОХОПЛЮЮЧІ ДОПОМІЖНІ ФУНКЦІЇ ДЛЯ ІНТЕРАКТИВY ---
 
@@ -1249,16 +1149,134 @@ function animateAndAddToCart(buttonElement, productId) {
     }, 450);
 }
 
+
+
+function renderProductDetailPage(product) {
+    const container = document.getElementById('product-detail-container');
+    if (!container) return;
+
+    // 1. Збираємо масив картинок
+    const images = product.images && product.images.length > 0 
+        ? product.images 
+        : [product.image || 'https://via.placeholder.com/400'];
+
+    // Генеруємо HTML для міні-прев'ю
+    let thumbnailsHTML = '';
+    if (images.length > 1) {
+        images.forEach((imgUrl, index) => {
+            thumbnailsHTML += `
+                <img class="thumb-img ${index === 0 ? 'active' : ''}" 
+                     src="${imgUrl}" 
+                     alt="Прев'ю ${index + 1}" 
+                     onclick="changeMainImage(this, '${imgUrl}')">
+            `;
+        });
+    }
+
+    // 2. Розраховуємо плиточки розмірів
+    let sizesHTML = '';
+    const availableSizes = product.sizes || [39, 40, 41, 42, 43]; 
+
+    availableSizes.forEach(size => {
+        sizesHTML += `
+            <button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>
+        `;
+    });
+
+    // 3. Формуємо характеристики
+    const specs = product.specs || {
+        "Категорія": product.category || "Спорт",
+        "Бренд": product.brand || "Original",
+        "Наявність": "На складі"
+    };
+    
+    let specsHTML = '';
+    for (let key in specs) {
+        specsHTML += `<li><strong>${key}:</strong> <span>${specs[key]}</span></li>`;
+    }
+
+    // 4. Вливаємо структуру в контейнер
+    container.innerHTML = `
+        <div class="product-page-container">
+            
+            <div class="product-media-gallery">
+                <div class="main-image-wrapper">
+                    <img id="mainProductImage" src="${images[0]}" alt="${product.name}">
+                </div>
+                <div class="thumbnails-container">
+                    ${thumbnailsHTML}
+                </div>
+            </div>
+
+            <div class="product-info-order">
+                <h1 class="single-product-title">${product.name}</h1>
+                
+                <div class="product-status-badge">
+                    <span class="status-dot"></span> В наявності
+                </div>
+
+                <div class="single-product-price">${product.price} грн</div>
+
+                <div class="size-selector-section">
+                    <div class="section-label">Оберіть розмір:</div>
+                    <div class="sizes-grid">
+                        ${sizesHTML}
+                    </div>
+                </div>
+
+                <button class="btn-main-buy" onclick="addToCartFromPage('${product.id}')">
+                    <span>🛒 Додати в кошик</span>
+                </button>
+            </div>
+
+        </div>
+
+        <div class="product-details-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab(event, 'tab-description')">Опис</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-specs')">Характеристики</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-description">
+                <p>${product.description || 'Опис цього товару незабаром з\'явиться.'}</p>
+            </div>
+            
+            <div class="tab-content" id="tab-specs">
+                <ul class="specs-list">
+                    ${specsHTML}
+                </ul>
+            </div>
+        </div>
+    `;
+}
+
+// --- ДОПОМІЖНІ ФУНКЦІЇ ДЛЯ ІНТЕРАКТИВУ ---
+
+function changeMainImage(thumbElement, newSrc) {
+    document.getElementById('mainProductImage').src = newSrc;
+    document.querySelectorAll('.thumb-img').forEach(img => img.classList.remove('active'));
+    thumbElement.classList.add('active');
+}
+
+let selectedProductSize = null;
+function selectSize(buttonElement, size) {
+    document.querySelectorAll('.size-chip').forEach(btn => btn.classList.remove('selected'));
+    buttonElement.classList.add('selected');
+    selectedProductSize = size; 
+}
+
 function switchTab(event, tabId) {
-    // 1. Сховуємо всі вкладки
     document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-
-    // 2. Показуємо потрібну
     document.getElementById(tabId).classList.add('active');
     event.currentTarget.classList.add('active');
 }
 
+function addToCartFromPage(productId) {
+    if (typeof addToCart === 'function') {
+        addToCart(productId);
+    }
+                }
 
 
     
