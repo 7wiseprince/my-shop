@@ -97,22 +97,28 @@ function renderProducts(products, containerId) {
             `;
         }
 
-        container.innerHTML += `
-            <div class="product-card" style="position: relative;">
-                <button class="btn-favorite" onclick="event.stopPropagation(); toggleFavorite('${prodId}')">${heartIcon}</button>
-                
-                <div onclick="openProductPage('${prodId}')" style="cursor: pointer;">
-                    <img class="product-image" src="${(product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/150')}" alt="${product.name}">
-                    <div class="product-title">${product.name}</div>
-                    <div class="product-desc">${product.description || ''}</div>
-                </div>
+container.innerHTML += `
+    <div class="product-card" style="position: relative;">
+        <button class="btn-favorite" onclick="event.stopPropagation(); toggleFavorite('${prodId}')">${heartIcon}</button>
+        
+        <div onclick="openProductPage('${prodId}')" style="cursor: pointer;">
+            <img class="product-image" src="${(product.images && product.images.length > 0) ? product.images[0] : (product.image || 'https://via.placeholder.com/150')}" alt="${product.name}">
+            <div class="product-title">${product.name}</div>
+            <div class="product-desc">${product.description || ''}</div>
+        </div>
 
-                <div class="product-price">${product.price} грн</div>
-                <button class="btn-add-to-cart" onclick="event.stopPropagation(); addToCart('${prodId}')">Додати в кошик</button>
+        <div class="product-footer-row">
+            <div class="product-price">${product.price} грн</div>
+            <button class="btn-cart-icon" onclick="event.stopPropagation(); animateAndAddToCart(this, '${prodId}')">
+                <span class="cart-icon-symbol">🛒</span>
+            </button>
+        </div>
 
-                ${adminButtonsHTML}
-            </div>
-        `;
+        ${adminButtonsHTML}
+    </div>
+`;
+            
+        
     });
 }
 
@@ -1147,6 +1153,29 @@ async function toggleFeatured(productId) {
 }
 
 
+// Функція, яка запускає візуальний ефект додавання та викликає твій стандартний кошик
+function animateAndAddToCart(buttonElement, productId) {
+    // Якщо анімація вже йде — ігноруємо повторні кліки
+    if (buttonElement.classList.contains('added-pulse')) return;
+
+    // 1. Вмикаємо анімацію
+    buttonElement.classList.add('added-pulse');
+    
+    // Тимчасово змінюємо іконку на галочку для крутого відгуку
+    const iconSpan = buttonElement.querySelector('.cart-icon-symbol');
+    if (iconSpan) iconSpan.innerText = '✔️';
+
+    // 2. Викликаємо твою стандартну логіку додавання до кошика
+    if (typeof addToCart === 'function') {
+        addToCart(productId);
+    }
+
+    // 3. Через 400 мілісекунд (коли анімація закінчиться) повертаємо все назад
+    setTimeout(() => {
+        buttonElement.classList.remove('added-pulse');
+        if (iconSpan) iconSpan.innerText = '🛒';
+    }, 400);
+}
 
     
         // Старт додатка
