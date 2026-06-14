@@ -1274,6 +1274,7 @@ header {
 }
 
 /* ОВЕРЛЕЙ МЕНЮ (ПОВНІСТЮ ПЕРЕКРИВАЄ СЕРДЕЧКА) */
+/* ОВЕРЛЕЙ (ЗАДНІЙ ФОН) */
 .burger-menu-overlay {
     position: fixed;
     top: 0;
@@ -1281,17 +1282,17 @@ header {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 100; /* Шар 100 залізно перекриє червоні сердечка товарів */
+    z-index: 100;
     transition: left 0.3s ease-in-out;
+    /* 🌟 ДОДАЄМО ЦЕЙ РЯДОК: якщо меню задовге для екрану, воно буде гортатися */
+    overflow-y: auto; 
 }
 
-.burger-menu-overlay.open {
-    left: 0;
-}
-
+/* КОНТЕНТНА ЧАСТИНА МЕНЮ */
 .burger-menu-content {
     width: 75%;
-    height: 100%;
+    /* 🌟 ЗМІНЮЄМО НА min-height, щоб блок міг розтягуватися вниз під контент */
+    min-height: 100%; 
     background: #ffffff;
     padding: 25px 20px;
     display: flex;
@@ -1299,6 +1300,7 @@ header {
     box-sizing: border-box;
     z-index: 101;
 }
+
 
 /* Кнопка закриття */
 .burger-close-btn {
