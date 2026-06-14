@@ -839,6 +839,10 @@ function updateCartBadge() {
 }
 
 // Чиста функція відкриття / закриття шторки
+
+
+
+       // Функція відкриття/закриття шторки
 function toggleBurgerMenu(event) {
     if (event) event.preventDefault();
     const menu = document.getElementById('mobile-burger-menu');
@@ -847,35 +851,47 @@ function toggleBurgerMenu(event) {
     }
 }
 
-// Універсальний безпечний перехід для всіх кнопок бургер-меню
-function navigateFromBurger(event, pageId) {
-    if (event) event.preventDefault(); // Зупиняємо стрибки сторінки вгору
+// Нова безпечна функція для кліків у бургері
+function clickBurgerLink(event, pageId) {
+    if (event) event.preventDefault(); // Зупиняємо перезавантаження посилань
     
-    // 1. Закриваємо шторку меню
+    // 1. Одразу ховаємо шторку меню
     const menu = document.getElementById('mobile-burger-menu');
     if (menu) menu.classList.remove('open');
     
-    // Special case: якщо натиснули на Кошик, відкриваємо твій кастомний кошик
+    // 2. Якщо це кошик — відкриваємо його окремою функцією
     if (pageId === 'page-cart') {
-        if (typeof toggleCart === 'function') {
-            toggleCart(true);
-        }
+        if (typeof toggleCart === 'function') toggleCart(true);
         return;
     }
     
-    // 2. Перемикаємо сторінку через глобальний showPage сайту
+    // 3. Перемикаємо сторінку
     if (typeof showPage === 'function') {
-        showPage(pageId);
+        try {
+            showPage(pageId);
+        } catch (err) {
+            console.log("Пряме перемикання сторінок");
+            fallbackPageSwitch(pageId);
+        }
     } else {
-        // Запасний варіант, якщо сторінки перемикаються через display прямим кодом
-        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-        const targetPage = document.getElementById(pageId);
-        if (targetPage) targetPage.style.display = 'block';
+        fallbackPageSwitch(pageId);
     }
 }
 
+// Резервне чисте перемикання (якщо showPage дає збій на нових сторінках)
+function fallbackPageSwitch(pageId) {
+    document.querySelectorAll('.page').forEach(p => {
+        p.style.display = 'none';
+        p.classList.remove('active');
+    });
+    
+    const target = document.getElementById(pageId);
+    if (target) {
+        target.style.display = 'block';
+        target.classList.add('active');
+    }
+}
 
-       
                         
 
 
