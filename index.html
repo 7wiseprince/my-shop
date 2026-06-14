@@ -41,21 +41,19 @@
 
     <h3 class="section-title">Популярні категорії</h3>
     <div class="categories-scroll">
-        <div class="category-card" onclick="switchPage('catalog'); setTimeout(() => { const btn = document.querySelector('.filter-btn:nth-child(2)'); filterProducts('shoes', btn || this); }, 50);">
-    </div>
 
-<div class="category-card" onclick="switchPage('catalog'); setTimeout(() => { const btn = document.querySelector('.filter-btn:nth-child(3)'); filterProducts('clothes', btn || this); }, 50);">
-    </div>
+    <div class="category-card" onclick="switchPage('catalog'); setTimeout(() => { const btn = document.querySelector('.filter-btn:nth-child(2)'); filterProducts('shoes', btn || this); }, 50);" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400');">
+    <span>Взуття</span>
+</div>
 
-<div class="category-card" onclick="switchPage('catalog'); setTimeout(() => { const btn = document.querySelector('.filter-btn:nth-child(4)'); filterProducts('accessories', btn || this); }, 50);">
+<div class="category-card" onclick="switchPage('catalog'); setTimeout(() => { const btn = document.querySelector('.filter-btn:nth-child(3)'); filterProducts('clothes', btn || this); }, 50);" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400');">
+    <span>Одяг</span>
+</div>
+
+<div class="category-card" onclick="switchPage('catalog'); setTimeout(() => { const btn = document.querySelector('.filter-btn:nth-child(4)'); filterProducts('accessories', btn || this); }, 50);" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400');">
+    <span>Аксесуари</span>
 </div>
         
-    </div>
-
-    <h3 class="section-title">Популярні товари</h3>
-    <div class="products-grid" id="featured-products"></div>
-</div>
-    
     
 
 
