@@ -1,4 +1,4 @@
-let allProducts = [];
+       let allProducts = [];
 let cart = [];
 let favorites = []; // Масив для зберігання улюблених товарів
 
@@ -26,11 +26,11 @@ async function loadProducts() {
         const response = await fetch('/api/products');
         allProducts = await response.json();
         
-        // ЧЕТКО: Сортуємо глобальний масив і виводимо в каталог
+        // Сортуємо глобальний масив і виводимо в каталог
         const sortedProducts = getSortedProductsForCatalog(allProducts);
         renderProducts(sortedProducts, 'catalog-products');
         
-        // ОБОВ'ЯЗКОВО: Оновлюємо популярні товари на головній сторінці при завантаженні
+        // Оновлюємо популярні товари на головній сторінці при завантаженні
         updateFeaturedProductsUI();
             
     } catch (error) {
@@ -49,10 +49,10 @@ function renderProducts(products, containerId) {
         return;
     }
 
-    // 📱 ВМИКАЄМО НАШУ УНІВЕРСАЛЬНУ ДВІЙКОВУ СІТКУ!
+    // ВМИКАЄМО НАШУ УНІВЕРСАЛЬНУ ДВІЙКОВУ СІТКУ!
     container.className = 'products-grid';
 
-    // 🕵️‍♂️ ПЕРЕВІРКА НА АДМІНА
+    // ПЕРЕВІРКА НА АДМІНА
     const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
     let isUserAdmin = false;
 
@@ -114,7 +114,6 @@ function renderProducts(products, containerId) {
     });
 }
 
-// ОНОВЛЕНА ЛОГІКА: БЕЗ ЗАПАСНИХ ТОВАРІВ, ЯКЩО ТОП ПОРОЖНІЙ
 function updateFeaturedProductsUI() {
     const featuredContainer = document.getElementById('featured-products');
     if (!featuredContainer) return;
@@ -139,7 +138,6 @@ function updateFeaturedProductsUI() {
     }
 }
 
-// ФІЛЬТРАЦІЯ З СОРТУВАННЯМ ПОПУЛЯРНИХ ВГОРУ
 function filterProducts(category, button) {
     document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
     button.classList.add('active');
@@ -153,7 +151,6 @@ function filterProducts(category, button) {
     renderProducts(sortedAndFiltered, 'catalog-products');
 }
 
-// СОРТУВАЛКА ДЛЯ КАТАЛОГУ
 function getSortedProductsForCatalog(productsList) {
     return [...productsList].sort((a, b) => {
         const aFeatured = a.isFeatured ? 1 : 0;
@@ -162,7 +159,6 @@ function getSortedProductsForCatalog(productsList) {
     });
 }
 
-// 📸 Масив для збереження посилань на фотографії
 let uploadedImages = [];
 
 function openCloudinaryWidget() {
@@ -181,7 +177,6 @@ function openCloudinaryWidget() {
     });
 }
 
-// ОБРОБНИК ФОРМИ АДМІНКИ
 const addProductForm = document.getElementById('addProductForm');
 if (addProductForm) {
     addProductForm.addEventListener('submit', async (e) => {
@@ -221,7 +216,7 @@ if (addProductForm) {
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof switchPage === 'function') switchPage('catalog');
             } else {
-                alert("Помилка сервера: " + (result.error || result.message || "Невідома помилка"));
+                alert("Помилка сервера: " + (result.error || result.message || "Невідома㳑 помилка"));
             }
         } catch (err) {
             alert("Критична помилка мережі: " + err.message);
@@ -292,22 +287,18 @@ function updateCabinetFavoritesUI() {
     renderProducts(favorites, 'cabinet-favorites-list');
 }
 
-// Функції кошика
 function addToCart(productId, chosenSize = null) {
     const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
     if (!product) return;
 
-    // Шукаємо, чи є вже ТАКІЙ САМИЙ товар З ТАКИМ САМИМ розміром у кошику
     const cartItem = cart.find(item => 
         (item._id === productId || item.id === productId || item.id == productId) && 
         (item.selectedSize === chosenSize)
     );
 
     if (cartItem) {
-        // Якщо знайшли такий же товар з таким же розміром — просто збільшуємо кількість
         cartItem.quantity = (cartItem.quantity || 1) + 1;
     } else {
-        // Якщо товар новий або розмір інший — додаємо як окрему позицію
         cart.push({ ...product, quantity: 1, selectedSize: chosenSize });
     }
 
@@ -315,7 +306,6 @@ function addToCart(productId, chosenSize = null) {
         updateCartUI();
     }
 }
-
     
 function removeFromCart(index) {
     cart.splice(index, 1); 
@@ -360,8 +350,10 @@ function updateCartUI() {
 
         cart.forEach((item, index) => {
             total += Number(item.price) * (item.quantity || 1);
-            const sizeText = item.selectedSize ? ` <span style="font-size: 12px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #333;">Розмір: ${item.selectedSize}</span>` : '';
-            const quantityText = item.quantity > 1 ? ` <span style="color: #667; font-weight: bold;">(x${item.quantity})</span>` : '';
+            
+            // ЧІТКО: генеруємо бейдж розміру, якщо він вибраний
+            const sizeText = item.selectedSize ? ` <span style="font-size: 11px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #333; font-weight: normal;">Розмір: ${item.selectedSize}</span>` : '';
+            const quantityText = item.quantity > 1 ? ` <span style="color: #666; font-weight: bold;">(x${item.quantity})</span>` : '';
             const itemTotalPrice = Number(item.price) * (item.quantity || 1);
 
             listContainer.innerHTML += `
@@ -446,9 +438,10 @@ function submitOrderCOD() {
     const buyerName = currentUser ? `${name} (${currentUser.name})` : name;
 
     const orderData = {
-        customerName: `${buyerName} | Тел: ${phone} | Доставка: ${delivery}`,
+        customerName: `${buyerName} | Tel: ${phone} | Доставка: ${delivery}`,
+        // Важливо: передаємо розміри у замовлення для адміна на сервер
         items: cart.map(item => ({ 
-            name: item.name, 
+            name: item.selectedSize ? `${item.name} (Розмір: ${item.selectedSize})` : item.name, 
             price: item.price, 
             quantity: item.quantity || 1 
         })),
@@ -477,7 +470,6 @@ function submitOrderCOD() {
     });
 }
     
-
 function renderPayPalButton(totalUah) {
     const usdRate = 40;
     const totalUsd = (totalUah / usdRate).toFixed(2);
@@ -506,7 +498,11 @@ function renderPayPalButton(totalUah) {
 
                 const orderData = {
                     customerName: `${name} | Тел: ${phone} | Доставка: ${delivery}`,
-                    items: cart.map(item => ({ name: item.name, price: item.price })),
+                    items: cart.map(item => ({ 
+                        name: item.selectedSize ? `${item.name} (Розмір: ${item.selectedSize})` : item.name, 
+                        price: item.price,
+                        quantity: item.quantity || 1
+                    })),
                     total: totalUah
                 };
 
@@ -532,11 +528,10 @@ function renderPayPalButton(totalUah) {
             });
         }
     }).render('#paypal-button-container');
-}
+                   }
 
 
 
-                                            
 function toggleAdmin() {
     const adminPage = document.getElementById('page-admin');
     if (adminPage && adminPage.classList.contains('active')) {
@@ -561,7 +556,6 @@ function submitAdminLogin() {
         if (errorMsg) errorMsg.style.display = 'block';
     }
 }
-                                        
     
 async function loadAdminOrders() {
     const container = document.getElementById('admin-orders-list');
@@ -782,11 +776,6 @@ function autoLogin() {
 }
 
 autoLogin();
-           
-
-
-                                            
-
                     
 function showSuccessModal() {
     toggleCart(false);
@@ -854,9 +843,12 @@ function toggleBurgerMenu() {
     if (menu) {
         menu.classList.toggle('active');
     }
-}
+                    }
+                        
 
-async function toggleFeatured(productId) {
+
+
+                    async function toggleFeatured(productId) {
     try {
         const token = localStorage.getItem('sneakers_token');
 
@@ -923,23 +915,16 @@ function animateAndAddToCart(buttonElement, productId) {
     }, 450);
 }
 
-// 🎯 СЛУЖБОВА ФУНКЦІЯ: Зв'язує клік по картці, шукає об'єкт товару і запускає його рендер
 function openProductPage(productId) {
-    // Шукаємо об'єкт товару за його ID в масиві
     const product = allProducts.find(p => p.id == productId || p._id == productId);
     if (!product) {
         console.error("Товар не знайдено з ID:", productId);
         return;
     }
-    // Спершу генеруємо дизайн сторінки з даними цього товару
     renderProductDetailPage(product);
-    // Перемикаємо SPA-сторінку на детальну картку
     switchPage('product');
-                            }
+}
 
-
-
-                                            // 🌟 ФУНКЦІЯ ПРЕМІУМ-РЕНДЕРУ СТОРІНКИ ТОВАРУ
 function renderProductDetailPage(product) {
     const container = document.getElementById('product-detail-container');
     if (!container) return;
@@ -960,22 +945,17 @@ function renderProductDetailPage(product) {
         });
     }
 
-        // Обнуляємо глобальну змінну вибраного розміру щоразу, коли відкриваємо НОВИЙ товар
-    selectedProductSize = null;
-
-    let sizesSectionHTML = ''; // Сюди згенеруємо весь блок або залишимо порожнім
-    
-    // Перевіряємо категорію товару
+    // УНІВЕРСАЛЬНІ РОЗМІРИ ЗА КАТЕГОРІЯМИ
+    selectedProductSize = null; 
+    let sizesSectionHTML = ''; 
     const category = product.category ? product.category.toLowerCase() : 'all';
-    
+
     if (category === 'shoes' || category === 'взуття') {
-        // Якщо взуття — беремо розміри з бази або ставимо стандартні цифри
         const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : [39, 40, 41, 42, 43];
         let sizesGrid = '';
         availableSizes.forEach(size => {
             sizesGrid += `<button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>`;
         });
-        
         sizesSectionHTML = `
             <div class="size-selector-section">
                 <div class="section-label">Оберіть розмір взуття:</div>
@@ -983,13 +963,11 @@ function renderProductDetailPage(product) {
             </div>
         `;
     } else if (category === 'clothes' || category === 'одяг') {
-        // Якщо одяг — беремо розміри з бази або ставимо стандартні літери
         const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L', 'XL'];
         let sizesGrid = '';
         availableSizes.forEach(size => {
             sizesGrid += `<button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>`;
         });
-        
         sizesSectionHTML = `
             <div class="size-selector-section">
                 <div class="section-label">Оберіть розмір одягу:</div>
@@ -997,10 +975,8 @@ function renderProductDetailPage(product) {
             </div>
         `;
     } else {
-        // Для аксесуарів та всього іншого блок розмірів просто залишається порожнім (ховається)
-        sizesSectionHTML = '';
+        sizesSectionHTML = ''; // Ховаємо для аксесуарів
     }
-        
 
     const specs = product.specs || {
         "Категорія": product.category || "Спорт",
@@ -1033,12 +1009,7 @@ function renderProductDetailPage(product) {
 
                 <div class="single-product-price">${product.price} грн</div>
 
-                <div class="size-selector-section">
-                    <div class="section-label">Оберіть розмір:</div>
-                    <div class="sizes-grid">
-                        ${sizesSectionHTML}
-                    </div>
-                </div>
+                ${sizesSectionHTML}
 
                 <button class="btn-main-buy" onclick="addToCartFromPage('${product.id}')">
                     <span>🛒 Додати в кошик</span>
@@ -1087,25 +1058,19 @@ function switchTab(event, tabId) {
 }
 
 function addToCartFromPage(productId) {
-    // Шукаємо товар, щоб дізнатися його категорію
     const product = allProducts.find(p => p.id == productId || p._id == productId);
     if (!product) return;
 
     const category = product.category ? product.category.toLowerCase() : 'all';
     
-    // Якщо це одяг або взуття, вибір розміру ОБОВ'ЯЗКОВИЙ
     if ((category === 'shoes' || category === 'взуття' || category === 'clothes' || category === 'одяг') && !selectedProductSize) {
         alert('⚠️ Будь ласка, оберіть розмір перед додаванням у кошик!');
         return;
     }
 
-    // Кличемо нашу головну функцію додавання в кошик, але передаємо туди ще й розмір!
     addToCart(productId, selectedProductSize);
-    
-    // Красиве візуальне сповіщення (опціонально)
     alert(`🛒 Товар додано в кошик! ${selectedProductSize ? '(Розмір: ' + selectedProductSize + ')' : ''}`);
-        }
-
+}
 
 // Старт додатка
 document.addEventListener("DOMContentLoaded", () => {
