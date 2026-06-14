@@ -1246,20 +1246,22 @@ header {
 
 .
 /* НОВА БІЛА КНОПКА БУРГЕРА */
+/* КНОПКА БУРГЕРА — ЧІТКА ТА БІЛА */
 .burger-btn {
     background: transparent !important;
     border: none !important;
-    width: 24px;
-    height: 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    color: #ffffff !important; /* Залізно білий колір значка */
+    font-size: 28px !important; /* Збільшений розмір, щоб зручно тапати */
     cursor: pointer;
-    padding: 0 !important;
-    margin-right: 10px;
+    padding: 0 10px !important;
+    margin-right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: relative;
-    z-index: 50; /* Кнопка вище за контент шапки */
+    z-index: 101; /* Стає вище за основний контент */
 }
+
 
 /* Білі красиві смужки */
 .burger-btn span {
