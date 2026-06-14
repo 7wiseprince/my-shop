@@ -853,48 +853,27 @@ function toggleBurgerMenu(event) {
 }
 
 // СИНХРОНІЗОВАНА НАВІГАЦІЯ ДЛЯ БУРГЕР-МЕНЮ (БЕЗ КОНФЛІКТІВ)
+// ОНОВЛЕНА НАВІГАЦІЯ БУРГЕРА (ПІД ТВОЮ СИСТЕМУ SWITCHPAGE)
 function clickBurgerLink(event, pageId) {
-    if (event) event.preventDefault(); // Повністю блокуємо дефолтну поведінку посилання
+    if (event) event.preventDefault(); // Повністю блокуємо смикання екрану
 
     // 1. Одразу ховаємо шторку меню назад
     const menu = document.getElementById('mobile-burger-menu');
     if (menu) menu.classList.remove('open');
 
-    // 2. Окремий випадок для Кошика
+    // 2. Якщо натиснули на Кошик — відкриваємо кошик
     if (pageId === 'page-cart') {
         if (typeof toggleCart === 'function') toggleCart(true);
         return;
     }
 
-    // 3. Перемикаємо сторінку через твою РІДНУ функцію switchPage
-    // Оскільки твоя функція приймає чистий ID без префіксу "page-", ми зрізаємо його
-    const cleanId = pageId.replace('page-', ''); 
-
+    // 3. Перемикаємо сторінку через твою рідну функцію switchPage
     if (typeof switchPage === 'function') {
-        try {
-            switchPage(cleanId);
-        } catch (err) {
-            console.error("Помилка під час switchPage:", err);
-            fallbackPageSwitch(pageId);
-        }
-    } else {
-        fallbackPageSwitch(pageId);
+        switchPage(pageId);
     }
 }
 
-// Резервний варіант (якщо сторінки «Про нас» чи «Відгуки» ще не повністю прописані у switchPage)
-function fallbackPageSwitch(pageId) {
-    document.querySelectorAll('.page').forEach(p => {
-        p.style.display = 'none';
-        p.classList.remove('active');
-    });
 
-    const target = document.getElementById(pageId);
-    if (target) {
-        target.style.display = 'block';
-        target.classList.add('active');
-    }
-}
 
                         
 
