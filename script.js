@@ -293,22 +293,29 @@ function updateCabinetFavoritesUI() {
 }
 
 // Функції кошика
-function addToCart(productId) {
+function addToCart(productId, chosenSize = null) {
     const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
     if (!product) return;
 
-    const cartItem = cart.find(item => (item._id === productId || item.id === productId || item.id == productId));
+    // Шукаємо, чи є вже ТАКІЙ САМИЙ товар З ТАКИМ САМИМ розміром у кошику
+    const cartItem = cart.find(item => 
+        (item._id === productId || item.id === productId || item.id == productId) && 
+        (item.selectedSize === chosenSize)
+    );
 
     if (cartItem) {
+        // Якщо знайшли такий же товар з таким же розміром — просто збільшуємо кількість
         cartItem.quantity = (cartItem.quantity || 1) + 1;
     } else {
-        cart.push({ ...product, quantity: 1 });
+        // Якщо товар новий або розмір інший — додаємо як окрему позицію
+        cart.push({ ...product, quantity: 1, selectedSize: chosenSize });
     }
 
     if (typeof updateCartUI === 'function') {
         updateCartUI();
     }
 }
+
     
 function removeFromCart(index) {
     cart.splice(index, 1); 
@@ -353,13 +360,14 @@ function updateCartUI() {
 
         cart.forEach((item, index) => {
             total += Number(item.price) * (item.quantity || 1);
-            const quantityText = item.quantity > 1 ? ` <span style="color: #666; font-weight: bold;">(x${item.quantity})</span>` : '';
+            const sizeText = item.selectedSize ? ` <span style="font-size: 12px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #333;">Розмір: ${item.selectedSize}</span>` : '';
+            const quantityText = item.quantity > 1 ? ` <span style="color: #667; font-weight: bold;">(x${item.quantity})</span>` : '';
             const itemTotalPrice = Number(item.price) * (item.quantity || 1);
 
             listContainer.innerHTML += `
                 <div class="cart-item">
                     <div class="cart-item-info">
-                        <div class="cart-item-title">${item.name}${quantityText}</div>
+                        <div class="cart-item-title">${item.name}${sizeText}${quantityText}</div>
                         <div class="cart-item-price">${itemTotalPrice} грн</div>
                     </div>
                     <button class="btn-remove" onclick="removeFromCart(${index})">🗑️</button>
@@ -952,14 +960,47 @@ function renderProductDetailPage(product) {
         });
     }
 
-    let sizesHTML = '';
-    const availableSizes = product.sizes || [39, 40, 41, 42, 43]; 
+        // Обнуляємо глобальну змінну вибраного розміру щоразу, коли відкриваємо НОВИЙ товар
+    selectedProductSize = null;
 
-    availableSizes.forEach(size => {
-        sizesHTML += `
-            <button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>
+    let sizesSectionHTML = ''; // Сюди згенеруємо весь блок або залишимо порожнім
+    
+    // Перевіряємо категорію товару
+    const category = product.category ? product.category.toLowerCase() : 'all';
+    
+    if (category === 'shoes' || category === 'взуття') {
+        // Якщо взуття — беремо розміри з бази або ставимо стандартні цифри
+        const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : [39, 40, 41, 42, 43];
+        let sizesGrid = '';
+        availableSizes.forEach(size => {
+            sizesGrid += `<button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>`;
+        });
+        
+        sizesSectionHTML = `
+            <div class="size-selector-section">
+                <div class="section-label">Оберіть розмір взуття:</div>
+                <div class="sizes-grid">${sizesGrid}</div>
+            </div>
         `;
-    });
+    } else if (category === 'clothes' || category === 'одяг') {
+        // Якщо одяг — беремо розміри з бази або ставимо стандартні літери
+        const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L', 'XL'];
+        let sizesGrid = '';
+        availableSizes.forEach(size => {
+            sizesGrid += `<button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>`;
+        });
+        
+        sizesSectionHTML = `
+            <div class="size-selector-section">
+                <div class="section-label">Оберіть розмір одягу:</div>
+                <div class="sizes-grid">${sizesGrid}</div>
+            </div>
+        `;
+    } else {
+        // Для аксесуарів та всього іншого блок розмірів просто залишається порожнім (ховається)
+        sizesSectionHTML = '';
+    }
+        
 
     const specs = product.specs || {
         "Категорія": product.category || "Спорт",
@@ -995,7 +1036,7 @@ function renderProductDetailPage(product) {
                 <div class="size-selector-section">
                     <div class="section-label">Оберіть розмір:</div>
                     <div class="sizes-grid">
-                        ${sizesHTML}
+                        ${sizesSectionHTML}
                     </div>
                 </div>
 
@@ -1046,10 +1087,25 @@ function switchTab(event, tabId) {
 }
 
 function addToCartFromPage(productId) {
-    if (typeof addToCart === 'function') {
-        addToCart(productId);
+    // Шукаємо товар, щоб дізнатися його категорію
+    const product = allProducts.find(p => p.id == productId || p._id == productId);
+    if (!product) return;
+
+    const category = product.category ? product.category.toLowerCase() : 'all';
+    
+    // Якщо це одяг або взуття, вибір розміру ОБОВ'ЯЗКОВИЙ
+    if ((category === 'shoes' || category === 'взуття' || category === 'clothes' || category === 'одяг') && !selectedProductSize) {
+        alert('⚠️ Будь ласка, оберіть розмір перед додаванням у кошик!');
+        return;
     }
-}
+
+    // Кличемо нашу головну функцію додавання в кошик, але передаємо туди ще й розмір!
+    addToCart(productId, selectedProductSize);
+    
+    // Красиве візуальне сповіщення (опціонально)
+    alert(`🛒 Товар додано в кошик! ${selectedProductSize ? '(Розмір: ' + selectedProductSize + ')' : ''}`);
+        }
+
 
 // Старт додатка
 document.addEventListener("DOMContentLoaded", () => {
