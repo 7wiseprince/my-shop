@@ -849,22 +849,23 @@ function toggleBurgerMenu(event) {
 }
 
 // Функція для переходу по сторінках з бургер-меню
+// Універсальна функція для переходу зі сторінок бургеру
 function navigateFromBurger(pageId) {
-    // 1. Спочатку закриваємо бургер-меню, щоб воно сховалося назад
+    // 1. Закриваємо меню
     const menu = document.getElementById('mobile-burger-menu');
     if (menu) menu.classList.remove('open');
     
-    // 2. Викликаємо твою стандартну функцію перемикання сторінок
-    // Переконайся, як вона у тебе точно називається (наприклад, showPage або на кшталт цього)
+    // 2. Перемикаємо сторінку через твою стандартну функцію
     if (typeof showPage === 'function') {
         showPage(pageId);
     } else {
-        // Якщо у тебе перемикання йде через приховання класів вручну:
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        // Альтернативний варіант, якщо класи перемикаються вручну
+        document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
         const targetPage = document.getElementById(pageId);
-        if (targetPage) targetPage.classList.add('active');
+        if (targetPage) targetPage.style.display = 'block';
     }
 }
+
 
                         
 
