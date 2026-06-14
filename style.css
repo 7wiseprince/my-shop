@@ -1242,66 +1242,77 @@ header {
 
 /* Вони будуть використовувати твій клас .category-card, тому стануть точно такими ж красивими, як на головній! */
 /* СТИЛЬ КНОПКИ БУРГЕРА */
+
+
+.
+/* НОВА БІЛА КНОПКА БУРГЕРА */
 .burger-btn {
-    background: transparent;
-    border: none;
-    font-size: 24px;
+    background: transparent !important;
+    border: none !important;
+    width: 24px;
+    height: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     cursor: pointer;
-    color: #2c3e50;
-    padding: 5px 10px;
-    /* Мінімалістичний індекс, просто щоб кнопка була поверх шапки */
+    padding: 0 !important;
+    margin-right: 10px;
     position: relative;
-    z-index: 2; 
+    z-index: 50; /* Кнопка вище за контент шапки */
 }
 
-/* ОВЕРЛЕЙ (ЗАДНІЙ ФОН МЕНЮ) */
+/* Білі красиві смужки */
+.burger-btn span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #ffffff !important; /* Робимо смужки білими, як і весь текст шапки */
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+/* ОВЕРЛЕЙ МЕНЮ (ПОВНІСТЮ ПЕРЕКРИВАЄ СЕРДЕЧКА) */
 .burger-menu-overlay {
     position: fixed;
     top: 0;
-    left: -100%; /* Меню сховане за лівим краєм екрану */
+    left: -100%;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4); /* М'яке затемнення фону */
-    /* Головний екран меню стає трохи вище за кнопку */
-    z-index: 3; 
-    transition: left 0.3s ease-in-out; /* Плавний виїзд */
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100; /* Шар 100 залізно перекриє червоні сердечка товарів */
+    transition: left 0.3s ease-in-out;
 }
 
-/* Клас, який вмикається через JS при кліку */
 .burger-menu-overlay.open {
     left: 0;
 }
 
-/* КОНТЕНТНА ЧАСТИНА МЕНЮ */
 .burger-menu-content {
-    width: 75%; /* Займає 3/4 екрану смартфона */
+    width: 75%;
     height: 100%;
     background: #ffffff;
     padding: 25px 20px;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    z-index: 101;
 }
 
-/* КНОПКА ЗАКРИТТЯ (ХРЕСТИК) */
+/* Кнопка закриття */
 .burger-close-btn {
     background: transparent;
     border: none;
-    font-size: 22px;
+    font-size: 20px;
     cursor: pointer;
     color: #7f8c8d;
-    transition: color 0.2s;
-}
-.burger-close-btn:active {
-    color: #e74c3c; /* Червоніє при натисканні */
 }
 
-/* СПИСОК ПОСИЛАНЬ */
+/* Навігація */
 .burger-nav {
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    margin-top: 10px;
+    gap: 10px;
+    margin-top: 15px;
 }
 
 .burger-nav a {
@@ -1309,12 +1320,13 @@ header {
     font-weight: 600;
     color: #2c3e50;
     text-decoration: none;
-    padding: 12px 8px;
+    padding: 12px 10px;
     border-radius: 8px;
+    display: flex;
+    align-items: center;
     transition: background 0.2s;
 }
 
-/* Ефект тапу на посилання для мобілки */
 .burger-nav a:active {
     background: #f8f9fa;
 }
