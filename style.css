@@ -1227,10 +1227,17 @@ header {
     }
 
 
+/* КАТЕГОРІЇ КАТАЛОГУ В ДВІ КОЛОНКИ (ДВОЇЧНА СІТКА) */
 .categories-catalog-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding: 10px;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* Робить рівно 2 колонки для категорій */
+    gap: 12px !important; /* Відступи між плитками */
+    padding: 10px !important;
 }
+
+/* Робимо висоту карток трохи меншою, щоб вони ідеально сідали в дві колонки на екрані телефону */
+.categories-catalog-grid .category-card {
+    height: 140px !important; /* Менша висота, щоб плиточки були акуратними квадратами */
+}
+
 /* Вони будуть використовувати твій клас .category-card, тому стануть точно такими ж красивими, як на головній! */
