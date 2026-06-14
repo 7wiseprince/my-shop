@@ -15,9 +15,10 @@
 <body>
 <header>
     <div class="header-left-panel" style="display: flex; align-items: center;">
-        <button id="burger-menu-btn" class="burger-btn" onclick="toggleBurgerMenu()">☰</button>
+        <button id="burger-menu-btn" class="burger-btn" onclick="toggleBurgerMenu(event)">☰</button>
         <span class="logo" id="secret-bag" onclick="toggleAdmin()">🛍️ MyShop</span>
-    </div> <div class="header-right-panel" style="display: flex; align-items: center; gap: 10px;">
+    </div> 
+    <div class="header-right-panel" style="display: flex; align-items: center; gap: 10px;">
         <input type="text" id="search-input" placeholder="Пошук товарів..." oninput="handleSearch()" />
         
         <button class="cart-header-btn" onclick="toggleCart(true)">
@@ -27,7 +28,57 @@
     </div> 
 </header>
 
+<div id="mobile-burger-menu" class="burger-menu-overlay">
+    <div class="burger-menu-content">
+        <div class="burger-menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <span style="font-weight: 800; font-size: 18px; color: #2c3e50;">🛍️ Навігація</span>
+            <button class="burger-close-btn" onclick="toggleBurgerMenu(event)" style="margin-bottom: 0;">✖</button>
+        </div>
+        
+        <nav class="burger-nav">
+            <a href="#" onclick="navigateFromBurger('page-main')">🏠 Головна</a>
+            <a href="#" onclick="navigateFromBurger('page-catalog')">📦 Каталог</a>
+            <a href="#" onclick="navigateFromBurger('page-favorites')">❤️ Закладки</a>
+            <a href="#" onclick="navigateFromBurger('page-cart')">🛒 Кошик</a>
+            
+            <div style="margin: 10px 0; border-top: 1px dashed #cbd5e1;"></div> <a href="#" onclick="navigateFromBurger('page-about')">ℹ️ Про нас</a>
+            <a href="#" onclick="navigateFromBurger('page-reviews')">💬 Відгуки покупців</a>
+            <a href="#" onclick="navigateFromBurger('page-contacts')">📞 Контакти та Доставка</a>
+        </nav>
+        
+        <div class="burger-footer" style="margin-top: auto; padding-top: 20px; text-align: center;">
+            <p style="font-size: 12px; color: #7f8c8d; margin-bottom: 10px;">Ми в соцмережах:</p>
+            <div style="display: flex; justify-content: center; gap: 15px; font-size: 20px;">
+                <a href="https://instagram.com/твій_профіль" target="_blank" style="text-decoration: none;">📸</a>
+                <a href="https://t.me/твій_канал" target="_blank" style="text-decoration: none;">✈️</a>
+            </div>
+        </div>
+    </div>
+</div>
+    
+    
 
+<div id="page-about" class="page" style="display: none; padding: 20px; text-align: center;">
+    <h2 class="section-title">Про наш бренд</h2>
+    <p style="color: #34495e; line-height: 1.6; margin-top: 15px;">
+        Вітаємо у MyShop! Ми створюємо преміальний стрітвір одяг та підбираємо найкраще взуття для твого стилю. Наша мета — якість, комфорт та унікальність у кожній деталі.
+    </p>
+</div>
+
+<div id="page-reviews" class="page" style="display: none; padding: 20px; text-align: center;">
+    <h2 class="section-title">Відгуки покупців</h2>
+    <p style="color: #7f8c8d; margin-top: 15px;">Тут скоро з'являться відгуки наших задоволених клієнтів з Instagram! ⭐⭐⭐⭐⭐</p>
+</div>
+
+<div id="page-contacts" class="page" style="display: none; padding: 20px; text-align: center;">
+    <h2 class="section-title">Контакти та Доставка</h2>
+    <p style="color: #34495e; margin-top: 15px; line-height: 1.6;">
+        📍 <b>Доставка:</b> Новою Поштою по всій Україні (1-3 дні).<br>
+        📞 <b>Підтримка в Telegram:</b> @твій_юзернейм<br>
+        🕒 <b>Графік роботи:</b> Щодня з 10:00 до 21:00
+    </p>
+</div>
+    
         
 <div id="page-home" class="page active">
     <div class="promo-banner">
