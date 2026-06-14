@@ -1226,3 +1226,11 @@ header {
     border-bottom: 1px dashed #f0f0f0;
     }
 
+
+.categories-catalog-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 10px;
+}
+/* Вони будуть використовувати твій клас .category-card, тому стануть точно такими ж красивими, як на головній! */
