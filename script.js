@@ -838,28 +838,36 @@ function updateCartBadge() {
     }
 }
 
-// Функція відкриття / закриття бургер-меню
+// Чиста функція відкриття / закриття шторки
 function toggleBurgerMenu(event) {
-    if (event) event.stopPropagation(); // Зупиняємо завади кліку
+    if (event) event.preventDefault();
     const menu = document.getElementById('mobile-burger-menu');
-    if (!menu) return;
-    
-    // Тогглимо (вмикаємо/вимикаємо) клас open
-    menu.classList.toggle('open');
+    if (menu) {
+        menu.classList.toggle('open');
+    }
 }
 
-// Функція для переходу по сторінках з бургер-меню
-// Універсальна функція для переходу зі сторінок бургеру
-function navigateFromBurger(pageId) {
-    // 1. Закриваємо меню
+// Універсальний безпечний перехід для всіх кнопок бургер-меню
+function navigateFromBurger(event, pageId) {
+    if (event) event.preventDefault(); // Зупиняємо стрибки сторінки вгору
+    
+    // 1. Закриваємо шторку меню
     const menu = document.getElementById('mobile-burger-menu');
     if (menu) menu.classList.remove('open');
     
-    // 2. Перемикаємо сторінку через твою стандартну функцію
+    // Special case: якщо натиснули на Кошик, відкриваємо твій кастомний кошик
+    if (pageId === 'page-cart') {
+        if (typeof toggleCart === 'function') {
+            toggleCart(true);
+        }
+        return;
+    }
+    
+    // 2. Перемикаємо сторінку через глобальний showPage сайту
     if (typeof showPage === 'function') {
         showPage(pageId);
     } else {
-        // Альтернативний варіант, якщо класи перемикаються вручну
+        // Запасний варіант, якщо сторінки перемикаються через display прямим кодом
         document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
         const targetPage = document.getElementById(pageId);
         if (targetPage) targetPage.style.display = 'block';
@@ -867,6 +875,7 @@ function navigateFromBurger(pageId) {
 }
 
 
+       
                         
 
 
