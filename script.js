@@ -838,12 +838,34 @@ function updateCartBadge() {
     }
 }
 
-function toggleBurgerMenu() {
-    const menu = document.getElementById('burger-menu');
-    if (menu) {
-        menu.classList.toggle('active');
+// Функція відкриття / закриття бургер-меню
+function toggleBurgerMenu(event) {
+    if (event) event.stopPropagation(); // Зупиняємо завади кліку
+    const menu = document.getElementById('mobile-burger-menu');
+    if (!menu) return;
+    
+    // Тогглимо (вмикаємо/вимикаємо) клас open
+    menu.classList.toggle('open');
+}
+
+// Функція для переходу по сторінках з бургер-меню
+function navigateFromBurger(pageId) {
+    // 1. Спочатку закриваємо бургер-меню, щоб воно сховалося назад
+    const menu = document.getElementById('mobile-burger-menu');
+    if (menu) menu.classList.remove('open');
+    
+    // 2. Викликаємо твою стандартну функцію перемикання сторінок
+    // Переконайся, як вона у тебе точно називається (наприклад, showPage або на кшталт цього)
+    if (typeof showPage === 'function') {
+        showPage(pageId);
+    } else {
+        // Якщо у тебе перемикання йде через приховання класів вручну:
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const targetPage = document.getElementById(pageId);
+        if (targetPage) targetPage.classList.add('active');
     }
-                    }
+}
+
                         
 
 
