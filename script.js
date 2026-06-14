@@ -843,34 +843,38 @@ function updateCartBadge() {
 
 
        // Функція відкриття/закриття шторки
+// ЧИСТА ФУНКЦІЯ ВІДКРИТТЯ / ЗАКРИТТЯ ШТОРКИ
 function toggleBurgerMenu(event) {
-    if (event) event.preventDefault();
+    if (event) event.preventDefault(); // Зупиняємо стрибки сторінки через href="#"
     const menu = document.getElementById('mobile-burger-menu');
     if (menu) {
         menu.classList.toggle('open');
     }
 }
 
-// Нова безпечна функція для кліків у бургері
+// СИНХРОНІЗОВАНА НАВІГАЦІЯ ДЛЯ БУРГЕР-МЕНЮ (БЕЗ КОНФЛІКТІВ)
 function clickBurgerLink(event, pageId) {
-    if (event) event.preventDefault(); // Зупиняємо перезавантаження посилань
-    
-    // 1. Одразу ховаємо шторку меню
+    if (event) event.preventDefault(); // Повністю блокуємо дефолтну поведінку посилання
+
+    // 1. Одразу ховаємо шторку меню назад
     const menu = document.getElementById('mobile-burger-menu');
     if (menu) menu.classList.remove('open');
-    
-    // 2. Якщо це кошик — відкриваємо його окремою функцією
+
+    // 2. Окремий випадок для Кошика
     if (pageId === 'page-cart') {
         if (typeof toggleCart === 'function') toggleCart(true);
         return;
     }
-    
-    // 3. Перемикаємо сторінку
-    if (typeof showPage === 'function') {
+
+    // 3. Перемикаємо сторінку через твою РІДНУ функцію switchPage
+    // Оскільки твоя функція приймає чистий ID без префіксу "page-", ми зрізаємо його
+    const cleanId = pageId.replace('page-', ''); 
+
+    if (typeof switchPage === 'function') {
         try {
-            showPage(pageId);
+            switchPage(cleanId);
         } catch (err) {
-            console.log("Пряме перемикання сторінок");
+            console.error("Помилка під час switchPage:", err);
             fallbackPageSwitch(pageId);
         }
     } else {
@@ -878,13 +882,13 @@ function clickBurgerLink(event, pageId) {
     }
 }
 
-// Резервне чисте перемикання (якщо showPage дає збій на нових сторінках)
+// Резервний варіант (якщо сторінки «Про нас» чи «Відгуки» ще не повністю прописані у switchPage)
 function fallbackPageSwitch(pageId) {
     document.querySelectorAll('.page').forEach(p => {
         p.style.display = 'none';
         p.classList.remove('active');
     });
-    
+
     const target = document.getElementById(pageId);
     if (target) {
         target.style.display = 'block';
