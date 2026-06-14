@@ -32,23 +32,24 @@
     <div class="burger-menu-content">
         <div class="burger-menu-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
             <span style="font-weight: 800; font-size: 18px; color: #2c3e50;">🛍️ Навігація</span>
-            <button class="burger-close-btn" onclick="toggleBurgerMenu(event)">✖</button>
+            <button class="burger-close-btn" onclick="toggleBurgerMenu(event)" style="background:none; border:none; font-size:20px; cursor:pointer;">✖</button>
         </div>
         
         <nav class="burger-nav">
-            <a href="#" onclick="navigateFromBurger(event, 'page-main')">🏠 Головна</a>
-            <a href="#" onclick="navigateFromBurger(event, 'page-catalog')">📦 Каталог</a>
-            <a href="#" onclick="navigateFromBurger(event, 'page-favorites')">❤️ Закладки</a>
-            <a href="#" onclick="navigateFromBurger(event, 'page-cart')">🛒 Кошик</a>
+            <a href="#" onclick="clickBurgerLink(event, 'page-main')">🏠 Головна</a>
+            <a href="#" onclick="clickBurgerLink(event, 'page-catalog')">📦 Каталог</a>
+            <a href="#" onclick="clickBurgerLink(event, 'page-favorites')">❤️ Закладки</a>
+            <a href="#" onclick="clickBurgerLink(event, 'page-cart')">🛒 Кошик</a>
             
             <div style="margin: 10px 0; border-top: 1px dashed #cbd5e1;"></div>
             
-            <a href="#" onclick="navigateFromBurger(event, 'page-about')">ℹ️ Про нас</a>
-            <a href="#" onclick="navigateFromBurger(event, 'page-reviews')">💬 Відгуки покупців</a>
-            <a href="#" onclick="navigateFromBurger(event, 'page-contacts')">📞 Контакти та Доставка</a>
+            <a href="#" onclick="clickBurgerLink(event, 'page-about')">ℹ️ Про нас</a>
+            <a href="#" onclick="clickBurgerLink(event, 'page-reviews')">💬 Відгуки покупців</a>
+            <a href="#" onclick="clickBurgerLink(event, 'page-contacts')">📞 Контакти та Доставка</a>
         </nav>
     </div>
-                </div>
+</div>
+    
     
     
         
