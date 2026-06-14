@@ -112,14 +112,34 @@
     
     
     <div id="page-catalog" class="page">
-        <div class="filters">
-            <button class="filter-btn active" onclick="filterProducts('all', this)">Все</button>
-            <button class="filter-btn" onclick="filterProducts('shoes', this)">Взуття</button>
-            <button class="filter-btn" onclick="filterProducts('clothes', this)">Одяг</button>
-            <button class="filter-btn" onclick="filterProducts('accessories', this)">Аксесуари</button>
+    <h2 class="section-title" style="text-align: center; margin-bottom: 20px;">Каталог товарів</h2>
+    
+    <div class="categories-catalog-grid">
+        
+        <div class="category-card" onclick="openCatalogCategory('shoes')" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400');">
+            <span>Взуття</span>
         </div>
-        <div class="products-grid" id="catalog-products"></div>
+
+        <div class="category-card" onclick="openCatalogCategory('clothes')" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400');">
+            <span>Одяг</span>
+        </div>
+
+        <div class="category-card" onclick="event.stopPropagation(); openCatalogCategory('accessories')" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.4)), url('https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=400');">
+            <span>Аксесуари</span>
+        </div>
+        
     </div>
+
+    <div id="inner-category-products-wrapper" style="display: none; margin-top: 20px;">
+        <button onclick="backToCatalogCategories()" class="btn-back" style="background: #2c3e50; color: white; border: none; padding: 8px 15px; border-radius: 20px; margin-bottom: 15px; cursor: pointer; font-weight: bold; font-size: 13px;">
+            ⬅️ Назад до категорій
+        </button>
+        <h3 id="current-category-title" class="section-title" style="margin-top: 0;">Товари</h3>
+        
+        <div id="catalog-products" class="products-grid"></div>
+    </div>
+    </div>
+    
      
     <div id="page-favorites" class="page">
     <h2 style="text-align: center; margin-top: 20px; color: #2c3e50;">Улюблені товари</h2>
