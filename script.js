@@ -617,22 +617,53 @@ async function loadAdminOrders() {
     }
 }
     
-function handleSearch() {
-    const query = document.getElementById('search-input').value.toLowerCase();
-    const productCards = document.querySelectorAll('.product-card');
 
-    productCards.forEach(card => {
-        const titleElement = card.querySelector('.product-title');
-        if (titleElement) {
-            const title = titleElement.innerText.toLowerCase();
-            if (title.includes(query)) {
-                card.style.display = 'block'; 
-            } else {
-                card.style.display = 'none'; 
-            }
-        }
+
+// 🔥 ФУНКЦІЯ ЖИВОГО ПОШУКУ
+function handleSearch() {
+    // 1. Отримуємо текст із інпуту пошуку
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+    
+    const query = searchInput.value.trim().toLowerCase();
+
+    // 2. Якщо користувач почав писати, а він НЕ на сторінці каталогу, 
+    // автоматично перемикаємо його на каталог, щоб він бачив результати
+    const catalogPage = document.getElementById('page-catalog');
+    if (query.length > 0 && (!catalogPage || !catalogPage.classList.contains('active'))) {
+        switchPage('catalog');
+    }
+
+    // 3. Якщо користувач шукає щось всередині відкритої категорії каталогу, 
+    // скидаємо вигляд до загального списку товарів (щоб шукати по всьому асортименту)
+    const innerCategoryWrapper = document.getElementById('inner-category-products-wrapper');
+    const categoriesGrid = document.querySelector('.categories-catalog-grid');
+    
+    if (query.length > 0 && innerCategoryWrapper && innerCategoryWrapper.style.display === 'block') {
+        // Якщо були всередині категорії, показуємо загальну сітку товарів каталогу
+        if (categoriesGrid) categoriesGrid.style.display = 'none';
+        // Переконуємося, що контейнер товарів активний
+        innerCategoryWrapper.style.display = 'block';
+        // Тимчасово міняємо заголовок, щоб користувач розумів, що це результати пошуку
+        const title = document.getElementById('current-category-title');
+        if (title) title.innerText = '🔍 Результати пошуку';
+    } else if (query.length === 0 && innerCategoryWrapper && innerCategoryWrapper.style.display === 'block' && document.getElementById('current-category-title').innerText === '🔍 Результати пошуку') {
+        // Якщо пошук повністю стерли, повертаємо початковий вибір категорій
+        backToCatalogCategories();
+    }
+
+    // 4. Фільтруємо наш глобальний масив allProducts за назвою або описом
+    const filteredProducts = allProducts.filter(product => {
+        const nameMatches = product.name && product.name.toLowerCase().includes(query);
+        const descMatches = product.description && product.description.toLowerCase().includes(query);
+        return nameMatches || descMatches;
     });
-}
+
+    // 5. Рендеримо відфільтровані товари в сітку каталогу
+    renderProducts(filteredProducts, 'catalog-products');
+    }
+
+
 
 let currentAuthMode = 'login'; 
 
