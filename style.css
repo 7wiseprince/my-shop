@@ -1323,3 +1323,29 @@ header {
 .burger-nav a:active {
     background: #f8f9fa;
     }
+#search-input {
+    padding: 8px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    max-width: 200px;
+}
+
+#search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+}
+
+/* На дуже маленьких екранах зменшимо пошук, щоб не вилазив */
+@media (max-width: 380px) {
+    #search-input {
+        max-width: 140px;
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    }
+    
