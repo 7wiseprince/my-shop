@@ -32,7 +32,12 @@ async function loadProducts() {
         // Сортуємо глобальний масив і виводимо в каталог
         const sortedProducts = getSortedProductsForCatalog(allProducts);
         renderProducts(sortedProducts, 'catalog-products');
-        
+
+       favorites = favorites.filter(fav =>
+    allProducts.some(p => p._id === fav._id)
+);
+
+        updateFavoritesUI();
         // Оновлюємо популярні товари на головній сторінці при завантаженні
         updateFeaturedProductsUI();
             
@@ -267,6 +272,9 @@ function toggleFavorite(productId) {
 }
                                   
 function updateFavoritesUI() {
+   favorites = favorites.filter(fav =>
+    allProducts.some(p => p._id === fav._id)
+);
     const favoritesContainer = document.getElementById('favorites-products');
     if (favoritesContainer) favoritesContainer.className = 'products-grid';
 
