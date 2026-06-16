@@ -24,7 +24,6 @@ mongoose.connect(process.env.MONGO_URI)
 
 // СХЕМА ТОВАРУ (🔥 ОНОВЛЕНО: Додано поле isFeatured)
 const productSchema = new mongoose.Schema({
-    id: Number,
     name: String,
     price: Number,
     category: String,
@@ -94,9 +93,9 @@ async function seedDatabase() {
     const count = await Product.countDocuments();
     if (count === 0) {
         const defaultProducts = [
-            { id: 1, name: "Спортивні кросівки", price: 300, category: "shoes", images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"], description: "Легкі професійні кросівки для бігу.", isFeatured: false },
-            { id: 2, name: "Стильна футболка", price: 150, category: "clothes", images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500"], description: "100% натуральна бавовна.", isFeatured: false },
-            { id: 3, name: "Спортивна кепка", price: 100, category: "accessories", images: ["https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500"], description: "Стильний захист від сонця.", isFeatured: false }
+            {  name: "Спортивні кросівки", price: 300, category: "shoes", images: ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500"], description: "Легкі професійні кросівки для бігу.", isFeatured: false },
+            {  name: "Стильна футболка", price: 150, category: "clothes", images: ["https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500"], description: "100% натуральна бавовна.", isFeatured: false },
+            {  name: "Спортивна кепка", price: 100, category: "accessories", images: ["https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500"], description: "Стильний захист від сонця.", isFeatured: false }
         ];
         await Product.insertMany(defaultProducts);
         console.log("Базові товари успішно завантажені в хмару!");
