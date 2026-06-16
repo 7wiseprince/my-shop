@@ -59,12 +59,12 @@ function renderProducts(products, containerId) {
     const userJson = localStorage.getItem('user') || localStorage.getItem('currentUser');
     let isUserAdmin = false;
 
-    if (window.currentUser && window.currentUser.isAdmin) {
+    if (window.currentUser && window.currentUser.role === 'admin') {
         isUserAdmin = true;
     } else if (userJson) {
         try {
             const parsedUser = JSON.parse(userJson);
-            if (parsedUser.isAdmin || parsedUser.role === 'admin') {
+            if (parsedUser.role === 'admin') {
                 isUserAdmin = true;
             }
         } catch (e) {
@@ -73,8 +73,8 @@ function renderProducts(products, containerId) {
     }
 
     products.forEach(product => {
-        const prodId = product.id; 
-        const isFavorite = favorites.some(item => (item.id == prodId || item._id == product._id));
+        const prodId = product._id; 
+        const isFavorite = favorites.some(item => (item._id === prodId));
         const heartIcon = isFavorite ? '❤️' : '🤍';
 
         const isFeatured = product.isFeatured || false;
@@ -84,10 +84,10 @@ function renderProducts(products, containerId) {
         if (isUserAdmin) {
             adminButtonsHTML = `
                 <div class="admin-controls-panel" style="margin-top: 8px; display: flex; flex-direction: column; gap: 5px;">
-                    <button class="btn-toggle-featured" onclick="event.stopPropagation(); toggleFeatured('${prodId}')" style="width: 100%; background: #f1c40f; color: #2c3e50; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(241, 196, 15, 0.2);">
+                    <button class="btn-toggle-featured" onclick="event.stopPropagation(); toggleFeatured('${prodId}')" style="width: 100%; background: #f1c40f; color: #2c3e50; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">
                         ${starIcon}
                     </button>
-                    <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${prodId}')" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 6px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; box-shadow: 0 2px 4px rgba(231, 76, 60, 0.2);">
+                    <button class="btn-delete-admin" onclick="event.stopPropagation(); deleteProduct('${prodId}')" style="width: 100%; background: #e74c3c; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px;">
                         🗑️ Видалити товар (Адмін)
                     </button>
                 </div>
@@ -219,7 +219,7 @@ if (addProductForm) {
                 if (typeof loadProducts === 'function') loadProducts();
                 if (typeof switchPage === 'function') switchPage('catalog');
             } else {
-                alert("Помилка сервера: " + (result.error || result.message || "Невідома㳑 помилка"));
+                alert("Помилка сервера: " + (result.error || result.message || "Невідома помилка"));
             }
         } catch (err) {
             alert("Критична помилка мережі: " + err.message);
@@ -228,10 +228,10 @@ if (addProductForm) {
 }
 
 function toggleFavorite(productId) {
-    const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
+    const product = allProducts.find(p => p._id === productId);
     if (!product) return;
 
-    const index = favorites.findIndex(item => (item._id === productId || item.id === productId || item.id == productId));
+    const index = favorites.findIndex(item => item._id === productId);
 
     if (index === -1) {
         favorites.push(product);
@@ -250,7 +250,7 @@ function toggleFavorite(productId) {
     }
 
     if (currentUser) {
-        const uId = currentUser._id || currentUser.id;
+        const uId = currentUser._id;
         
         fetch('/api/favorites', {
             method: 'POST',
@@ -291,11 +291,11 @@ function updateCabinetFavoritesUI() {
 }
 
 function addToCart(productId, chosenSize = null) {
-    const product = allProducts.find(p => (p._id === productId || p.id === productId || p.id == productId));
+    const product = allProducts.find(p => p._id === productId);
     if (!product) return;
 
     const cartItem = cart.find(item => 
-        (item._id === productId || item.id === productId || item.id == productId) && 
+        item._id === productId && 
         (item.selectedSize === chosenSize)
     );
 
@@ -355,7 +355,7 @@ function updateCartUI() {
             total += Number(item.price) * (item.quantity || 1);
             
             // ЧІТКО: генеруємо бейдж розміру, якщо він вибраний
-            const sizeText = item.selectedSize ? ` <span style="font-size: 11px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #333; font-weight: normal;">Розмір: ${item.selectedSize}</span>` : '';
+            const sizeText = item.selectedSize ? ` <span style="font-size: 11px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; margin-left: 5px; color: #333; font-weight: normal;">Роз: ${item.selectedSize}</span>` : '';
             const quantityText = item.quantity > 1 ? ` <span style="color: #666; font-weight: bold;">(x${item.quantity})</span>` : '';
             const itemTotalPrice = Number(item.price) * (item.quantity || 1);
 
@@ -942,7 +942,7 @@ function clickBurgerLink(event, pageId) {
         }
 
         allProducts = allProducts.map(p => {
-            if (p.id == productId) {
+            if (p._id === productId) {
                 return { ...p, isFeatured: data.product.isFeatured };
             }
             return p;
@@ -986,7 +986,7 @@ function animateAndAddToCart(buttonElement, productId) {
 }
 
 function openProductPage(productId) {
-    const product = allProducts.find(p => p.id == productId || p._id == productId);
+    const product = allProducts.find(p => p._id === productId);
     if (!product) {
         console.error("Товар не знайдено з ID:", productId);
         return;
@@ -1081,7 +1081,7 @@ function renderProductDetailPage(product) {
 
                 ${sizesSectionHTML}
 
-                <button class="btn-main-buy" onclick="addToCartFromPage('${product.id}')">
+                <button class="btn-main-buy" onclick="addToCartFromPage('${product._id}')">
                     <span>🛒 Додати в кошик</span>
                 </button>
             </div>
@@ -1128,7 +1128,7 @@ function switchTab(event, tabId) {
 }
 
 function addToCartFromPage(productId) {
-    const product = allProducts.find(p => p.id == productId || p._id == productId);
+    const product = allProducts.find(p => p._id === productId);
     if (!product) return;
 
     const category = product.category ? product.category.toLowerCase() : 'all';
@@ -1169,8 +1169,6 @@ function backToCatalogCategories() {
     // Ховаємо товари
     document.getElementById('inner-category-products-wrapper').style.display = 'none';
 }
-
-
 
 
 
