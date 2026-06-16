@@ -130,24 +130,22 @@ app.get('/api/products', async (req, res) => {
 
 // Отримати ОДИН товар за його цифровим ID
 app.get('/api/products/:id', async (req, res) => {
-    try {
-        const productId = Number(req.params.id);
-        const product = await Product.findOne({ id: productId });
-        
-        if (!product) {
-            return res.status(404).json({ success: false, message: "Товар не знайдено" });
-        }
-        res.json(product);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
+    const product = await Product.findById(req.params.id);
 
+    if (!product) {
+        return res.status(404).json({
+            success: false,
+            message: "Товар не знайдено"
+        });
+    }
+
+    res.json(product);
+});
 // 🔥 НОВИЙ МАРШРУТ: Перемикання статусу популярності товару (ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.post('/api/products/toggle-featured/:id', isAdmin, async (req, res) => {
     try {
         const productId = Number(req.params.id);
-        const product = await Product.findOne({ id: productId });
+        const product = await Product.findById(req.params.id);
         
         if (!product) {
             return res.status(404).json({ success: false, message: 'Товар не знайдено' });
@@ -167,15 +165,12 @@ app.post('/api/products/toggle-featured/:id', isAdmin, async (req, res) => {
 app.post('/api/products', isAdmin, async (req, res) => {
     try {
         const { name, price, category, images, description } = req.body;
-        const lastProduct = await Product.findOne().sort({ id: -1 });
-        const newId = lastProduct ? lastProduct.id + 1 : 1;
 
         const finalImages = (Array.isArray(images) && images.length > 0) 
             ? images 
             : ["https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=500"];
 
         const newProduct = new Product({
-            id: newId,
             name,
             price: Number(price),
             category,
@@ -195,7 +190,7 @@ app.post('/api/products', isAdmin, async (req, res) => {
 app.delete('/api/products/:id', isAdmin, async (req, res) => {
     try {
         const productId = Number(req.params.id);
-        await Product.deleteOne({ id: productId });
+        await Product.findByIdAndDelete(req.params.id);
         res.json({ success: true, message: "Товар успішно видалено адміном!" });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
