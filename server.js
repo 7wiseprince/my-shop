@@ -144,7 +144,6 @@ app.get('/api/products/:id', async (req, res) => {
 // 🔥 НОВИЙ МАРШРУТ: Перемикання статусу популярності товару (ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.post('/api/products/toggle-featured/:id', isAdmin, async (req, res) => {
     try {
-        const productId = Number(req.params.id);
         const product = await Product.findById(req.params.id);
         
         if (!product) {
@@ -189,7 +188,6 @@ app.post('/api/products', isAdmin, async (req, res) => {
 // Видалити товар (ЗАХИЩЕНО ДЛЯ АДМІНІВ)
 app.delete('/api/products/:id', isAdmin, async (req, res) => {
     try {
-        const productId = Number(req.params.id);
         await Product.findByIdAndDelete(req.params.id);
         res.json({ success: true, message: "Товар успішно видалено адміном!" });
     } catch (err) {
