@@ -52,6 +52,8 @@ const orderSchema = new mongoose.Schema({
         default: null
     },
     customerName: String,
+    phone: String,
+    delivery: String,
     items: Array,
     total: Number,
     status: String,
