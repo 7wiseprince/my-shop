@@ -46,6 +46,11 @@ const User = mongoose.model('User', userSchema);
 // СХЕМА ЗАМОВЛЕННЯ
 const orderSchema = new mongoose.Schema({
     id: Number,
+    userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        default: null
+    },
     customerName: String,
     items: Array,
     total: Number,
