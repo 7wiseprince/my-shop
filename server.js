@@ -340,14 +340,44 @@ app.post('/api/login', async (req, res) => {
 // СИНХРОНІЗАЦІЯ ОБРАНОГО
 app.post('/api/favorites', async (req, res) => {
     try {
-        const { userId, favorites } = req.body;
-        await User.findByIdAndUpdate(userId, { favorites: favorites });
-        res.json({ success: true, message: 'Обране синхронізовано з базою!' });
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Токен відсутній'
+            });
+        }
+
+        jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
+            if (err) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Невалідний токен'
+                });
+            }
+
+            const { favorites } = req.body;
+
+            await User.findByIdAndUpdate(
+                decoded.id,
+                { favorites }
+            );
+
+            res.json({
+                success: true,
+                message: 'Обране синхронізовано!'
+            });
+        });
+
     } catch (error) {
-        res.status(500).json({ success: false, error: error.message });
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
 });
-
 // АВТОМАТИЧНА ПЕРЕВІРКА ТОКЕНА
 app.get('/api/me', async (req, res) => {
     try {
