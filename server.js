@@ -205,7 +205,7 @@ app.delete('/api/products/:id', isAdmin, async (req, res) => {
 // Створити нове замовлення
 app.post('/api/orders', async (req, res) => {
     try {
-        const { items, total, customerName, phone, status, paymentMethod } = req.body; 
+        const { items, total, customerName,delivery, phone, status, paymentMethod } = req.body; 
         let userId = null;
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
