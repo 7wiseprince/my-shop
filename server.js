@@ -204,13 +204,31 @@ app.delete('/api/products/:id', isAdmin, async (req, res) => {
 app.post('/api/orders', async (req, res) => {
     try {
         const { items, total, customerName, phone, status, paymentMethod } = req.body; 
+        let userId = null;
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (token) {
+            try {
+                // Розкодовуємо токен за допомогою нашого секрету
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                if (decoded && decoded.id) {
+                    userId = decoded.id; // 🔥 Знайшли ID авторизованого користувача!
+                }
+            } catch (jwtErr) {
+                console.log("Замовлення оформлюється як гість (токен невалідний або прострочений)");
+            }
+        }
         
         const lastOrder = await Order.findOne().sort({ id: -1 });
         const orderId = lastOrder ? lastOrder.id + 1 : 1001;
-
+    
         const newOrder = new Order({
             id: orderId,
+            userId: userId,
             customerName: customerName || "Анонімний покупець",
+            phone: phone,
+            delivery: delivery,
             items,
             total,
             status: status || (paymentMethod === 'післяплата' ? "Очікує оплати при отриманні" : "Оплачено, очікує відправки"), 
