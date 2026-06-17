@@ -452,7 +452,9 @@ function submitOrderCOD() {
     const buyerName = currentUser ? `${name} (${currentUser.name})` : name;
 
     const orderData = {
-        customerName: `${buyerName} | Tel: ${phone} | Доставка: ${delivery}`,
+       customerName: buyerName,
+       phone: phone,
+       delivery: delivery,
         // Важливо: передаємо розміри у замовлення для адміна на сервер
         items: cart.map(item => ({ 
             name: item.selectedSize ? `${item.name} (Розмір: ${item.selectedSize})` : item.name, 
