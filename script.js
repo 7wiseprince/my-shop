@@ -1,4 +1,4 @@
-       let allProducts = [];
+let allProducts = [];
 let cart = [];
 let favorites = []; // Масив для зберігання улюблених товарів
 
@@ -467,8 +467,7 @@ function submitOrderCOD() {
     };
        
        // 1. Беремо наш системний токен
-    const token = localStorage.getItem('token'); 
-       
+    const token = localStorage.getItem('sneakers_token')
     // 2. Формуємо базові заголовки запиту
     const headers = { 
         'Content-Type': 'application/json' 
