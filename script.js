@@ -254,21 +254,24 @@ function toggleFavorite(productId) {
         renderProducts(allProducts.slice(0, 2), 'featured-products');
     }
 
-    if (currentUser) {
-        const uId = currentUser._id;
-        
-        fetch('/api/favorites', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                userId: uId,     
-                favorites: favorites    
-            })
+   if (currentUser) {
+
+    const token = localStorage.getItem('sneakers_token');
+
+    fetch('/api/favorites', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            favorites: favorites
         })
-        .then(res => res.json())
-        .then(data => console.log(data.message))
-        .catch(err => console.error('Помилка збереження обраного:', err));
-    }
+    })
+    .then(res => res.json())
+    .then(data => console.log(data.message))
+    .catch(err => console.error('Помилка збереження обраного:', err));
+       }
 }
                                   
 function updateFavoritesUI() {
