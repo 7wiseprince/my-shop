@@ -448,16 +448,16 @@ function submitOrderCOD() {
     const subtotal = cart.reduce((sum, item) => sum + (Number(item.price) * (item.quantity || 1)), 0);
     const commission = 20 + (subtotal * 0.02);
     const finalTotal = subtotal + commission;
-
-    const buyerName = currentUser ? `${name} (${currentUser.name})` : name;
-
+    const buyerName = typeof currentUser !== 'undefined' && currentUser ? `${name} (${currentUser.name})` : name;
     const orderData = {
        customerName: buyerName,
        phone: phone,
        delivery: delivery,
         // Важливо: передаємо розміри у замовлення для адміна на сервер
-        items: cart.map(item => ({ 
-            name: item.selectedSize ? `${item.name} (Розмір: ${item.selectedSize})` : item.name, 
+
+           items: cart.map(item => ({ 
+            _id: item._id, // Важливо для бази даних
+            name: item.chosenSize ? `${item.name} (Розмір: ${item.chosenSize})` : item.name, 
             price: item.price, 
             quantity: item.quantity || 1 
         })),
@@ -465,10 +465,24 @@ function submitOrderCOD() {
         paymentMethod: "післяплата",
         status: "Очікує оплати при отриманні"
     };
+       
+       // 1. Беремо наш системний токен
+    const token = localStorage.getItem('token'); 
+       
+    // 2. Формуємо базові заголовки запиту
+    const headers = { 
+        'Content-Type': 'application/json' 
+    };
 
+    // 3. Якщо користувач авторизований — прикріплюємо токен
+    if (token) {
+        headers['Authorization'] = 'Bearer ' + token;
+    }
+       
+       
     fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+         headers: headers,
         body: JSON.stringify(orderData)
     })
     .then(response => response.json())
