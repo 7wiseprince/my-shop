@@ -435,6 +435,40 @@ app.get('/api/me', async (req, res) => {
     }
 });
 
+app.get('/api/my-orders', async (req, res) => {
+    try {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({
+                success: false,
+                message: 'Токен відсутній'
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+        const orders = await Order.find({
+            userId: decoded.id
+        }).sort({ id: -1 });
+
+        res.json({
+            success: true,
+            orders
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+
+
+
 app.listen(PORT, () => {
     console.log(`Сервер успішно запущений на порту ${PORT} 🚀`);
 });
