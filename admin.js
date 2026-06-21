@@ -48,3 +48,64 @@ function openCloudinaryWidget() {
         }
     });
 }
+async function toggleFeatured(productId) {
+    try {
+        const token = localStorage.getItem('sneakers_token');
+
+        if (!token) {
+            alert("Помилка безпеки: Токен сесії відсутній. Будь ласка, перезайдіть в адмінку.");
+            return;
+        }
+
+        const response = await fetch(`/api/products/toggle-featured/${productId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` 
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || `Сервер повернув помилку: ${response.status}`);
+        }
+
+        allProducts = allProducts.map(p => {
+            if (p._id === productId) {
+                return { ...p, isFeatured: data.product.isFeatured };
+            }
+            return p;
+        });
+
+        updateFeaturedProductsUI();
+        
+        const activeFilterBtn = document.querySelector('.filter-btn.active');
+        if (activeFilterBtn) {
+            const categoryText = activeFilterBtn.innerText.trim();
+            if (categoryText.includes("Взуття")) filterProducts('shoes', activeFilterBtn);
+            else if (categoryText.includes("Одяг")) filterProducts('clothes', activeFilterBtn);
+            else if (categoryText.includes("Аксесуари")) filterProducts('accessories', activeFilterBtn);
+            else filterProducts('all', activeFilterBtn);
+        } else {
+            const sortedProducts = getSortedProductsForCatalog(allProducts);
+            renderProducts(sortedProducts, 'catalog-products');
+        }
+
+    } catch (error) {
+        console.error("Помилка toggleFeatured:", error);
+        alert(error.message || "Не вдалося зберегти зміни. Спробуйте ще раз.");
+    }
+            }
+function toggleAdmin() {
+    const adminPage = document.getElementById('page-admin');
+    if (adminPage && adminPage.classList.contains('active')) {
+        switchPage('home');
+        return;
+    }
+    if (currentUser && currentUser.role === 'admin') {
+        switchPage('admin'); 
+        loadAdminOrders();
+    }
+                                                                }
+        
