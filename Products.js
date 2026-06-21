@@ -158,5 +158,132 @@ function filterProducts(category, button) {
     renderProducts(sortedAndFiltered, 'catalog-products');
 }
 
+function openProductPage(productId) {
+    const product = allProducts.find(p => p._id === productId);
+    if (!product) {
+        console.error("Товар не знайдено з ID:", productId);
+        return;
+    }
+    renderProductDetailPage(product);
+    switchPage('product');
+}
+
+function renderProductDetailPage(product) {
+    const container = document.getElementById('product-detail-container');
+    if (!container) return;
+
+    const images = product.images && product.images.length > 0 
+        ? product.images 
+        : [product.image || 'https://via.placeholder.com/400'];
+
+    let thumbnailsHTML = '';
+    if (images.length > 1) {
+        images.forEach((imgUrl, index) => {
+            thumbnailsHTML += `
+                <img class="thumb-img ${index === 0 ? 'active' : ''}" 
+                     src="${imgUrl}" 
+                     alt="Прев'ю ${index + 1}" 
+                     onclick="changeMainImage(this, '${imgUrl}')">
+            `;
+        });
+    }
+
+    // УНІВЕРСАЛЬНІ РОЗМІРИ ЗА КАТЕГОРІЯМИ
+    selectedProductSize = null; 
+    let sizesSectionHTML = ''; 
+    const category = product.category ? product.category.toLowerCase() : 'all';
+
+    if (category === 'shoes' || category === 'взуття') {
+        const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : [39, 40, 41, 42, 43];
+        let sizesGrid = '';
+        availableSizes.forEach(size => {
+            sizesGrid += `<button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>`;
+        });
+        sizesSectionHTML = `
+            <div class="size-selector-section">
+                <div class="section-label">Оберіть розмір взуття:</div>
+                <div class="sizes-grid">${sizesGrid}</div>
+            </div>
+        `;
+    } else if (category === 'clothes' || category === 'одяг') {
+        const availableSizes = product.sizes && product.sizes.length > 0 ? product.sizes : ['S', 'M', 'L', 'XL'];
+        let sizesGrid = '';
+        availableSizes.forEach(size => {
+            sizesGrid += `<button class="size-chip" onclick="selectSize(this, '${size}')">${size}</button>`;
+        });
+        sizesSectionHTML = `
+            <div class="size-selector-section">
+                <div class="section-label">Оберіть розмір одягу:</div>
+                <div class="sizes-grid">${sizesGrid}</div>
+            </div>
+        `;
+    } else {
+        sizesSectionHTML = ''; // Ховаємо для аксесуарів
+    }
+
+    const specs = product.specs || {
+        "Категорія": product.category || "Спорт",
+        "Бренд": product.brand || "Original",
+        "Наявність": "На складі"
+    };
+    
+    let specsHTML = '';
+    for (let key in specs) {
+        specsHTML += `<li><strong>${key}:</strong> <span>${specs[key]}</span></li>`;
+    }
+
+    container.innerHTML = `
+        <div class="product-page-container">
+            <div class="product-media-gallery">
+                <div class="main-image-wrapper">
+                    <img id="mainProductImage" src="${images[0]}" alt="${product.name}">
+                </div>
+                <div class="thumbnails-container">
+                    ${thumbnailsHTML}
+                </div>
+            </div>
+
+            <div class="product-info-order">
+                <h1 class="single-product-title">${product.name}</h1>
+                
+                <div class="product-status-badge">
+                    <span class="status-dot"></span> В наявності
+                </div>
+
+                <div class="single-product-price">${product.price} грн</div>
+
+                ${sizesSectionHTML}
+
+                <button class="btn-main-buy" onclick="addToCartFromPage('${product._id}')">
+                    <span>🛒 Додати в кошик</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="product-details-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" onclick="switchTab(event, 'tab-description')">Опис</button>
+                <button class="tab-btn" onclick="switchTab(event, 'tab-specs')">Характеристики</button>
+            </div>
+            
+            <div class="tab-content active" id="tab-description">
+                <p>${product.description || 'Опис цього товару незабаром з\'явиться.'}</p>
+            </div>
+            
+            <div class="tab-content" id="tab-specs">
+                <ul class="specs-list">
+                    ${specsHTML}
+                </ul>
+            </div>
+        </div>
+    `;
+}
+function getSortedProductsForCatalog(productsList) {
+    return [...productsList].sort((a, b) => {
+        const aFeatured = a.isFeatured ? 1 : 0;
+        const bFeatured = b.isFeatured ? 1 : 0;
+        return bFeatured - aFeatured;
+    });
+}
 
 
