@@ -108,4 +108,17 @@ function toggleAdmin() {
         loadAdminOrders();
     }
                                                                 }
-        
+
+function submitAdminLogin() {
+    const passwordInput = document.getElementById('admin-password-input').value;
+    const errorMsg = document.getElementById('login-error-msg');
+
+    if (passwordInput === "1111") { 
+        if (errorMsg) errorMsg.style.display = 'none';
+        switchPage('admin'); 
+        loadAdminOrders();
+    } else {
+        if (errorMsg) errorMsg.style.display = 'block';
+    }
+}
+    
