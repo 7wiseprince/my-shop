@@ -331,5 +331,18 @@ function handleSearch() {
     }
 }
 
+
+
+window.loadProducts = loadProducts;
+window.renderProducts = renderProducts;
+window.updateFeaturedProductsUI = updateFeaturedProductsUI;
+window.filterProducts = filterProducts;
+window.getSortedProductsForCatalog = getSortedProductsForCatalog;
+window.openProductPage = openProductPage;
+window.renderProductDetailPage = renderProductDetailPage;
+window.changeMainImage = changeMainImage;
+window.selectSize = selectSize;
+window.addToCartFromPage = addToCartFromPage;
+window.toggleFeatured = toggleFeatured;
             
 
