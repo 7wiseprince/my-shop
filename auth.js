@@ -1,3 +1,4 @@
+let currentAuthMode = 'login';
 function toggleAuthTab(mode) {
     currentAuthMode = mode;
     
