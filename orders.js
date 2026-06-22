@@ -156,5 +156,8 @@ function submitOrderCOD() {
 
 
 
+window.handlePaymentMethodChange = handlePaymentMethodChange;
+window.submitOrderCOD = submitOrderCOD;
+window.renderPayPalButton = renderPayPalButton;
 
     
