@@ -19,52 +19,7 @@ function openCloudinaryWidget() {
     });
 }
 
-const addProductForm = document.getElementById('addProductForm');
-if (addProductForm) {
-    addProductForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
 
-        const productData = {
-            name: document.getElementById('p-name').value,
-            price: document.getElementById('p-price').value,
-            category: document.getElementById('p-category').value,
-            images: uploadedImages, 
-            description: document.getElementById('p-desc').value
-        };
-
-        try {
-            const token = localStorage.getItem('sneakers_token');
-
-            const response = await fetch('/api/products', {
-                method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
-                },
-                body: JSON.stringify(productData)
-            });
-
-            if (!response.ok) {
-                alert(`🔴 Помилка доступу! Статус сервера: ${response.status}. Перевірте, чи ви авторизовані як адмін.`);
-                return;
-            }
-
-            const result = await response.json();
-            
-            if (result.success) {
-                alert(result.message);
-                document.getElementById('addProductForm').reset();
-                uploadedImages = [];
-                if (typeof loadProducts === 'function') loadProducts();
-                if (typeof switchPage === 'function') switchPage('catalog');
-            } else {
-                alert("Помилка сервера: " + (result.error || result.message || "Невідома помилка"));
-            }
-        } catch (err) {
-            alert("Критична помилка мережі: " + err.message);
-        }
-    });
-}
 
 
 
