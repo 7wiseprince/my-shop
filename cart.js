@@ -114,3 +114,42 @@ function updateCartBadge() {
         }
     }
 }
+
+
+function animateAndAddToCart(buttonElement, productId) {
+    if (buttonElement.classList.contains('added-pulse')) return;
+
+    buttonElement.classList.add('added-pulse');
+    const iconSpan = buttonElement.querySelector('.cart-icon-symbol');
+    if (iconSpan) iconSpan.innerText = '✔️';
+
+    if (typeof addToCart === 'function') {
+        addToCart(productId);
+    }
+
+    setTimeout(() => {
+        buttonElement.classList.remove('added-pulse');
+        if (iconSpan) iconSpan.innerText = '🛒';
+    }, 450);
+}
+
+
+
+
+
+
+function addToCartFromPage(productId) {
+    const product = allProducts.find(p => p._id === productId);
+    if (!product) return;
+
+    const category = product.category ? product.category.toLowerCase() : 'all';
+    
+    if ((category === 'shoes' || category === 'взуття' || category === 'clothes' || category === 'одяг') && !selectedProductSize) {
+        alert('⚠️ Будь ласка, оберіть розмір перед додаванням у кошик!');
+        return;
+    }
+
+    addToCart(productId, selectedProductSize);
+    alert(`🛒 Товар додано в кошик! ${selectedProductSize ? '(Розмір: ' + selectedProductSize + ')' : ''}`);
+}
+
