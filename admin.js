@@ -228,5 +228,9 @@ async function loadAdminOrders() {
 }
 
 
-
+window.toggleAdmin = toggleAdmin;
+window.submitAdminLogin = submitAdminLogin;
+window.deleteProduct = deleteProduct;
+window.openCloudinaryWidget = openCloudinaryWidget;
+window.loadAdminOrders = loadAdminOrders;
     
