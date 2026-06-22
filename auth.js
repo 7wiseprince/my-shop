@@ -139,3 +139,10 @@ function autoLogin() {
 }
 
 autoLogin();
+
+
+window.toggleAuthTab = toggleAuthTab;
+window.handleAuth = handleAuth;
+window.showUserCabinet = showUserCabinet;
+window.logout = logout;
+window.autoLogin = autoLogin;
