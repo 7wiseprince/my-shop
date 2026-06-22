@@ -96,3 +96,20 @@ function backToCatalogCategories() {
     // Ховаємо товари
     document.getElementById('inner-category-products-wrapper').style.display = 'none';
         }
+
+
+
+
+
+
+
+
+
+window.switchPage = switchPage;
+window.toggleBurgerMenu = toggleBurgerMenu;
+window.clickBurgerLink = clickBurgerLink;
+window.switchTab = switchTab;
+window.showSuccessModal = showSuccessModal;
+window.closeSuccessModal = closeSuccessModal;
+window.openCatalogCategory = openCatalogCategory;
+window.backToCatalogCategories = backToCatalogCategories;
