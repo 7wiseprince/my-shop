@@ -45,3 +45,54 @@ function clickBurgerLink(event, pageId) {
         switchPage(pageId);
     }
 }
+
+
+
+function switchTab(event, tabId) {
+    document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+function showSuccessModal() {
+    toggleCart(false);
+    const successModal = document.getElementById('success-modal');
+    if (successModal) successModal.style.display = 'flex';
+}
+
+function closeSuccessModal() {
+    const successModal = document.getElementById('success-modal');
+    if (successModal) successModal.style.display = 'none';
+    cart = [];
+    updateCartUI();
+    switchPage('home'); 
+                         }
+
+
+
+        // Функція, яка відкриває товари конкретної категорії в каталозі
+function openCatalogCategory(category) {
+    // 1. Ховаємо великі картки категорій
+    document.querySelector('.categories-catalog-grid').style.display = 'none';
+    
+    // 2. Показуємо блок із товарами та кнопкою "Назад"
+    document.getElementById('inner-category-products-wrapper').style.display = 'block';
+    
+    // 3. Міняємо заголовок під категорію
+    const title = document.getElementById('current-category-title');
+    if (category === 'shoes') title.innerText = '👟 Взуття';
+    if (category === 'clothes') title.innerText = '👕 Одяг';
+    if (category === 'accessories') title.innerText = '🎒 Аксесуари';
+
+    // 4. Фільтруємо наші товари з бази і рендеримо їх у сітку
+    const filtered = allProducts.filter(p => p.category && p.category.toLowerCase() === category);
+    renderProducts(filtered, 'catalog-products');
+}
+
+// Функція повернення назад до вибору категорій
+function backToCatalogCategories() {
+    // Показуємо картки категорій назад
+    document.querySelector('.categories-catalog-grid').style.display = 'flex';
+    // Ховаємо товари
+    document.getElementById('inner-category-products-wrapper').style.display = 'none';
+        }
