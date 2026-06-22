@@ -153,3 +153,11 @@ function addToCartFromPage(productId) {
     alert(`🛒 Товар додано в кошик! ${selectedProductSize ? '(Розмір: ' + selectedProductSize + ')' : ''}`);
 }
 
+
+
+window.addToCart = addToCart;
+window.removeFromCart = removeFromCart;
+window.toggleCart = toggleCart;
+window.updateCartUI = updateCartUI;
+window.updateCartBadge = updateCartBadge;
+window.animateAndAddToCart = animateAndAddToCart;
