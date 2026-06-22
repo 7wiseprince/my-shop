@@ -67,3 +67,8 @@ function updateCabinetFavoritesUI() {
     renderProducts(favorites, 'cabinet-favorites-list');
      }
                      
+
+
+window.toggleFavorite = toggleFavorite;
+window.updateFavoritesUI = updateFavoritesUI;
+window.updateCabinetFavoritesUI = updateCabinetFavoritesUI;
