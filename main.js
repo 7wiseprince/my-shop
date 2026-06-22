@@ -1,7 +1,14 @@
 let allProducts = [];
 let cart = [];
 let favorites = []; // Масив для зберігання улюблених товарів
+let uploadedImages = [];
 
+
+
+
+
+
+// Старт додатка
 document.addEventListener("DOMContentLoaded", () => {
     loadProducts();
     loadAdminOrders(); 
@@ -11,3 +18,4 @@ document.addEventListener("DOMContentLoaded", () => {
         updateCartBadge();
     }
 });
+
